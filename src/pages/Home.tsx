@@ -370,52 +370,50 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
          </div>
 
-         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-            <div className="bg-white/5 backdrop-blur-xl p-12 md:p-20 shadow-2xl relative overflow-hidden flex flex-col lg:flex-row items-center gap-16 text-right rounded-[48px] border border-white/10">
-               <div className="flex-1">
-                  <h2 className="text-4xl md:text-5xl font-display font-black mb-6 text-white leading-tight">קבל את המידע <br /><span className="text-babun-accent">לפני כולם</span></h2>
-                  <p className="text-white/60 text-xl font-light leading-relaxed">הטור השבועי, ניתוחי שוק, פינת חדשות נדל"ן - ישירות אליך.</p>
-               </div>
-               <div className="flex-1 w-full max-w-md">
-                  {status === "success" ? (
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="bg-babun-accent/10 p-10 text-center rounded-[32px] border border-babun-accent/30"
-                    >
-                       <div className="text-babun-accent mb-4 flex justify-center"><CheckCircle size={48} /></div>
-                       <div className="text-white text-2xl font-bold">תודה על ההרשמה!</div>
-                       <div className="text-white/60 mt-2">נתראה בתיבת הדואר שלך בקרוב.</div>
-                    </motion.div>
-                  ) : (
-                    <form onSubmit={handleNewsletter} className="flex flex-col gap-5">
-                       <input 
-                        required 
-                        type="text" 
-                        placeholder="שם פרטי" 
-                        className="h-16 bg-white/5 px-8 rounded-2xl outline-none border border-white/10 focus:border-babun-accent/50 focus:bg-white/10 transition-all text-right text-white" 
-                      />
-                       <input 
-                        required 
-                        type="email" 
-                        placeholder="כתובת דוא'ל" 
-                        className="h-16 bg-white/5 px-8 rounded-2xl outline-none border border-white/10 focus:border-babun-accent/50 focus:bg-white/10 transition-all text-right text-white"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                      />
-                       <button className="bg-babun-accent text-babun-primary font-bold px-10 h-16 rounded-2xl hover:scale-105 transition-transform text-lg shadow-xl shadow-babun-accent/20">
-                          הרשמה לניוזלטר
-                       </button>
-                    </form>
-                  )}
-                  <div className="mt-10 flex justify-start">
-                     <a href="https://wa.me/972504141516" target="_blank" className="flex items-center gap-4 text-[#25D366] font-bold text-sm uppercase tracking-widest hover:opacity-80 transition-all">
-                        <span>הצטרפו לקבוצת הווצאפ השקטה שלנו</span>
-                        <div className="w-10 h-10 bg-[#25D366]/10 rounded-full flex items-center justify-center">
-                           <MessageCircle size={20} />
-                        </div>
-                     </a>
-                  </div>
+         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 flex flex-col lg:flex-row items-center gap-16 text-right">
+            <div className="flex-1">
+               <h2 className="text-5xl md:text-7xl font-display font-black mb-8 text-white leading-tight">קבל את המידע <br /><span className="text-babun-accent">לפני כולם</span></h2>
+               <p className="text-white/80 text-2xl font-light leading-relaxed">הטור השבועי, ניתוחי שוק, פינת חדשות נדל"ן - ישירות אליך.</p>
+            </div>
+            <div className="flex-1 w-full max-w-md bg-black/40 backdrop-blur-md p-10 rounded-[48px] border border-white/10">
+               {status === "success" ? (
+                 <motion.div 
+                   initial={{ opacity: 0, scale: 0.9 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   className="bg-babun-accent/10 p-10 text-center rounded-[32px] border border-babun-accent/30"
+                 >
+                    <div className="text-babun-accent mb-4 flex justify-center"><CheckCircle size={48} /></div>
+                    <div className="text-white text-2xl font-bold">תודה על ההרשמה!</div>
+                    <div className="text-white/60 mt-2">נתראה בתיבת הדואר שלך בקרוב.</div>
+                 </motion.div>
+               ) : (
+                 <form onSubmit={handleNewsletter} className="flex flex-col gap-5">
+                    <input 
+                     required 
+                     type="text" 
+                     placeholder="שם פרטי" 
+                     className="h-16 bg-white/10 px-8 rounded-2xl outline-none border border-white/20 focus:border-babun-accent/50 focus:bg-white/20 transition-all text-right text-white" 
+                   />
+                    <input 
+                     required 
+                     type="email" 
+                     placeholder="כתובת דוא'ל" 
+                     className="h-16 bg-white/10 px-8 rounded-2xl outline-none border border-white/20 focus:border-babun-accent/50 focus:bg-white/20 transition-all text-right text-white"
+                     value={email}
+                     onChange={e => setEmail(e.target.value)}
+                   />
+                    <button className="bg-babun-accent text-babun-primary font-bold px-10 h-16 rounded-2xl hover:scale-105 transition-transform text-lg shadow-xl shadow-babun-accent/20">
+                       הרשמה לניוזלטר
+                    </button>
+                 </form>
+               )}
+               <div className="mt-10 flex justify-start">
+                  <a href="https://wa.me/972504141516" target="_blank" className="flex items-center gap-4 text-[#25D366] font-bold text-sm uppercase tracking-widest hover:opacity-80 transition-all">
+                     <span>קבוצת הווצאפ השקטה</span>
+                     <div className="w-10 h-10 bg-[#25D366]/10 rounded-full flex items-center justify-center">
+                        <MessageCircle size={20} />
+                     </div>
+                  </a>
                </div>
             </div>
          </div>
