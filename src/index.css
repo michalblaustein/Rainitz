@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Assistant", sans-serif;
-  --font-sans: "Assistant", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Heebo", sans-serif;
+  --font-sans: "Heebo", ui-sans-serif, system-ui, sans-serif;
   
   --color-babun-primary: #000000;
   --color-babun-accent: #fee000;
@@ -19,7 +19,7 @@
 }
 
 @layer base {
-  @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
   body {
     @apply font-sans bg-babun-light text-babun-primary min-h-screen antialiased;
@@ -46,5 +46,12 @@
 
   .input-babun {
     @apply w-full bg-white border border-babun-primary/10 rounded-babun-md px-6 py-4 outline-none focus:border-babun-accent transition-all;
+  }
+
+  .mesh-grid {
+    background-size: 80px 80px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
   }
 }

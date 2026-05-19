@@ -1,15 +1,10 @@
-import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight, CheckCircle, Target, Shield, BookOpen, Users, MessageCircle, BarChart3, Presentation, Mail, Send } from "lucide-react";
+import { motion, useMotionValue, useTransform, animate } from "motion/react";
+import { ArrowLeft, ArrowRight, CheckCircle, Target, Shield, BookOpen, Users, MessageCircle, BarChart3, Presentation, Mail, Send, Star } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 
-const trustLogos = [
-  { name: "המודיע", url: "https://upload.wikimedia.org/wikipedia/he/thumb/d/d4/HaModia_logo.svg/1200px-HaModia_logo.svg.png" },
-  { name: "كلية נבונה", url: "https://kolkalanavona.co.il/wp-content/uploads/2021/04/logo-new.png" },
-  { name: "קווי מידע", url: "https://kaveimedia.co.il/wp-content/uploads/2021/02/logo.png" }
-];
 
 const services = [
   {
@@ -54,6 +49,18 @@ const services = [
   }
 ];
 
+function AnimatedNumber({ value }: { value: number }) {
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (latest) => Math.round(latest).toLocaleString());
+
+  useEffect(() => {
+    const controls = animate(count, value, { duration: 2, ease: "easeOut" });
+    return controls.stop;
+  }, [value, count]);
+
+  return <motion.span>{rounded}</motion.span>;
+}
+
 export default function Home() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<null | "loading" | "success">(null);
@@ -73,92 +80,175 @@ export default function Home() {
   return (
     <div className="bg-babun-light">
       {/* HERO SECTION */}
-      <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-white">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-babun-primary/5 -skew-x-12 translate-x-20 z-0" />
+      <section className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-black text-white">
+        {/* Background Mesh */}
+        <div className="absolute inset-0 mesh-grid z-0" />
+        
         <div className="max-w-7xl mx-auto px-4 md:px-8 w-full relative z-10 text-right">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            <div className="lg:col-span-8">
+            {/* Image Side (Left) */}
+            <div className="lg:col-span-5 relative order-2 flex justify-center">
+              <div className="relative w-full max-w-lg aspect-square">
+                 {/* Yellow Circle Background */}
+                 <motion.div 
+                   initial={{ opacity: 0, scale: 0.8 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   transition={{ duration: 1 }}
+                   className="absolute inset-0 bg-babun-accent rounded-full z-0"
+                 />
+                 
+                 <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 1 }}
+                  className="relative z-10 w-full h-full flex items-end justify-center"
+                 >
+                   <img 
+                    src="https://lh3.googleusercontent.com/d/1wzfE5sZMtpfnHN39XgYqYtvsHanSB_vn" 
+                    alt="יעקב רייניץ" 
+                    className="w-[120%] max-w-none -mb-4 drop-shadow-2xl"
+                    referrerPolicy="no-referrer"
+                   />
+                 </motion.div>
+
+                 {/* Floating Cards */}
+                 <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ 
+                      opacity: 1, 
+                      x: 0,
+                      y: [0, -10, 0] 
+                    }}
+                    transition={{ 
+                      opacity: { delay: 0.6 },
+                      x: { delay: 0.6 },
+                      y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+                    }}
+                    className="absolute top-1/4 -right-12 z-20 bg-white p-6 rounded-babun-lg shadow-2xl text-black text-center min-w-[180px]"
+                 >
+                    <div className="text-4xl font-display font-black text-babun-primary">+5,000</div>
+                    <div className="text-sm font-bold opacity-80 mt-1">פגישות ייעוץ</div>
+                 </motion.div>
+
+                 <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ 
+                      opacity: 1, 
+                      x: 0,
+                      y: [0, 10, 0]
+                    }}
+                    transition={{ 
+                      opacity: { delay: 0.8 },
+                      x: { delay: 0.8 },
+                      y: { duration: 5, repeat: Infinity, ease: "easeInOut" }
+                    }}
+                    className="absolute bottom-10 -left-12 z-20 bg-white p-6 rounded-babun-lg shadow-2xl text-black text-center min-w-[180px]"
+                 >
+                    <div className="text-sm font-bold leading-tight mb-3">הפודקאסט הכי מושמע<br />בציבור החרדי</div>
+                    <div className="flex justify-center gap-1 text-babun-accent">
+                        {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" />)}
+                    </div>
+                 </motion.div>
+              </div>
+            </div>
+
+            {/* Text Side (Right) */}
+            <div className="lg:col-span-7 order-1 flex flex-col items-start text-right">
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
+                className="flex flex-col items-start w-full text-right"
               >
-                <div className="flex items-center gap-4 justify-end mb-8">
-                   <div className="w-12 h-px bg-babun-accent" />
-                   <span className="text-[11px] font-black uppercase tracking-[0.5em] text-babun-primary">Jacob Rainitz Real Estate</span>
-                </div>
-                <h1 className="text-6xl md:text-8xl lg:text-9xl font-display font-black leading-[0.85] text-babun-primary mb-10 tracking-tighter">
-                  ידעת כמה <br />
-                  עסקאות טובות <br />
-                  <span className="text-babun-accent italic">אבדו?</span>
+                <h1 className="font-display text-white mb-8 tracking-tighter flex flex-col items-start text-right w-full">
+                  <span className="text-6xl md:text-8xl lg:text-[6rem] font-bold leading-[1.05] block w-full">
+                    כש<span className="text-babun-accent">אתה</span> לא יודע
+                  </span>
+                  <span className="text-6xl md:text-8xl lg:text-[6rem] font-bold leading-[1.05] block w-full">
+                    <span className="text-babun-accent">מה</span> אתה לא יודע
+                  </span>
                 </h1>
-                <p className="text-xl md:text-2xl font-light text-babun-primary/60 mb-12 leading-relaxed max-w-2xl ml-auto">
-                  18 שנות ניסיון. טור שבועי ב"המודיע". ספר שמסביר מה אף אחד לא אמר לך. יעקב רייניץ לצידך — מהשאלה הראשונה עד חתימת הטאבו.
-                </p>
-                <div className="flex flex-wrap gap-6 justify-end">
-                   <Link to="/consulting" className="btn-babun-primary shadow-2xl shadow-babun-primary/20">
-                      קביעת פגישת ייעוץ ←
+                <h2 className="text-2xl md:text-3xl font-normal text-white mb-12 leading-tight text-right w-full">
+                  חושבים להשקיע בנדל״ן? בואו להבין את היכולות שלכם, המספרים, הסיכונים וההזדמנויות.
+                </h2>
+                <div className="flex flex-wrap gap-6 justify-start items-center w-full">
+                   <Link 
+                    to="/consulting" 
+                    className="bg-babun-accent text-babun-primary font-bold py-5 px-10 rounded-babun-full text-xl transition-all duration-300 hover:scale-105"
+                   >
+                      קביעת פגישת ייעוץ
                    </Link>
-                   <Link to="/about" className="btn-babun-outline group">
-                      קרא עוד על יעקב ←
+                   <Link 
+                    to="/about" 
+                    className="bg-white text-babun-primary font-bold py-5 px-10 rounded-babun-full text-xl transition-all duration-300 hover:bg-white/90"
+                   >
+                      קרא עוד
                    </Link>
                 </div>
               </motion.div>
-            </div>
-            <div className="lg:col-span-4 relative hidden lg:block">
-               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4 }}
-                className="aspect-[4/5] bg-babun-primary grayscale rounded-babun-lg overflow-hidden relative"
-               >
-                 <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover mix-blend-overlay opacity-60" />
-                 <div className="absolute inset-0 bg-gradient-to-t from-babun-primary to-transparent" />
-                 <div className="absolute bottom-10 right-10 left-10 text-white text-right">
-                    <div className="text-4xl font-display font-black text-babun-accent mb-2 italic">18</div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest opacity-60 leading-relaxed">שנות ניסיון בלב העשייה של הנדל"ן החרדי והכללי.</div>
-                 </div>
-               </motion.div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* TRUST STRIP */}
-      <section className="bg-babun-primary py-16 text-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 font-sans">
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-right border-b border-white/10 pb-16">
-              <div className="flex flex-col md:flex-row items-center gap-6 justify-end">
-                 <div className="md:order-1 text-right">
-                    <div className="text-4xl font-display font-black text-babun-accent mb-1">מ-2006</div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest opacity-40">בשטח הנדל"ן הישראלי</div>
-                 </div>
-              </div>
-              <div className="flex flex-col md:flex-row items-center gap-6 justify-end border-x border-white/5">
-                 <div className="md:order-1 text-right">
-                    <div className="text-4xl font-display font-black text-babun-accent mb-1">500+</div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest opacity-40">משפחות ומשקיעים שליוויתי</div>
-                 </div>
-              </div>
-              <div className="flex flex-col md:flex-row items-center gap-6 justify-end">
-                 <div className="md:order-1 text-right">
-                    <div className="text-4xl font-display font-black text-babun-accent mb-1">1</div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest opacity-40">ספר שמסביר את כל מה שלא סיפרו לך</div>
-                 </div>
-              </div>
-           </div>
-           
-           <div className="mt-16 flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-30 grayscale invert">
-              <div className="flex flex-col items-center">
-                <span className="font-display font-black text-2xl">המודיע</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="font-display font-black text-2xl">כלכלה נבונה</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="font-display font-black text-2xl">קווי מידע</span>
-              </div>
-           </div>
+      {/* STATS SECTION - REINITZ IN NUMBERS */}
+      <section className="bg-white py-32 overflow-hidden border-t border-babun-primary/5">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 text-center flex flex-col items-center">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-32"
+          >
+            <h2 className="text-6xl md:text-8xl font-display font-black tracking-tighter text-babun-primary">
+              רייניץ <span className="text-babun-accent">במספרים</span>
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16 md:gap-8 w-full">
+            {[
+              { 
+                val: 18, 
+                label: "שנים", 
+                sub: "של ייעוצים, הרצאות וסדנאות" 
+              },
+              { 
+                val: 5000, 
+                label: "משפחות +", 
+                sub: "שליווינו לרכישה בטוחה" 
+              },
+              { 
+                val: 60, 
+                label: "דקות", 
+                sub: "שנותנות לך תמונה מלאה" 
+              },
+              { 
+                val: 1, 
+                label: "ספר", 
+                sub: "שהפך ידע מקצועי לשפה של כולם" 
+              }
+            ].map((stat, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.6 }}
+                className="flex flex-col items-center"
+              >
+                <div className="text-6xl md:text-8xl font-display font-black text-babun-primary mb-2">
+                  <AnimatedNumber value={stat.val} />
+                </div>
+                <div className="text-4xl md:text-5xl font-display font-black text-babun-primary mb-6">
+                  {stat.label}
+                </div>
+                <div className="w-16 h-1 bg-babun-accent mb-8" />
+                <p className="text-sm font-bold opacity-40 max-w-[200px] leading-relaxed">
+                  {stat.sub}
+                </p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -166,7 +256,6 @@ export default function Home() {
       <section className="py-32">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
            <div className="mb-20 text-right">
-              <span className="text-babun-accent font-black text-[11px] uppercase tracking-[0.4em] block mb-4">WHAT WE OFFER</span>
               <h2 className="text-5xl md:text-7xl font-display font-black tracking-tighter text-babun-primary">מה תמצא כאן.</h2>
            </div>
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -223,27 +312,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PROOF SECTION */}
-      <section className="py-32">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 text-center">
-           <h2 className="text-5xl md:text-8xl font-display font-black text-babun-primary mb-24 lowercase tracking-tighter">The <span className="text-babun-accent italic">Proof.</span></h2>
-           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-              {[
-                { label: "בשרי בשטח, לא בכיתה", val: "18 שנה" },
-                { label: "משפחות ומשקיעים שליווינו", val: "500+" },
-                { label: "טור שבועי ב'המודיע'", val: "שנים" },
-                { label: "ספר מקצועי אחד", val: "1" }
-              ].map((stat, i) => (
-                <div key={i} className="space-y-4">
-                   <div className="text-6xl font-display font-black text-babun-primary mb-2 tracking-tighter">{stat.val}</div>
-                   <div className="w-12 h-0.5 bg-babun-accent mx-auto" />
-                   <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">{stat.label}</div>
-                </div>
-              ))}
-           </div>
-        </div>
-      </section>
-
       {/* NEWSLETTER */}
       <section className="py-24 bg-babun-primary">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -274,7 +342,7 @@ export default function Home() {
                        <button className="btn-babun-primary w-full justify-center py-5 uppercase tracking-widest h-14">הרשמה לניוזלטר</button>
                     </form>
                   )}
-                  <div className="mt-8 flex justify-end">
+                  <div className="mt-8 flex justify-start">
                      <a href="https://wa.me/972504141516" target="_blank" className="flex items-center gap-4 text-[#25D366] font-bold text-xs uppercase tracking-widest hover:opacity-80 transition-all">
                         הצטרפו לקבוצת הווצאפ שלנו <BarChart3 size={18} />
                      </a>

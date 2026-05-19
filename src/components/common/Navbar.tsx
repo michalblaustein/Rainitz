@@ -9,7 +9,6 @@ const navLinks = [
   { name: "מחשבונים", path: "/calculators" },
   { name: "הספר", path: "/book" },
   { name: "מאמרים ופודקאסטים", path: "/articles" },
-  { name: "צור קשר", path: "/contact" },
 ];
 
 export default function Navbar() {
@@ -32,35 +31,48 @@ export default function Navbar() {
         className={`w-full transition-all duration-500 ${
           isScrolled 
             ? "bg-white shadow-xl py-4" 
-            : "bg-white/90 backdrop-blur-sm py-6"
+            : "bg-transparent py-6"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex justify-between items-center">
           {/* Logo Right */}
           <Link to="/" className="flex items-center gap-2">
             <img 
-              src="https://lh3.googleusercontent.com/d/1CYyzzstemzbU_W4xXZKI79Q0msNLNOdQ" 
+              src={isScrolled ? "https://lh3.googleusercontent.com/d/1CYyzzstemzbU_W4xXZKI79Q0msNLNOdQ" : "https://lh3.googleusercontent.com/d/1TtktR-B0LsjkNXjvcdUP8JPkZye4U8Ks"} 
               alt="יעקב רייניץ" 
-              className="h-20 md:h-28 w-auto transition-all duration-300"
+              className="h-20 md:h-24 w-auto transition-all duration-300"
               referrerPolicy="no-referrer"
             />
           </Link>
 
           {/* Main Navigation - Center */}
-          <nav className="hidden lg:flex items-center gap-10">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.path} 
-                to={link.path}
-                className={`text-lg font-medium transition-all duration-300 relative group py-2 ${
-                  location.pathname === link.path ? "text-black font-bold" : "text-black/70 hover:text-black hover:font-bold"
-                }`}
-              >
-                {link.name}
-                <span className={`absolute -bottom-1 right-0 w-full h-1 bg-babun-accent transition-transform duration-500 origin-right ${
-                  location.pathname === link.path ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                }`} />
-              </Link>
+          <nav className="hidden lg:flex items-center gap-0">
+            {navLinks.map((link, index) => (
+              <div key={link.path} className="flex items-center">
+                <Link 
+                  to={link.path}
+                  className={`text-lg transition-all duration-300 relative group px-6 py-2 flex flex-col items-center ${
+                    location.pathname === link.path 
+                      ? (isScrolled ? "text-black" : "text-white") 
+                      : (isScrolled ? "text-black/70 hover:text-black" : "text-white/70 hover:text-white")
+                  }`}
+                >
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="invisible font-bold block h-0 select-none overflow-hidden" aria-hidden="true">
+                      {link.name}
+                    </span>
+                    <span className="font-extrabold transition-all duration-100">
+                      {link.name}
+                    </span>
+                  </div>
+                  <span className={`absolute -bottom-1 right-0 w-full h-1 bg-babun-accent transition-transform duration-500 origin-right ${
+                    location.pathname === link.path ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                  }`} />
+                </Link>
+                {index < navLinks.length - 1 && (
+                  <div className={`w-px h-6 transition-colors duration-300 ${isScrolled ? "bg-black/10" : "bg-white/20"}`} />
+                )}
+              </div>
             ))}
           </nav>
 
@@ -68,14 +80,14 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             <Link 
               to="/consulting" 
-              className="btn-babun-primary text-lg py-2.5 px-8 hidden md:flex"
+              className="bg-babun-accent text-babun-primary font-bold text-lg py-3 px-8 rounded-babun-full hidden md:flex transition-transform hover:scale-105 active:scale-95"
             >
               קביעת פגישת ייעוץ
             </Link>
 
             {/* Mobile Menu Toggle */}
             <button 
-              className="lg:hidden p-2 text-babun-primary"
+              className={`lg:hidden p-2 transition-colors duration-300 ${isScrolled ? "text-babun-primary" : "text-white"}`}
               onClick={() => setIsOpen(!isOpen)}
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}

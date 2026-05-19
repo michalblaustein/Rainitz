@@ -9,9 +9,9 @@ export default function Footer() {
           <div className="max-w-md lg:text-right">
             <Link to="/" className="flex items-center justify-start lg:justify-end mb-8">
               <img 
-                src="https://lh3.googleusercontent.com/d/1CYyzzstemzbU_W4xXZKI79Q0msNLNOdQ" 
+                src="https://lh3.googleusercontent.com/d/1TtktR-B0LsjkNXjvcdUP8JPkZye4U8Ks" 
                 alt="יעקב רייניץ" 
-                className="h-16 md:h-24 w-auto brightness-0 invert"
+                className="h-16 md:h-24 w-auto"
                 referrerPolicy="no-referrer"
               />
             </Link>
@@ -27,26 +27,18 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-12 lg:gap-24 text-right">
+          <div className="grid grid-cols-2 gap-12 lg:gap-24 text-right">
             <div>
-              <h5 className="text-xs font-bold uppercase tracking-[0.3em] text-babun-accent mb-8">ניווט</h5>
+              <h5 className="text-xs font-bold uppercase tracking-[0.3em] text-babun-accent mb-8">תפריט</h5>
               <ul className="space-y-4 text-sm text-white/60">
-                <li><Link to="/" className="hover:text-white transition-colors">בית</Link></li>
-                <li><Link to="/about" className="hover:text-white transition-colors">אודות</Link></li>
                 <li><Link to="/courses" className="hover:text-white transition-colors">קורסים והרצאות</Link></li>
-                <li><Link to="/consulting" className="hover:text-white transition-colors">פגישות ייעוץ</Link></li>
+                <li><Link to="/consulting" className="hover:text-white transition-colors">פגישת ייעוץ</Link></li>
+                <li><Link to="/calculators" className="hover:text-white transition-colors">מחשבונים</Link></li>
                 <li><Link to="/book" className="hover:text-white transition-colors">הספר</Link></li>
-                <li><Link to="/articles" className="hover:text-white transition-colors">מאמרים ותקשורת</Link></li>
+                <li><Link to="/articles" className="hover:text-white transition-colors">מאמרים ופודקאסטים</Link></li>
               </ul>
             </div>
             <div>
-              <h5 className="text-xs font-bold uppercase tracking-[0.3em] text-babun-accent mb-8">כלים</h5>
-              <ul className="space-y-4 text-sm text-white/60">
-                <li><Link to="/calculators" className="hover:text-white transition-colors">מחשבונים</Link></li>
-                <li><Link to="/contact" className="hover:text-white transition-colors">יצירת קשר</Link></li>
-              </ul>
-            </div>
-            <div className="col-span-2 md:col-span-1">
               <h5 className="text-xs font-bold uppercase tracking-[0.3em] text-babun-accent mb-8">צור קשר</h5>
               <ul className="space-y-4 text-sm text-white/60">
                 <li className="flex items-center gap-3 justify-end">office@rainitznadlan.co.il <Mail size={14} /></li>
