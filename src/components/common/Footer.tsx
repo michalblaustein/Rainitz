@@ -9,7 +9,7 @@ export default function Footer() {
           <div className="max-w-md lg:text-right">
             <Link to="/" className="flex items-center justify-start lg:justify-end mb-8">
               <img 
-                src="https://drive.google.com/uc?export=view&id=12Rxg5zyqDjcmcZQN5gL1O0aUjHfOYtRG" 
+                src="https://lh3.googleusercontent.com/d/1CYyzzstemzbU_W4xXZKI79Q0msNLNOdQ" 
                 alt="יעקב רייניץ" 
                 className="h-16 md:h-24 w-auto brightness-0 invert"
                 referrerPolicy="no-referrer"
