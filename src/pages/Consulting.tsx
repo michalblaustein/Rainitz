@@ -19,7 +19,7 @@ export default function Consulting() {
           <div className="lg:max-w-md pt-12">
              <h2 className="text-2xl font-display font-bold text-babun-primary mb-4">שאלה נכונה שווה יותר ממיליון שקל.</h2>
              <p className="text-babun-primary/60 text-lg leading-relaxed font-light">
-               60 דקות. ₪1,200. תצא עם תמונה ברורה — ולא עם עוד בלבול.
+               60 דקות. ₪1,200. תצא עם תמונה ברורה - ולא עם עוד בלבול.
              </p>
           </div>
         </div>
@@ -31,8 +31,8 @@ export default function Consulting() {
              <section>
                 <h3 className="text-4xl font-display font-black text-babun-primary mb-10 tracking-tight">מה קורה בפגישה.</h3>
                 <div className="text-xl text-babun-primary/70 leading-relaxed font-light space-y-6 mb-12">
-                   <p>אין שאלות "טיפשות" כאן. אתה מביא את העסקה, הנכס, הספקות — ואני מביא 18 שנים של ניסיון בלב שוק הנדל"ן.</p>
-                   <p>בסוף הפגישה — יש לך החלטה. לא "בואו נראה". תצא עם רשימת צעדים מעשיים וביטחון מלא בדרך שלך.</p>
+                   <p>אין שאלות "טיפשות" כאן. אתה מביא את העסקה, הנכס, הספקות - ואני מביא 18 שנים של ניסיון בלב שוק הנדל"ן.</p>
+                   <p>בסוף הפגישה - יש לך החלטה. לא "בואו נראה". תצא עם רשימת צעדים מעשיים וביטחון מלא בדרך שלך.</p>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

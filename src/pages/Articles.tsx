@@ -49,7 +49,7 @@ export default function Articles() {
           <div className="lg:max-w-md pt-12">
              <h2 className="text-2xl font-display font-bold text-babun-primary mb-4">הידע פה. קח.</h2>
              <p className="text-babun-primary/60 text-lg leading-relaxed font-light">
-               טור שבועי. פודקאסט. ראיונות. כתבות. כל מה שכתבתי — במקום אחד.
+               טור שבועי. פודקאסט. ראיונות. כתבות. כל מה שכתבתי - במקום אחד.
              </p>
           </div>
         </div>
@@ -111,11 +111,11 @@ export default function Articles() {
         <section className="mt-40 bg-babun-primary text-white p-12 md:p-20 rounded-babun-lg relative overflow-hidden">
            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16 text-right">
               <div className="flex-1">
-                 <h3 className="text-3xl font-display font-black text-babun-accent mb-6 italic">חדשות נדל"ן — עדכון שוטף</h3>
+                 <h3 className="text-3xl font-display font-black text-babun-accent mb-6 italic">חדשות נדל"ן - עדכון שוטף</h3>
                  <div className="space-y-8">
                     {[
                       "עליית ריבית בנק ישראל: מה המשמעות למשכנתא שלכם?",
-                      "המכרזים החדשים בפריפריה — הזדמנות או מלכודת?",
+                      "המכרזים החדשים בפריפריה - הזדמנות או מלכודת?",
                       "התחדשות עירונית בבני ברק: פני העתיד"
                     ].map((news, i) => (
                       <div key={i} className="flex items-center gap-4 justify-end border-b border-white/5 pb-4 group cursor-pointer">

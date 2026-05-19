@@ -8,8 +8,8 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 
 const services = [
   {
-    title: "ייעוץ נדל\"ן אישי",
-    desc: "פגישה אחת שמשנה את כל ההחלטה. מסתכלים יחד על העסקה, מזהים סיכונים שלא ראית, ובונים צעד ברור קדימה.",
+    title: "פגישת ייעוץ אישית",
+    desc: "פגישת ייעוץ שעושה סדר בראש. בודקים כדאיות ופוטנציאל רווח. מזהים סיכונים ואתגרים. יוצאים עם תכלס - משימות ברורות איך מתקדמים.",
     price: "₪1,200",
     cta: "קביעת מועד",
     link: "/consulting",
@@ -17,7 +17,7 @@ const services = [
   },
   {
     title: "קורסים מקצועיים",
-    desc: "שישה מפגשים שבסופם אתה כבר לא תלוי באף אחד. למשקיעים, לזוגות, לכל מי שרוצה להבין את השוק לעומקו.",
+    desc: "שישה מפגשים שבסופם אתה הופך למומחה. מתאים ל: משקיעים, זוגות, ולכל מי שרוצה להבין את השוק לעומקו.",
     price: "הרשמה פתוחה",
     cta: "הצטרפות למחזור הקרוב",
     link: "/courses",
@@ -25,27 +25,11 @@ const services = [
   },
   {
     title: "הרצאות והדרכות",
-    desc: "לארגונים, קהילות, וחברות. תוכן שמשנה את הדרך שבה אנשים מסתכלים על נדל\"ן — ממחרת.",
+    desc: "לארגונים, קהילות, וחברות. תוכן מרתק ומעשיר שמשנה את הדרך שבה אנשים מסתכלים על נדל\"ן.",
     price: "הזמנה מראש",
     cta: "תיאום הרצאה",
     link: "/contact",
     icon: MessageCircle
-  },
-  {
-    title: "שיתופי פעולה",
-    desc: "מתווך, יזם, או איש נדל\"ן שרוצה זווית חיצונית? נבנה מסגרת עבודה שמועילה לשני הצדדים.",
-    price: "B2B",
-    cta: "שלח פנייה",
-    link: "/contact",
-    icon: Shield
-  },
-  {
-    title: "ספר \"שליש בקרקע\"",
-    desc: "148 עמודים. כל מה שצריך לדעת לפני שחותמים. מהמשכנתא ועד הטאבו, מהמכרז ועד קבוצת הרכישה.",
-    price: "₪149",
-    cta: "הזמנת הספר",
-    link: "/book",
-    icon: BookOpen
   }
 ];
 
@@ -253,10 +237,10 @@ export default function Home() {
       </section>
 
       {/* SERVICES */}
-      <section className="py-32">
+      <section className="py-32 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-           <div className="mb-20 text-right">
-              <h2 className="text-5xl md:text-7xl font-display font-black tracking-tighter text-babun-primary">מה תמצא כאן.</h2>
+           <div className="mb-20 text-center">
+              <h2 className="text-5xl md:text-7xl font-display font-black tracking-tighter text-babun-primary">איך תרצה <span className="text-babun-accent">להתקדם</span>?</h2>
            </div>
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((item, i) => (
@@ -270,8 +254,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-2xl font-display font-bold mb-6 text-babun-primary">{item.title}</h3>
                   <p className="text-babun-primary/60 text-lg font-light leading-relaxed mb-10 flex-grow">{item.desc}</p>
-                  <div className="w-full pt-10 border-t border-babun-primary/5 flex items-center justify-between flex-row-reverse">
-                     <span className="text-[11px] font-black uppercase text-babun-accent tracking-widest">{item.price}</span>
+                  <div className="w-full pt-10 border-t border-babun-primary/5 flex items-center justify-start">
                      <Link to={item.link} className="text-babun-primary font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:text-babun-accent transition-colors">
                         {item.cta} <ArrowLeft size={16} />
                      </Link>
@@ -283,68 +266,154 @@ export default function Home() {
       </section>
 
       {/* TARGET AUDIENCE - BENTO */}
-      <section className="py-32 bg-babun-primary text-white">
+      <section className="py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-right">
           <div className="max-w-3xl ml-auto mb-20">
-             <h2 className="text-4xl md:text-6xl font-display font-black mb-8 leading-tight tracking-tight">בין אם זו הדירה הראשונה שלך, בין אם זו ההשקעה העשירית —</h2>
-             <p className="text-xl text-babun-accent italic font-light">מרכז רייניץ בנוי לאנשים שרוצים להבין, לא רק לקנות.</p>
+             <h2 className="text-3xl md:text-5xl font-display font-black mb-8 leading-tight tracking-tight text-babun-primary">בין אם זו הדירה <span className="text-babun-accent">הראשונה</span> שלך, <br />בין אם זו ההשקעה <span className="text-babun-accent">העשירית</span></h2>
+             <p className="text-2xl text-babun-primary/60 font-light">מרכז רייניץ בנוי לאנשים שרוצים להבין, לא רק לקנות.</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-             <div className="md:col-span-8 bg-white/5 p-12 border border-white/10 hover:border-babun-accent transition-colors">
-                 <h4 className="text-2xl font-display font-bold mb-6 text-babun-accent">משקיעים פרטיים</h4>
-                 <p className="text-lg font-light text-white/60 leading-relaxed">יש לך הון. אתה רוצה שהוא יעבוד חכם. הבעיה: לא תמיד יודעים מי עובד בשבילך ומי בשביל העמלה שלו. כאן — זה ברור.</p>
-             </div>
-             <div className="md:col-span-4 bg-white/5 p-12 border border-white/10 hover:border-babun-accent transition-colors">
-                 <h4 className="text-2xl font-display font-bold mb-6 text-babun-accent">זוגות ואברכים</h4>
-                 <p className="text-lg font-light text-white/60 leading-relaxed">חולמים על דירה. לא יודעים מאיפה להתחיל. אנחנו פורסים בפניך את כל המפה.</p>
-             </div>
-             <div className="md:col-span-4 bg-white/5 p-12 border border-white/10 hover:border-babun-accent transition-colors">
-                 <h4 className="text-2xl font-display font-bold mb-6 text-babun-accent">אנשי מקצוע</h4>
-                 <p className="text-lg font-light text-white/60 leading-relaxed">מתווך, יועץ, ברוקר — רוצה לחדד את הכלים? נדבר.</p>
-             </div>
-             <div className="md:col-span-8 bg-babun-accent text-babun-primary p-12">
-                 <h4 className="text-2xl font-display font-black mb-6">נפגעי נדל"ן</h4>
-                 <p className="text-lg font-bold leading-relaxed mb-8">עשית עסקה שלא יצאה כמו שחשבת. אתה לא לבד — וזה לא חייב להישאר ככה. בוא נבין ביחד מה קרה ומה עושים מכאן.</p>
-                 <Link to="/contact" className="text-[11px] font-black uppercase tracking-widest border-b-2 border-babun-primary pb-1">תיאום שיחת חירום</Link>
-             </div>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-full">
+             {/* TOP LEFT - LARGE GREEN CARD */}
+             <motion.div 
+               whileHover={{ y: -5 }}
+               className="md:col-span-8 bg-[#424242] rounded-[48px] p-12 md:p-16 relative overflow-hidden flex flex-col justify-end min-h-[400px]"
+             >
+                <div className="absolute top-12 left-12 w-20 h-20 bg-babun-accent rounded-full flex items-center justify-center text-babun-primary shadow-lg">
+                   <Users size={32} />
+                </div>
+                <div className="relative z-10 max-w-xl">
+                   <h4 className="text-3xl md:text-5xl font-display font-black mb-8 text-white leading-tight">משקיעים פרטיים</h4>
+                   <p className="text-xl font-light text-white/80 leading-relaxed mb-8">יש לך הון. אתה רוצה שהוא יעבוד חכם. הבעיה: לא תמיד יודעים מי עובד בשבילך ומי בשביל העמלה שלו. כאן - זה ברור.</p>
+                   <div className="flex items-center gap-4 text-babun-accent font-bold">
+                      <div className="w-12 h-px bg-babun-accent/30" />
+                      <span>ליווי מלא ומקצועי</span>
+                   </div>
+                </div>
+                {/* Abstract shape */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+             </motion.div>
+
+             {/* TOP RIGHT - SMALL WHITE CARD */}
+             <motion.div 
+               whileHover={{ y: -5 }}
+               className="md:col-span-4 bg-white rounded-[48px] p-10 flex flex-col justify-between shadow-sm border border-gray-100"
+             >
+                <div className="w-16 h-16 bg-babun-accent/20 rounded-2xl flex items-center justify-center text-babun-accent">
+                   <Target size={28} />
+                </div>
+                <div>
+                   <h4 className="text-2xl font-display font-black mb-4 text-babun-primary">זוגות ואברכים</h4>
+                   <p className="text-babun-primary/60 font-light leading-relaxed">חולמים על דירה. לא יודעים מאיפה להתחיל. אנחנו פורסים בפניך את כל המפה.</p>
+                </div>
+                <div className="pt-6">
+                   <ArrowLeft className="text-babun-primary/20" />
+                </div>
+             </motion.div>
+
+             {/* BOTTOM LEFT - SMALL WHITE CARD */}
+             <motion.div 
+               whileHover={{ y: -5 }}
+               className="md:col-span-4 bg-white rounded-[48px] p-10 flex flex-col justify-between shadow-sm border border-gray-100"
+             >
+                <div className="w-16 h-16 bg-babun-accent/20 rounded-2xl flex items-center justify-center text-babun-accent">
+                   <Shield size={28} />
+                </div>
+                <div>
+                   <h4 className="text-2xl font-display font-black mb-4 text-babun-primary">אנשי מקצוע</h4>
+                   <p className="text-babun-primary/60 font-light leading-relaxed">מתווך, יועץ, ברוקר - רוצה לחדד את הכלים? נדבר ונעלה את הרמה יחד.</p>
+                </div>
+                <div className="pt-6">
+                   <ArrowLeft className="text-babun-primary/20" />
+                </div>
+             </motion.div>
+
+             {/* BOTTOM RIGHT - LARGE WHITE CARD */}
+             <motion.div 
+               whileHover={{ y: -5 }}
+               className="md:col-span-8 bg-white rounded-[48px] p-12 md:p-16 flex flex-col md:flex-row shadow-sm border border-gray-100 items-center gap-12"
+             >
+                <div className="flex-1 text-right">
+                   <h4 className="text-3xl md:text-5xl font-display font-black mb-6 text-babun-primary">נפגעי נדל"ן</h4>
+                   <p className="text-lg text-babun-primary/60 font-light leading-relaxed mb-8">עשית עסקה שלא יצאה כמו שחשבת. אתה לא לבד - וזה לא חייב להישאר ככה. בוא נבין ביחד מה קרה ומה עושים מכאן.</p>
+                   <Link to="/contact" className="inline-flex items-center gap-3 bg-[#424242] text-white px-8 py-4 rounded-full font-bold transition-transform hover:scale-105">
+                      <span>תיאום שיחת חירום</span>
+                      <ArrowLeft size={18} />
+                   </Link>
+                </div>
+                <div className="grid grid-cols-2 gap-8 border-r border-gray-100 pr-12 hidden md:grid">
+                   <div>
+                      <div className="text-4xl font-display font-black text-babun-primary">500+</div>
+                      <div className="text-sm text-babun-primary/40 font-bold">מקרים שנפתרו</div>
+                   </div>
+                   <div>
+                      <div className="text-4xl font-display font-black text-babun-primary">100%</div>
+                      <div className="text-sm text-babun-primary/40 font-bold">שקיפות מלאה</div>
+                   </div>
+                </div>
+             </motion.div>
           </div>
         </div>
       </section>
 
       {/* NEWSLETTER */}
-      <section className="py-24 bg-babun-primary">
-         <div className="max-w-7xl mx-auto px-4 md:px-8">
-            <div className="bg-white p-12 md:p-20 shadow-2xl relative overflow-hidden flex flex-col lg:flex-row items-center gap-16 text-right rounded-babun-lg">
+      <section className="relative py-32 overflow-hidden bg-[#121212]">
+         {/* Video Background */}
+         <div className="absolute inset-0 z-0 opacity-60">
+            <iframe 
+               className="absolute top-1/2 left-1/2 w-[110%] h-[110%] -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-110 object-cover"
+               src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
+               allow="autoplay; encrypted-media"
+               frameBorder="0"
+            />
+            {/* Dark Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+         </div>
+
+         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+            <div className="bg-white/5 backdrop-blur-xl p-12 md:p-20 shadow-2xl relative overflow-hidden flex flex-col lg:flex-row items-center gap-16 text-right rounded-[48px] border border-white/10">
                <div className="flex-1">
-                  <h2 className="text-4xl font-display font-black mb-4 text-babun-primary">קבל את המידע לפני כולם.</h2>
-                  <p className="text-babun-primary/60 text-lg font-light leading-relaxed">הטור השבועי, ניתוחי שוק, פינת חדשות נדל"ן — ישירות אליך.</p>
+                  <h2 className="text-4xl md:text-5xl font-display font-black mb-6 text-white leading-tight">קבל את המידע <br /><span className="text-babun-accent">לפני כולם</span></h2>
+                  <p className="text-white/60 text-xl font-light leading-relaxed">הטור השבועי, ניתוחי שוק, פינת חדשות נדל"ן - ישירות אליך.</p>
                </div>
                <div className="flex-1 w-full max-w-md">
                   {status === "success" ? (
-                    <div className="bg-babun-accent/20 p-8 text-center font-bold text-babun-primary border border-babun-accent">תודה על ההרשמה!</div>
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-babun-accent/10 p-10 text-center rounded-[32px] border border-babun-accent/30"
+                    >
+                       <div className="text-babun-accent mb-4 flex justify-center"><CheckCircle size={48} /></div>
+                       <div className="text-white text-2xl font-bold">תודה על ההרשמה!</div>
+                       <div className="text-white/60 mt-2">נתראה בתיבת הדואר שלך בקרוב.</div>
+                    </motion.div>
                   ) : (
-                    <form onSubmit={handleNewsletter} className="flex flex-col gap-4">
+                    <form onSubmit={handleNewsletter} className="flex flex-col gap-5">
                        <input 
                         required 
                         type="text" 
                         placeholder="שם פרטי" 
-                        className="h-14 bg-babun-light px-6 outline-none border-0 focus:ring-1 ring-babun-accent transition-all text-right" 
+                        className="h-16 bg-white/5 px-8 rounded-2xl outline-none border border-white/10 focus:border-babun-accent/50 focus:bg-white/10 transition-all text-right text-white" 
                       />
                        <input 
                         required 
                         type="email" 
                         placeholder="כתובת דוא'ל" 
-                        className="h-14 bg-babun-light px-6 outline-none border-0 focus:ring-1 ring-babun-accent transition-all text-right"
+                        className="h-16 bg-white/5 px-8 rounded-2xl outline-none border border-white/10 focus:border-babun-accent/50 focus:bg-white/10 transition-all text-right text-white"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                       />
-                       <button className="btn-babun-primary w-full justify-center py-5 uppercase tracking-widest h-14">הרשמה לניוזלטר</button>
+                       <button className="bg-babun-accent text-babun-primary font-bold px-10 h-16 rounded-2xl hover:scale-105 transition-transform text-lg shadow-xl shadow-babun-accent/20">
+                          הרשמה לניוזלטר
+                       </button>
                     </form>
                   )}
-                  <div className="mt-8 flex justify-start">
-                     <a href="https://wa.me/972504141516" target="_blank" className="flex items-center gap-4 text-[#25D366] font-bold text-xs uppercase tracking-widest hover:opacity-80 transition-all">
-                        הצטרפו לקבוצת הווצאפ שלנו <BarChart3 size={18} />
+                  <div className="mt-10 flex justify-start">
+                     <a href="https://wa.me/972504141516" target="_blank" className="flex items-center gap-4 text-[#25D366] font-bold text-sm uppercase tracking-widest hover:opacity-80 transition-all">
+                        <span>הצטרפו לקבוצת הווצאפ השקטה שלנו</span>
+                        <div className="w-10 h-10 bg-[#25D366]/10 rounded-full flex items-center justify-center">
+                           <MessageCircle size={20} />
+                        </div>
                      </a>
                   </div>
                </div>

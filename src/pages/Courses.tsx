@@ -46,7 +46,7 @@ export default function Courses() {
           <div className="lg:max-w-md pt-12">
              <h2 className="text-2xl font-display font-bold text-babun-primary mb-4">הקורס שהיית צריך לפני שקנית.</h2>
              <p className="text-babun-primary/60 text-lg leading-relaxed font-light">
-               6 מפגשים. שלב אחר שלב. בסוף — אתה מבין ננדל"ן בעצמך.
+               6 מפגשים. שלב אחר שלב. בסוף - אתה מבין ננדל"ן בעצמך.
              </p>
           </div>
         </div>
@@ -58,8 +58,8 @@ export default function Courses() {
              <section>
                 <h3 className="text-4xl font-display font-black text-babun-primary mb-10 tracking-tight">על הקורס.</h3>
                 <div className="text-xl text-babun-primary/70 leading-relaxed font-light space-y-6">
-                   <p>רוב האנשים מגיעים לרכישה עם מידע חסר. הם יודעים שיש "משכנתא" ויש "מחיר מבוקש" — אבל לא יודעים מה הם לא יודעים.</p>
-                   <p>הקורס הזה נבנה מ-18 שנות ניסיון בשטח ומשאלות שלקוחות שאלו אותי לפני שחתמו — ואחרי.</p>
+                   <p>רוב האנשים מגיעים לרכישה עם מידע חסר. הם יודעים שיש "משכנתא" ויש "מחיר מבוקש" - אבל לא יודעים מה הם לא יודעים.</p>
+                   <p>הקורס הזה נבנה מ-18 שנות ניסיון בשטח ומשאלות שלקוחות שאלו אותי לפני שחתמו - ואחרי.</p>
                 </div>
              </section>
 
@@ -82,7 +82,7 @@ export default function Courses() {
              <section className="bg-babun-primary text-white p-12 md:p-20 rounded-babun-lg relative overflow-hidden">
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
                    <div className="flex-1">
-                      <h3 className="text-3xl font-display font-black text-babun-accent mb-4 tracking-tight">הקורס הדיגיטלי — בקרוב</h3>
+                      <h3 className="text-3xl font-display font-black text-babun-accent mb-4 tracking-tight">הקורס הדיגיטלי - בקרוב</h3>
                       <p className="text-white/60 text-lg font-light leading-relaxed">לא יכול להגיע פיזית? הקורס המוקלט בדרך. השאירו פרטים להרשמה מוקדמת.</p>
                    </div>
                    <button className="btn-babun-primary border-transparent whitespace-nowrap">הרשמה מוקדמת</button>

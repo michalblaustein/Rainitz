@@ -16,7 +16,7 @@ export default function Footer() {
               />
             </Link>
             <p className="text-lg text-white/50 font-light leading-relaxed mb-10">
-              18 שנות ניסיון. טור שבועי ב"המודיע". ספר שמסביר מה אף אחד לא אמר לך. יעקב רייניץ לצידך — מהשאלה הראשונה עד חתימת הטאבו.
+              18 שנות ניסיון. טור שבועי ב"המודיע". ספר שמסביר מה אף אחד לא אמר לך. יעקב רייניץ לצידך - מהשאלה הראשונה עד חתימת הטאבו.
             </p>
             <div className="flex gap-4 justify-start lg:justify-end">
               {['FB', 'LN', 'WA'].map(social => (
