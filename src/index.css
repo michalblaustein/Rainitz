@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Assistant", sans-serif;
+  --font-sans: "Assistant", "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-babun-primary: #000000;
+  --color-babun-accent: #fee000;
+  --color-babun-secondary: #1a1a1a;
+  --color-babun-dark: #000000;
+  --color-babun-light: #ffffff;
+  --color-babun-gold: #fee000;
+  
+  --radius-babun-sm: 10px;
+  --radius-babun-md: 20px;
+  --radius-babun-lg: 30px;
+  --radius-babun-xl: 50px;
+  --radius-babun-full: 100px;
+}
+
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  body {
+    @apply font-sans bg-babun-light text-babun-primary min-h-screen antialiased;
+    direction: rtl;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  .btn-babun-primary {
+    @apply bg-babun-accent text-babun-primary font-bold py-3 px-8 rounded-babun-full transition-all duration-300 hover:bg-babun-primary hover:text-white inline-flex items-center gap-2;
+  }
+  
+  .btn-babun-outline {
+    @apply border-2 border-babun-primary text-babun-primary font-bold py-3 px-8 rounded-babun-full transition-all duration-300 hover:bg-babun-primary hover:text-white inline-flex items-center gap-2;
+  }
+  
+  .card-babun {
+    @apply bg-white p-8 rounded-babun-lg shadow-sm border border-babun-primary/5 transition-all duration-500 hover:shadow-xl;
+  }
+
+  .input-babun {
+    @apply w-full bg-white border border-babun-primary/10 rounded-babun-md px-6 py-4 outline-none focus:border-babun-accent transition-all;
+  }
+}

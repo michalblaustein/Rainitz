@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 3. Helper Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // 2. Validation Blueprints
+    function isValidLead(data) {
+      return data.keys().hasAll(['name', 'email', 'phone', 'createdAt']) && 
+             data.keys().size() >= 4 &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.email is string && data.email.size() > 0 && data.email.size() < 100 &&
+             data.phone is string && data.phone.size() >= 9 && data.phone.size() <= 15 &&
+             data.createdAt == request.time;
+    }
+
+    function isValidSubscriber(data) {
+      return data.keys().hasAll(['email', 'createdAt']) &&
+             data.keys().size() >= 2 &&
+             data.email is string && data.email.size() > 0 && data.email.size() < 100 &&
+             data.createdAt == request.time;
+    }
+
+    function isValidCourseSignup(data) {
+      return data.keys().hasAll(['name', 'email', 'phone', 'courseType', 'createdAt']) &&
+             data.keys().size() >= 5 &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.email is string && data.email.size() > 0 && data.email.size() < 100 &&
+             data.phone is string && data.phone.size() >= 9 && data.phone.size() <= 15 &&
+             data.courseType in ['physical', 'digital'] &&
+             data.createdAt == request.time;
+    }
+
+    // 1. Master Gate Collection Rules
+    match /leads/{leadId} {
+      allow create: if isValidId(leadId) && isValidLead(incoming());
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /subscribers/{subscriberId} {
+      allow create: if isValidId(subscriberId) && isValidSubscriber(incoming());
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /course_signups/{signupId} {
+      allow create: if isValidId(signupId) && isValidCourseSignup(incoming());
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Admins collection - managed manually or via Firebase Console for now
+    match /admins/{adminId} {
+      allow read: if isSignedIn() && request.auth.uid == adminId;
+      allow write: if false; // Only manageable via console
+    }
+  }
+}

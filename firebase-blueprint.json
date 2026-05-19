@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "Job": {
+      "title": "Job Posting",
+      "description": "Job listings on the board",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "companyId": { "type": "string" },
+        "companyName": { "type": "string" },
+        "companyLogo": { "type": "string" },
+        "location": { "type": "string" },
+        "type": { "type": "string", "enum": ["full-time", "part-time", "contract", "freelance"] },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "requirements": { "type": "string" },
+        "salary": { "type": "string" },
+        "isRemote": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "companyName", "location", "type", "description", "createdAt"]
+    },
+    "Application": {
+      "title": "Job Application",
+      "description": "Candidate applications for jobs",
+      "type": "object",
+      "properties": {
+        "jobId": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "candidateName": { "type": "string" },
+        "candidateEmail": { "type": "string", "format": "email" },
+        "candidatePhone": { "type": "string" },
+        "resumeUrl": { "type": "string" },
+        "coverLetter": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "reviewed", "interviewing", "accepted", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["jobId", "candidateName", "candidateEmail", "createdAt"]
+    },
+    "Company": {
+      "title": "Employer Profile",
+      "description": "Details about hiring companies",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "logo": { "type": "string" },
+        "description": { "type": "string" },
+        "industry": { "type": "string" },
+        "website": { "type": "string" },
+        "contactEmail": { "type": "string", "format": "email" },
+        "location": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "contactEmail", "createdAt"]
+    },
+    "NewsletterSubscriber": {
+      "title": "Newsletter Subscriber",
+      "description": "Subscribers for updates",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/jobs/{jobId}": {
+      "schema": "Job",
+      "description": "Job listings"
+    },
+    "/applications/{applicationId}": {
+      "schema": "Application",
+      "description": "Job applications"
+    },
+    "/companies/{companyId}": {
+      "schema": "Company",
+      "description": "Employer profiles"
+    },
+    "/newsletter_subscribers/{subscriberId}": {
+      "schema": "NewsletterSubscriber",
+      "description": "Newsletter subscribers"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "יעקב רייניץ - נדל\"ן וכלכלה נבונה",
+  "description": "מרכז רייניץ לנדל\"ן - ייעוץ אישי, קורסים מקצועיים, וליווי עסקאות נדל\"ן מתוך 18 שנות ניסיון שטח.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
