@@ -34,28 +34,32 @@ const articles = [
 
 export default function Articles() {
   return (
-    <div className="bg-babun-light pt-32 pb-24 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 mb-20 text-right">
-        <div className="flex flex-col lg:flex-row justify-between items-start gap-8 border-b border-babun-primary/10 pb-20">
-          <div className="max-w-3xl">
-             <span className="inline-block text-[11px] font-bold uppercase tracking-[0.5em] text-babun-accent mb-6 px-4 py-1.5 border border-babun-accent/20 bg-babun-accent/5">
+    <div className="bg-babun-light min-h-screen">
+      {/* PAGE HERO */}
+      <section className="bg-babun-primary text-white pt-48 pb-20 relative overflow-hidden">
+        <div className="absolute inset-0 mesh-grid opacity-20 z-0" />
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 text-right">
+          <div className="flex flex-col lg:flex-row justify-between items-start gap-8 border-b border-white/10 pb-20">
+            <div className="max-w-3xl">
+              <span className="inline-block text-[11px] font-bold uppercase tracking-[0.5em] text-babun-accent mb-6 px-4 py-1.5 border border-babun-accent/20 bg-babun-accent/5">
                 MEDIA & INSIGHTS
               </span>
-              <h1 className="text-6xl md:text-8xl font-display font-black leading-[0.9] text-babun-primary mb-8 lowercase tracking-tighter">
+              <h1 className="text-6xl md:text-8xl font-display font-black leading-[0.9] text-white mb-8 lowercase tracking-tighter">
                 Media <br />
                 <span className="text-babun-accent italic">Center.</span>
               </h1>
-          </div>
-          <div className="lg:max-w-md pt-12">
-             <h2 className="text-2xl font-display font-bold text-babun-primary mb-4">הידע פה. קח.</h2>
-             <p className="text-babun-primary/60 text-lg leading-relaxed font-light">
-               טור שבועי. פודקאסט. ראיונות. כתבות. כל מה שכתבתי - במקום אחד.
-             </p>
+            </div>
+            <div className="lg:max-w-md pt-12">
+              <h2 className="text-2xl font-display font-bold text-white mb-4">הידע פה. קח.</h2>
+              <p className="text-white/60 text-lg leading-relaxed font-light">
+                טור שבועי. פודקאסט. ראיונות. כתבות. כל מה שכתבתי - במקום אחד.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-24">
         {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-32">
            {mediaCategories.map((cat, i) => (

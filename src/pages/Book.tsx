@@ -30,28 +30,40 @@ export default function Book() {
   ];
 
   return (
-    <div className="bg-babun-light pt-32 pb-24 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 mb-20 text-right">
-        <div className="flex flex-col lg:flex-row justify-between items-start gap-8 border-b border-babun-primary/10 pb-20">
-          <div className="max-w-3xl">
-             <span className="inline-block text-[11px] font-black uppercase tracking-[0.5em] text-babun-accent mb-6 px-4 py-1.5 border border-babun-accent/20 bg-babun-accent/5">
-                MUST READ
-              </span>
-              <h1 className="text-6xl md:text-8xl font-display font-black leading-[0.9] text-babun-primary mb-8 lowercase tracking-tighter">
-                The <br />
-                <span className="text-babun-accent italic">Book.</span>
-              </h1>
-          </div>
-          <div className="lg:max-w-md pt-12 text-right">
-             <h2 className="text-3xl font-display font-black text-babun-primary mb-4 leading-tight">שליש בקרקע</h2>
-             <p className="text-babun-primary/60 text-lg leading-relaxed font-light">
-               148 עמודים. כל מה שלא מסבירים לך. המדריך המלא לנדל"ן חכם.
-             </p>
-          </div>
+    <div className="bg-white min-h-screen">
+      {/* PAGE HERO - VIDEO HEADER */}
+      <section className="relative h-[60vh] md:h-[80vh] w-full overflow-hidden">
+        {/* Background Video Holder */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-black/60 z-10" />
+          <iframe 
+            className="w-full h-full scale-[1.3] md:scale-[1.5] pointer-events-none"
+            src="https://www.youtube.com/embed/ZtiNxcUOgeI?autoplay=1&mute=1&loop=1&playlist=ZtiNxcUOgeI&controls=0&rel=0&modestbranding=1" 
+            title="background video"
+            frameBorder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          ></iframe>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        {/* Content Overlay */}
+        <div className="relative z-20 h-full flex flex-col items-center justify-center text-center px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-5xl"
+          >
+            <h1 className="text-6xl md:text-9xl font-display font-black text-white mb-6 tracking-tighter leading-none drop-shadow-2xl">
+              שליש <span className="text-babun-accent italic">בקרקע</span>
+            </h1>
+            <p className="text-2xl md:text-5xl font-display font-black text-white leading-tight drop-shadow-xl">
+              בהירות והכוונה בעולם הנדל״ן
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-32 pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
           <div className="lg:col-span-12 xl:col-span-8 order-2 xl:order-1 text-right space-y-24">
              <section className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">

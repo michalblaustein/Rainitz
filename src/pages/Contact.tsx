@@ -32,28 +32,31 @@ export default function Contact() {
   };
 
   return (
-    <div className="bg-babun-light pt-32 pb-24 min-h-screen">
-      {/* Page Header Area */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 mb-20 text-right">
-        <div className="flex flex-col lg:flex-row justify-between items-start gap-8 border-b border-babun-primary/10 pb-20">
-          <div className="max-w-3xl">
-             <span className="inline-block text-[11px] font-bold uppercase tracking-[0.5em] text-babun-accent mb-6 px-4 py-1.5 border border-babun-accent/20 bg-babun-accent/5">
+    <div className="bg-babun-light min-h-screen">
+      {/* PAGE HERO */}
+      <section className="bg-babun-primary text-white pt-48 pb-20 relative overflow-hidden">
+        <div className="absolute inset-0 mesh-grid opacity-20 z-0" />
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 text-right">
+          <div className="flex flex-col lg:flex-row justify-between items-start gap-8 border-b border-white/10 pb-20">
+            <div className="max-w-3xl">
+              <span className="inline-block text-[11px] font-bold uppercase tracking-[0.5em] text-babun-accent mb-6 px-4 py-1.5 border border-babun-accent/20 bg-babun-accent/5">
                 Always Online
               </span>
-              <h1 className="text-6xl md:text-8xl font-display font-black leading-[0.9] text-babun-primary mb-8 lowercase text-right tracking-tighter">
+              <h1 className="text-6xl md:text-8xl font-display font-black leading-[0.9] text-white mb-8 lowercase text-right tracking-tighter">
                 Get in <br />
                 <span className="text-babun-accent italic">Touch.</span>
               </h1>
-          </div>
-          <div className="lg:max-w-md pt-12">
-             <p className="text-babun-primary/60 text-lg leading-relaxed font-light">
-               שאלה. ייעוץ. שיתוף פעולה. הרצאה. כאן עונים. הצוות המקצועי שלנו כאן כדי לתת לכם מענה מדויק.
-             </p>
+            </div>
+            <div className="lg:max-w-md pt-12">
+              <p className="text-white/60 text-lg leading-relaxed font-light">
+                שאלה. ייעוץ. שיתוף פעולה. הרצאה. כאן עונים. הצוות המקצועי שלנו כאן כדי לתת לכם מענה מדויק.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
           
           {/* Info Side */}

@@ -24,12 +24,16 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const isHomePage = location.pathname === "/";
+  const darkHeroPages = ["/courses", "/consulting", "/calculators", "/book", "/articles", "/about", "/contact"];
+  const hasDarkHero = isHomePage || darkHeroPages.includes(location.pathname);
+
   return (
     <header className="fixed top-0 w-full z-50 transition-all duration-300">
       {/* Main Navbar */}
       <div 
         className={`w-full transition-all duration-500 ${
-          isScrolled 
+          isScrolled || !hasDarkHero
             ? "bg-white shadow-xl py-4" 
             : "bg-transparent py-6"
         }`}
@@ -38,7 +42,7 @@ export default function Navbar() {
           {/* Logo Right */}
           <Link to="/" className="flex items-center gap-2">
             <img 
-              src={isScrolled ? "https://lh3.googleusercontent.com/d/1CYyzzstemzbU_W4xXZKI79Q0msNLNOdQ" : "https://lh3.googleusercontent.com/d/1TtktR-B0LsjkNXjvcdUP8JPkZye4U8Ks"} 
+              src={isScrolled || !hasDarkHero ? "https://lh3.googleusercontent.com/d/1CYyzzstemzbU_W4xXZKI79Q0msNLNOdQ" : "https://lh3.googleusercontent.com/d/1TtktR-B0LsjkNXjvcdUP8JPkZye4U8Ks"} 
               alt="יעקב רייניץ" 
               className="h-20 md:h-24 w-auto transition-all duration-300"
               referrerPolicy="no-referrer"
@@ -53,8 +57,8 @@ export default function Navbar() {
                   to={link.path}
                   className={`text-lg transition-all duration-300 relative group px-6 py-2 flex flex-col items-center ${
                     location.pathname === link.path 
-                      ? (isScrolled ? "text-black" : "text-white") 
-                      : (isScrolled ? "text-black/70 hover:text-black" : "text-white/70 hover:text-white")
+                      ? (isScrolled || !hasDarkHero ? "text-black" : "text-white") 
+                      : (isScrolled || !hasDarkHero ? "text-black/70 hover:text-black" : "text-white/70 hover:text-white")
                   }`}
                 >
                   <div className="flex flex-col items-center justify-center">
@@ -70,7 +74,7 @@ export default function Navbar() {
                   }`} />
                 </Link>
                 {index < navLinks.length - 1 && (
-                  <div className={`w-px h-6 transition-colors duration-300 ${isScrolled ? "bg-black/10" : "bg-white/20"}`} />
+                  <div className={`w-px h-6 transition-colors duration-300 ${isScrolled || !hasDarkHero ? "bg-black/10" : "bg-white/20"}`} />
                 )}
               </div>
             ))}
@@ -87,7 +91,7 @@ export default function Navbar() {
 
             {/* Mobile Menu Toggle */}
             <button 
-              className={`lg:hidden p-2 transition-colors duration-300 ${isScrolled ? "text-babun-primary" : "text-white"}`}
+              className={`lg:hidden p-2 transition-colors duration-300 ${isScrolled || !hasDarkHero ? "text-babun-primary" : "text-white"}`}
               onClick={() => setIsOpen(!isOpen)}
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}

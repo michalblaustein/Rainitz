@@ -48,7 +48,7 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-4 group">
                 <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-babun-accent/20 transition-colors"><MapPin size={18} /></div>
-                <span className="group-hover:text-white transition-colors max-w-[200px]">בני ברק, מרכז העסקים מצדה 3</span>
+                <span className="group-hover:text-white transition-colors max-w-[200px]">מצדה 3, מרכז עסקים, בני ברק</span>
               </li>
             </ul>
           </div>

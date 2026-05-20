@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useTransform, animate } from "motion/react";
-import { ArrowLeft, ArrowRight, CheckCircle, Target, Shield, BookOpen, Users, MessageCircle, BarChart3, Presentation, Mail, Send, Star } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Target, Shield, BookOpen, Users, MessageCircle, BarChart3, Presentation, Mail, Send, Star, MoveLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -62,7 +62,7 @@ export default function Home() {
   };
 
   return (
-    <div className="bg-babun-light">
+    <div className="bg-babun-light" dir="rtl">
       {/* HERO SECTION */}
       <section className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-black text-white">
         {/* Background Mesh */}
@@ -265,8 +265,71 @@ export default function Home() {
         </div>
       </section>
 
+      {/* BOOK SECTION */}
+      <section className="relative mt-20 mb-8 lg:mt-32 lg:mb-10" id="book-section">
+        {/* Yellow Strip Background - Expanded upwards */}
+        <div className="absolute -top-12 left-0 right-0 bg-[#FFFBEB] z-0 h-[400px]" />
+        
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+            {/* Text (Right) */}
+            <motion.div 
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="lg:flex-[2] text-right flex flex-col items-start"
+            >
+               <div className="text-lg md:text-xl lg:text-2xl font-display font-medium text-black mb-3 leading-tight">
+                  <p>כשה<span className="font-bold">מתווך</span> עובד בשביל העמלה, וה<span className="font-bold">בנק</span> עובד בשביל עצמו.</p>
+               </div>
+               
+               <div className="mb-6">
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-black text-black leading-[1.1] tracking-tight">
+                    לך נשאר לרכוש כלים ולגלות <br />
+                    איפה מסתתר <span className="text-babun-accent">הרווח</span> בעסקאות נדל״ן
+                  </h2>
+               </div>
+
+               <p className="text-sm md:text-base lg:text-lg text-black font-bold mb-10 text-right">
+                 בין הנושאים בספר: משכנתאות • מחיר למשתכן • קבוצות רכישה <br />
+                 תמ״א • משא ומתן • מיסוי • ועוד...
+               </p>
+
+               <Link 
+                to="/book" 
+                className="group bg-black text-white px-8 md:px-12 py-3 md:py-4 rounded-full font-black text-lg md:text-xl hover:scale-105 transition-all shadow-xl hover:shadow-black/20 flex items-center gap-3"
+               >
+                 <span>לרכישה</span>
+                 <motion.div
+                   animate={{ x: [0, -5, 0] }}
+                   transition={{ repeat: Infinity, duration: 1.5 }}
+                 >
+                   <MoveLeft className="w-6 h-6 transition-transform group-hover:-translate-x-1" />
+                 </motion.div>
+               </Link>
+            </motion.div>
+
+            {/* Image (Left) - Pop out of the strip */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8, x: -50 }}
+              whileInView={{ opacity: 1, scale: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="flex-1 relative flex justify-center lg:justify-end"
+            >
+              <img 
+                src="https://lh3.googleusercontent.com/d/1YATeihtnryr9oCFr2-byVjsEYCnxVtIl" 
+                alt="הספר שליש בקרקע" 
+                className="w-full max-w-sm md:max-w-xl lg:max-w-5xl drop-shadow-[60px_90px_140px_rgba(0,0,0,0.35)] hover:scale-105 transition-transform duration-700 pointer-events-auto lg:-translate-x-24 lg:scale-[1.7] lg:-translate-y-16"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* TARGET AUDIENCE - BENTO */}
-      <section className="py-32 bg-white">
+      <section className="pt-12 pb-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-right">
           <div className="max-w-3xl ml-auto mb-20">
              <h2 className="text-3xl md:text-5xl font-display font-black mb-8 leading-tight tracking-tight text-babun-primary">בין אם זו הדירה <span className="text-babun-accent">הראשונה</span> שלך, <br />בין אם זו ההשקעה <span className="text-babun-accent">העשירית</span></h2>
@@ -357,11 +420,11 @@ export default function Home() {
       </section>
 
       {/* NEWSLETTER */}
-      <section className="relative py-32 overflow-hidden bg-[#121212]">
+      <section className="relative py-24 md:py-32 overflow-hidden bg-[#121212] flex items-center">
          {/* Video Background */}
          <div className="absolute inset-0 z-0 opacity-60">
             <iframe 
-               className="absolute top-1/2 left-1/2 w-[110%] h-[110%] -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-110 object-cover"
+               className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150"
                src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
                allow="autoplay; encrypted-media"
                frameBorder="0"
@@ -370,12 +433,12 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
          </div>
 
-         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 flex flex-col lg:flex-row items-center gap-16 text-right">
-            <div className="flex-1">
-               <h2 className="text-5xl md:text-7xl font-display font-black mb-8 text-white leading-tight">קבל את המידע <br /><span className="text-babun-accent">לפני כולם</span></h2>
-               <p className="text-white/80 text-2xl font-light leading-relaxed">הטור השבועי, ניתוחי שוק, פינת חדשות נדל"ן - ישירות אליך.</p>
+         <div className="w-full max-w-none px-4 md:px-12 lg:px-24 relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16 text-right">
+            <div className="flex-1 lg:max-w-4xl">
+               <h2 className="text-5xl md:text-7xl lg:text-[7.5rem] font-display font-black mb-6 text-white leading-[0.9]">קבל את המידע <br /><span className="text-babun-accent">לפני כולם</span></h2>
+               <p className="text-white/80 text-xl md:text-2xl font-light leading-relaxed max-w-2xl">הטור השבועי, ניתוחי שוק, פינת חדשות נדל"ן - ישירות אליך.</p>
             </div>
-            <div className="flex-1 w-full max-w-md bg-black/40 backdrop-blur-md p-10 rounded-[48px] border border-white/10">
+            <div className="w-full max-w-lg bg-black/60 backdrop-blur-xl p-12 rounded-[64px] border border-white/20 shadow-2xl">
                {status === "success" ? (
                  <motion.div 
                    initial={{ opacity: 0, scale: 0.9 }}
@@ -407,14 +470,6 @@ export default function Home() {
                     </button>
                  </form>
                )}
-               <div className="mt-10 flex justify-start">
-                  <a href="https://wa.me/972504141516" target="_blank" className="flex items-center gap-4 text-[#25D366] font-bold text-sm uppercase tracking-widest hover:opacity-80 transition-all">
-                     <span>קבוצת הווצאפ השקטה</span>
-                     <div className="w-10 h-10 bg-[#25D366]/10 rounded-full flex items-center justify-center">
-                        <MessageCircle size={20} />
-                     </div>
-                  </a>
-               </div>
             </div>
          </div>
       </section>
