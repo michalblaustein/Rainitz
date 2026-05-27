@@ -434,11 +434,24 @@ export default function Courses() {
       </section>
 
       {/* 6 MEETINGS SYLLABUS (6 מפגשים - מה לומדים) */}
-      <section id="syllabus-section" className="py-24 bg-zinc-50 relative border-t border-zinc-200/50">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 text-right">
+      <section id="syllabus-section" className="py-24 bg-zinc-950 relative border-t border-zinc-900 overflow-hidden">
+        {/* Animated/Video Background Overlay */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <iframe
+            src="https://www.youtube.com/embed/psnj6fJJlRE?autoplay=1&mute=1&loop=1&playlist=psnj6fJJlRE&controls=0&showinfo=0&rel=0&playsinline=1&enablejsapi=1"
+            className="absolute top-1/2 left-1/2 w-[160%] h-[160%] min-w-full min-h-full -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-90"
+            title="Syllabus background video"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-black/10 z-[1]" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 md:px-8 text-right relative z-10">
           <div className="text-right mb-16">
-            <h2 className="text-3xl md:text-5xl font-display font-black text-babun-primary flex items-center justify-start gap-3">
-              <span>6 מפגשים - מה לומדים</span>
+            <h2 className="text-3xl md:text-5xl font-display font-black text-white flex items-center justify-start gap-3">
+              <span>מה מחכה לך בקורס?</span>
             </h2>
           </div>
 
@@ -446,16 +459,16 @@ export default function Courses() {
             {syllabus.map((item, index) => (
               <div 
                 key={index}
-                className="bg-white p-8 md:p-10 rounded-[24px] border border-zinc-200/60 shadow-md shadow-zinc-200/10 hover:shadow-xl transition-all duration-300 relative group overflow-hidden"
+                className="bg-black/50 backdrop-blur-md p-8 md:p-10 rounded-[24px] border border-zinc-800/80 shadow-md shadow-black/40 hover:shadow-xl hover:border-babun-accent/50 transition-all duration-300 relative group overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-2 h-full bg-transparent group-hover:bg-babun-accent transition-colors" />
-                <div className="text-sm font-bold opacity-30 tracking-widest uppercase mb-4 text-babun-accent font-display group-hover:opacity-100 transition-opacity">
+                <div className="text-sm font-bold text-babun-accent tracking-widest uppercase mb-4 font-display group-hover:opacity-100 transition-opacity">
                   {item.num}
                 </div>
-                <h3 className="text-lg md:text-xl font-display font-black text-babun-primary mb-4 leading-snug">
+                <h3 className="text-lg md:text-xl font-display font-black text-white mb-4 leading-snug">
                   {item.title}
                 </h3>
-                <p className="text-zinc-600 text-sm md:text-base leading-relaxed font-light">
+                <p className="text-zinc-300 text-sm md:text-base leading-relaxed font-light">
                   {item.desc}
                 </p>
               </div>
