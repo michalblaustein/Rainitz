@@ -87,68 +87,42 @@ export default function Courses() {
   };
 
   // Firestore submission states
-  const [activeForm, setActiveForm] = useState<"intro" | "spot" | "digital">("intro");
-  const [formData, setFormData] = useState({ name: "", phone: "", email: "" });
-  const [introStatus, setIntroStatus] = useState<null | "loading" | "success">(null);
-  const [spotStatus, setSpotStatus] = useState<null | "loading" | "success">(null);
+  const [digitalFormData, setDigitalFormData] = useState({ name: "", phone: "", email: "" });
+  const [frontalFormData, setFrontalFormData] = useState({ name: "", phone: "", email: "" });
   const [digitalStatus, setDigitalStatus] = useState<null | "loading" | "success">(null);
-
-  const resetForm = () => {
-    setFormData({ name: "", phone: "", email: "" });
-  };
-
-  const handleRegisterIntro = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIntroStatus("loading");
-    try {
-      await addDoc(collection(db, "course_registrations"), {
-        ...formData,
-        type: "שיחת היכרות חינם",
-        createdAt: serverTimestamp(),
-      });
-      setIntroStatus("success");
-      resetForm();
-    } catch (err) {
-      console.error(err);
-      setIntroStatus(null);
-    }
-  };
-
-  const handleRegisterSpot = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSpotStatus("loading");
-    try {
-      await addDoc(collection(db, "course_registrations"), {
-        name: formData.name || "שמירת מקום ישירה",
-        phone: formData.phone || "שמירת מקום ישירה",
-        email: formData.email || "",
-        type: "שמירת מקום במחזור הקרוב",
-        createdAt: serverTimestamp(),
-      });
-      setSpotStatus("success");
-      resetForm();
-    } catch (err) {
-      console.error(err);
-      setSpotStatus(null);
-    }
-  };
+  const [frontalStatus, setFrontalStatus] = useState<null | "loading" | "success">(null);
 
   const handleRegisterDigital = async (e: React.FormEvent) => {
     e.preventDefault();
     setDigitalStatus("loading");
     try {
       await addDoc(collection(db, "course_registrations"), {
-        name: formData.name || "הרשמה מוקדמת דיגיטלי",
-        phone: formData.phone || "הרשמה מוקדמת דיגיטלי",
-        email: formData.email || "",
-        type: "עניין בקורס דיגיטלי",
+        ...digitalFormData,
+        type: "קורס דיגיטלי - רישום מוקדם",
         createdAt: serverTimestamp(),
       });
       setDigitalStatus("success");
-      resetForm();
+      setDigitalFormData({ name: "", phone: "", email: "" });
     } catch (err) {
       console.error(err);
       setDigitalStatus(null);
+    }
+  };
+
+  const handleRegisterFrontal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFrontalStatus("loading");
+    try {
+      await addDoc(collection(db, "course_registrations"), {
+        ...frontalFormData,
+        type: "קורס פרונטלי - רישום לעדכונים",
+        createdAt: serverTimestamp(),
+      });
+      setFrontalStatus("success");
+      setFrontalFormData({ name: "", phone: "", email: "" });
+    } catch (err) {
+      console.error(err);
+      setFrontalStatus(null);
     }
   };
 
@@ -257,16 +231,16 @@ export default function Courses() {
         {/* Background YouTube Video */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <iframe
-            className="w-full h-full absolute inset-0 pointer-events-none"
-            src="https://www.youtube.com/embed/psnj6fJJlRE?autoplay=1&mute=1&loop=1&playlist=psnj6fJJlRE&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&enablejsapi=1&playsinline=1"
+            className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150 opacity-100"
+            src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
             title="Syllabus Promo Background Video"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            style={{ transform: "scale(1.35)", transformOrigin: "center" }}
+            frameBorder="0"
+            allow="autoplay; encrypted-media"
           />
           {/* Black Transparent Overlay & mesh grid */}
-          <div className="absolute inset-0 bg-black/60 z-10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-babun-primary via-black/30 to-black/50 z-10" />
-          <div className="absolute inset-0 mesh-grid opacity-10 z-20" />
+          <div className="absolute inset-0 bg-black/75 z-[1]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/45 z-[2]" />
+          <div className="absolute inset-0 mesh-grid opacity-5 z-[3]" />
         </div>
         
         {/* Ambient subtle glow */}
@@ -280,7 +254,7 @@ export default function Courses() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.8 }}
-              className="text-4xl md:text-6xl lg:text-[86px] lg:leading-[84px] font-display font-black pt-28 mb-6 tracking-tight text-white"
+              className="text-4xl md:text-6xl lg:text-[86px] lg:leading-[84px] font-display font-black pt-28 mb-6 tracking-tight text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]"
             >
               רוב הטעויות בנדל"ן <br />
               <span className="text-babun-accent">קורות מחוסר ידע.</span>
@@ -290,7 +264,7 @@ export default function Courses() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.8 }}
-              className="text-white text-lg md:text-2xl font-light mb-10 max-w-2xl leading-relaxed md:leading-[33px] flex flex-col gap-2"
+              className="text-white text-lg md:text-2xl font-light mb-10 max-w-2xl leading-relaxed md:leading-[33px] flex flex-col gap-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]"
             >
               <span>הקורס המקצועי לרוכשי דירות ומשקיעי נדל"ן.</span>
               <span>קצר, ממוקד, אישי, פרקטי. והכי חשוב: בשפה שלך.</span>
@@ -438,14 +412,13 @@ export default function Courses() {
         {/* Animated/Video Background Overlay */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <iframe
-            src="https://www.youtube.com/embed/psnj6fJJlRE?autoplay=1&mute=1&loop=1&playlist=psnj6fJJlRE&controls=0&showinfo=0&rel=0&playsinline=1&enablejsapi=1"
-            className="absolute top-1/2 left-1/2 w-[160%] h-[160%] min-w-full min-h-full -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-90"
+            src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
+            className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150 opacity-100"
             title="Syllabus background video"
             frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            referrerPolicy="no-referrer"
+            allow="autoplay; encrypted-media"
           />
-          <div className="absolute inset-0 bg-black/10 z-[1]" />
+          <div className="absolute inset-0 bg-black/75 z-[1]" />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-right relative z-10">
@@ -695,284 +668,225 @@ export default function Courses() {
         </div>
       </section>
 
-      {/* DETAILS & PRICE BANNER (פרטים ורישום) */}
-      <section className="bg-babun-primary text-white py-12 relative overflow-hidden border-t border-babun-accent/20">
-        <div className="absolute inset-0 mesh-grid opacity-10" />
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 text-center lg:text-right">
-            <div>
-              <span className="inline-block text-babun-accent font-display text-sm font-bold uppercase tracking-widest mb-2">
-                פרטים ורישום מהיר
-              </span>
-              <h3 className="text-2xl md:text-3xl font-display font-black text-white leading-tight">
-                ₪4,500 + מע"מ למשתתף | 6 מפגשים קבוצות עד 25 משתתפים | מצדה 3, בני ברק
-              </h3>
-              <p className="text-white/60 text-sm mt-3 flex items-center gap-1.5 justify-center lg:justify-start">
-                <span className="text-babun-accent">⚠️ הערה לפני פרסום:</span>
-                לאמת עם יעקב - האם ₪4,500 הוא מחיר לקבוצה או לאדם. לפי זה לנסח מחדש את השורה הזו.
-              </p>
-            </div>
-            <div className="shrink-0 bg-zinc-900 border border-zinc-800 p-4 rounded-babun-md text-center min-w-[200px]">
-              <span className="block text-zinc-400 text-xs font-bold mb-1">מחזור קרוב בקרוב:</span>
-              <span className="block text-babun-accent font-mono text-base font-bold">[תאריכים - ישובצו עם פתיחת הרשמה]</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* REGISTRATION SECTION (הרשמה) */}
       <section id="register-section" className="py-24 bg-white relative scroll-mt-20">
-        <div className="max-w-5xl mx-auto px-4 md:px-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
           
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-display font-black text-babun-primary mb-4">
-              מוכן? נדבר.
+            <h2 className="text-3xl md:text-5xl font-display font-black text-babun-primary">
+              מסלולי הלימוד והרשמה
             </h2>
-            <p className="text-zinc-600 text-lg md:text-xl font-light max-w-2xl mx-auto">
-              שלב ראשון - שיחת היכרות של 20 דקות. חינם. נוודא שהקורס מתאים לך - לפני שאתה מתחייב לכלום.
+            <p className="text-zinc-600 mt-4 text-base md:text-lg max-w-2xl mx-auto font-light">
+              בחרו את מסלול הלימוד המתאים לכם ביותר: קורס טלפוני זמין, קורס דיגיטלי מתקדם או קורס פרונטלי מעמיק בקבוצה.
             </p>
           </div>
 
-          <div className="bg-zinc-50 border border-zinc-200 p-8 md:p-12 rounded-[32px] shadow-sm">
-            {/* Form Selection Tabs */}
-            <div className="flex flex-col sm:flex-row items-stretch justify-center gap-4 mb-10 border-b border-zinc-200 pb-8">
-              <button 
-                onClick={() => { setActiveForm("intro"); }}
-                className={`py-3 px-6 rounded-full font-bold text-sm transition-all text-center ${
-                  activeForm === "intro" 
-                    ? "bg-babun-primary text-white shadow-md shadow-black/10" 
-                    : "bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-100"
-                }`}
-              >
-                1. שיחת היכרות חינם (20 דק')
-              </button>
-              <button 
-                onClick={() => { setActiveForm("spot"); }}
-                className={`py-3 px-6 rounded-full font-bold text-sm transition-all text-center ${
-                  activeForm === "spot" 
-                    ? "bg-babun-primary text-white shadow-md shadow-black/10" 
-                    : "bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-100"
-                }`}
-              >
-                2. שריון מקום ישיר (מחזור קרוב)
-              </button>
-              <button 
-                onClick={() => { setActiveForm("digital"); }}
-                className={`py-3 px-6 rounded-full font-bold text-sm transition-all text-center ${
-                  activeForm === "digital" 
-                    ? "bg-babun-primary text-white shadow-md shadow-black/10" 
-                    : "bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-100"
-                }`}
-              >
-                3. קורס דיגיטלי - רישום מוקדם
-              </button>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+            
+            {/* CARD 1: PHONE COURSE */}
+            <div className="bg-zinc-50 border border-zinc-200/80 p-8 rounded-[32px] shadow-sm flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-babun-primary/10 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 left-0 h-2 bg-babun-primary/20" />
+              <div>
+                <div className="flex justify-between items-start mb-6 gap-2">
+                  <div>
+                    <span className="inline-block px-3 py-1 bg-babun-primary/10 text-babun-primary text-xs font-black rounded-full mb-3">
+                      במערכת אור עולם
+                    </span>
+                    <h3 className="text-2xl font-display font-black text-babun-primary">קורס טלפוני</h3>
+                  </div>
+                  <div className="text-left shrink-0">
+                    <span className="text-2xl font-black text-babun-primary">1,200 ₪</span>
+                    <p className="text-xs text-zinc-500 font-light">מחיר חד פעמי</p>
+                  </div>
+                </div>
+
+                <p className="text-zinc-600 text-sm leading-relaxed mb-6 font-light">
+                  לימוד נוח וזמין ישירות מהטלפון האישי שלך, בקצב שלך ובזמן שלך באמצעות מערכת הטלפוניה המתקדמת. הקורס מועבר במערכת הטלפונית של חסידות אור עולם ופתוח להאזנה בכל עת.
+                </p>
+
+                <div className="space-y-4 bg-white/60 backdrop-blur-sm p-5 rounded-2xl border border-zinc-200/60 mb-6">
+                  <div className="flex justify-between items-center text-sm border-b border-zinc-100 pb-3">
+                    <span className="text-zinc-500">מערכת:</span>
+                    <span className="font-bold text-babun-primary">אור עולם</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm border-b border-zinc-100 pb-3">
+                    <span className="text-zinc-500">טלפון בחיוג ישיר:</span>
+                    <a href="tel:0733454545" className="font-black text-babun-primary hover:text-babun-accent hover:underline">073-3454545</a>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-zinc-500">שלוחה להרשמה:</span>
+                    <span className="font-black text-babun-primary bg-zinc-100 px-2 py-0.5 rounded text-xs">שלוחה 6-2-2</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <a 
+                  href="tel:0733454545"
+                  className="w-full btn-babun-primary text-center justify-center font-black py-4 rounded-xl flex items-center gap-2 shadow-md hover:scale-[1.02] transition-transform"
+                >
+                  <span>☏ התקשרו עכשיו: 073-3454545</span>
+                </a>
+                <p className="text-center text-xs text-zinc-400 mt-3 font-light">שלוחה להאזנה וכל הפרטים: 6-2-2</p>
+              </div>
             </div>
 
-            {/* TAB CONTENT */}
-            <div className="text-right">
-              
-              {/* TAB 1: INTRO MEET */}
-              {activeForm === "intro" && (
-                <div>
-                  <h3 className="text-2xl font-display font-black text-babun-primary mb-2">שיחת היכרות טלפונית</h3>
-                  <p className="text-zinc-500 text-sm mb-8 leading-relaxed">
-                    מלא את פרטיך ואחזור אליך תוך 24 שעות לתיאום שיחה קצרה שתענה לך על כל השאלות.
-                  </p>
-
-                  {introStatus === "success" ? (
-                    <div className="p-8 bg-babun-accent/20 border border-babun-accent text-babun-primary font-bold text-center rounded-babun-lg text-lg animate-fade-in">
-                      ✓ קיבלנו את פרטיך לשיחת היכרות בהצלחה! משרדנו יחזור אליך תוך 24 שעות.
-                    </div>
-                  ) : (
-                    <form onSubmit={handleRegisterIntro} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-zinc-500 block">☐ שם מלא</label>
-                          <input 
-                            required
-                            type="text"
-                            placeholder="השם שלכם"
-                            className="input-babun w-full text-right"
-                            value={formData.name}
-                            onChange={e => setFormData({...formData, name: e.target.value})}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-zinc-500 block">☐ טלפון</label>
-                          <input 
-                            required
-                            type="tel"
-                            placeholder="מספר טלפון ליצירת קשר"
-                            className="input-babun w-full text-right"
-                            value={formData.phone}
-                            onChange={e => setFormData({...formData, phone: e.target.value})}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-zinc-500 block">☐ מייל</label>
-                          <input 
-                            required
-                            type="email"
-                            placeholder="כתובת אימייל"
-                            className="input-babun w-full text-right"
-                            value={formData.email}
-                            onChange={e => setFormData({...formData, email: e.target.value})}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4">
-                        <button 
-                          type="submit"
-                          disabled={introStatus === "loading"}
-                          className="btn-babun-primary text-lg px-8 py-4 font-black shadow-md border-0 w-full sm:w-auto hover:scale-[1.03] transition-transform"
-                        >
-                          {introStatus === "loading" ? "שולח..." : "← קבע שיחת היכרות עכשיו"}
-                        </button>
-                        <span className="text-zinc-500 text-sm italic">
-                          (כל פנייה → אנחנו חוזרים תוך 24 שעות)
-                        </span>
-                      </div>
-                    </form>
-                  )}
+            {/* CARD 2: DIGITAL COURSE */}
+            <div className="bg-zinc-50 border border-zinc-200/80 p-8 rounded-[32px] shadow-sm flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-babun-accent/30 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 left-0 h-2 bg-babun-accent" />
+              <div>
+                <div className="flex justify-between items-start mb-6 gap-2">
+                  <div>
+                    <span className="inline-block px-3 py-1 bg-babun-accent/15 text-babun-accent text-[11px] font-black rounded-full mb-3">
+                      יפתח בקרוב
+                    </span>
+                    <h3 className="text-2xl font-display font-black text-babun-primary">קורס דיגיטלי</h3>
+                  </div>
+                  <div className="text-left shrink-0">
+                    <span className="text-2xl font-black text-babun-primary">1,700 ₪</span>
+                    <p className="text-xs text-zinc-500 font-light">לרוכשים ברישום מוקדם</p>
+                  </div>
                 </div>
-              )}
 
-              {/* TAB 2: DIRECT SAVE */}
-              {activeForm === "spot" && (
-                <div>
-                  <h3 className="text-2xl font-display font-black text-babun-primary mb-2">שמירת מקום במחזור הקרוב</h3>
-                  <p className="text-zinc-500 text-sm mb-8 leading-relaxed">
-                    אם ברצונך לשריין מקום מובטח במחזור הקבוצתי הקרוב (מוגבל לעד 25 משתתפים), אנא שלח פרטים ונדאג לשמור לך מקום.
-                  </p>
+                <p className="text-zinc-600 text-sm leading-relaxed mb-6 font-light">
+                  המסלול המושלם ללמידה עצמית דינמית בקצב שלכם ובמכשיר שלכם. הרשמו עכשיו ללא כל התחייבות כספית כדי לשריין את הטבת הרישום המוקדם במועד ההשקה הקרוב.
+                </p>
 
-                  {spotStatus === "success" ? (
-                    <div className="p-8 bg-babun-accent/20 border border-babun-accent text-babun-primary font-bold text-center rounded-babun-lg text-lg animate-fade-in">
-                      ✓ מעולה! שמרנו לך מקום זמני במחזור הקרוב. אנו נחזור אליך בהקדם לצורך אימות ונעילה.
+                {digitalStatus === "success" ? (
+                  <div className="p-6 bg-babun-accent/20 border border-babun-accent text-babun-primary font-bold text-center rounded-2xl text-sm animate-fade-in my-6">
+                    ✓ נרשמת בהצלחה לרישום מוקדם לקורס הדיגיטלי! נעדכן אותך ראשון ברגע ההשקה עם מחיר ההטבה.
+                  </div>
+                ) : (
+                  <form onSubmit={handleRegisterDigital} className="space-y-3 mb-6 bg-white p-5 rounded-2xl border border-zinc-200/60 shadow-inner">
+                    <span className="text-xs font-black text-babun-primary block mb-1">טופס רישום מוקדם</span>
+                    
+                    <div className="space-y-1">
+                      <input 
+                        required
+                        type="text"
+                        placeholder="שם מלא"
+                        className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 focus:border-babun-accent focus:outline-none text-right"
+                        value={digitalFormData.name}
+                        onChange={e => setDigitalFormData({...digitalFormData, name: e.target.value})}
+                      />
                     </div>
-                  ) : (
-                    <form onSubmit={handleRegisterSpot} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-zinc-500 block">☐ שם מלא</label>
-                          <input 
-                            required
-                            type="text"
-                            placeholder="השם שלכם"
-                            className="input-babun w-full text-right"
-                            value={formData.name}
-                            onChange={e => setFormData({...formData, name: e.target.value})}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-zinc-500 block">☐ טלפון</label>
-                          <input 
-                            required
-                            type="tel"
-                            placeholder="מספר טלפון ליצירת קשר"
-                            className="input-babun w-full text-right"
-                            value={formData.phone}
-                            onChange={e => setFormData({...formData, phone: e.target.value})}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-zinc-500 block">☐ מייל</label>
-                          <input 
-                            required
-                            type="email"
-                            placeholder="כתובת אימייל"
-                            className="input-babun w-full text-right"
-                            value={formData.email}
-                            onChange={e => setFormData({...formData, email: e.target.value})}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4">
-                        <button 
-                          type="submit"
-                          disabled={spotStatus === "loading"}
-                          className="btn-babun-primary text-lg px-8 py-4 font-black shadow-md border-0 w-full sm:w-auto hover:scale-[1.03] transition-transform"
-                        >
-                          {spotStatus === "loading" ? "שומר..." : "← שמור לי מקום במחזור הקרוב"}
-                        </button>
-                        <span className="text-zinc-500 text-sm italic">
-                          (כל שמירת מקום תקפה זמנית עד לשיחה טלפונית תומכת)
-                        </span>
-                      </div>
-                    </form>
-                  )}
-                </div>
-              )}
-
-              {/* TAB 3: DIGITAL PRE-ORDER */}
-              {activeForm === "digital" && (
-                <div>
-                  <h3 className="text-2xl font-display font-black text-babun-primary mb-2">קורס דיגיטלי - בקרוב</h3>
-                  <p className="text-zinc-500 text-sm mb-8 leading-relaxed">
-                    לא יכול להגיע פיזית לבני ברק? הקורס המוקלט המושקע בדרך. הירשם כעת להרשמה מוקדמת כדי ליהנות מהנחה ייחודית ומעדיפות בקבלתו.
-                  </p>
-
-                  {digitalStatus === "success" ? (
-                    <div className="p-8 bg-babun-accent/20 border border-babun-accent text-babun-primary font-bold text-center rounded-babun-lg text-lg animate-fade-in">
-                      ✓ נרשמת בהצלחה להרשמה מוקדמת לקורס הדיגיטלי! נעדכן אותך ראשון ברגע ההשקה עם הטבה בלעדית.
+                    
+                    <div className="space-y-1 font-sans">
+                      <input 
+                        required
+                        type="tel"
+                        placeholder="מספר טלפון"
+                        className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 focus:border-babun-accent focus:outline-none text-right"
+                        value={digitalFormData.phone}
+                        onChange={e => setDigitalFormData({...digitalFormData, phone: e.target.value})}
+                      />
                     </div>
-                  ) : (
-                    <form onSubmit={handleRegisterDigital} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-zinc-500 block">☐ שם מלא</label>
-                          <input 
-                            required
-                            type="text"
-                            placeholder="השם שלכם"
-                            className="input-babun w-full text-right"
-                            value={formData.name}
-                            onChange={e => setFormData({...formData, name: e.target.value})}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-zinc-500 block">☐ טלפון</label>
-                          <input 
-                            required
-                            type="tel"
-                            placeholder="מספר טלפון ליצירת קשר"
-                            className="input-babun w-full text-right"
-                            value={formData.phone}
-                            onChange={e => setFormData({...formData, phone: e.target.value})}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-zinc-500 block">☐ מייל</label>
-                          <input 
-                            required
-                            type="email"
-                            placeholder="כתובת אימייל"
-                            className="input-babun w-full text-right"
-                            value={formData.email}
-                            onChange={e => setFormData({...formData, email: e.target.value})}
-                          />
-                        </div>
-                      </div>
 
-                      <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4">
-                        <button 
-                          type="submit"
-                          disabled={digitalStatus === "loading"}
-                          className="btn-babun-primary text-lg px-8 py-4 font-black shadow-md border-0 w-full sm:w-auto hover:scale-[1.03] transition-transform"
-                        >
-                          {digitalStatus === "loading" ? "רושם..." : "← הירשם מוקדם לקורס הדיגיטלי"}
-                        </button>
-                        <span className="text-zinc-500 text-sm italic">
-                          (אין כל צורך בתשלום כעת - הרישום חופשי ומבטיח הנחה בלבד)
-                        </span>
-                      </div>
-                    </form>
-                  )}
-                </div>
-              )}
+                    <div className="space-y-1 font-sans">
+                      <input 
+                        required
+                        type="email"
+                        placeholder="כתובת מייל"
+                        className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 focus:border-babun-accent focus:outline-none text-right"
+                        value={digitalFormData.email}
+                        onChange={e => setDigitalFormData({...digitalFormData, email: e.target.value})}
+                      />
+                    </div>
 
+                    <button 
+                      type="submit"
+                      disabled={digitalStatus === "loading"}
+                      className="w-full bg-babun-accent text-babun-primary font-black py-2.5 rounded-lg text-xs hover:bg-babun-accent/90 transition-colors mt-2 cursor-pointer"
+                    >
+                      {digitalStatus === "loading" ? "שולח..." : "אישור ושמירת מקום ←"}
+                    </button>
+                  </form>
+                )}
+              </div>
+
+              <div>
+                <span className="block text-center text-xs text-zinc-400 font-light italic">הרשמה מוקדמת ללא צורך בכרטיס אשראי</span>
+              </div>
             </div>
+
+            {/* CARD 3: FRONTAL COURSE */}
+            <div className="bg-zinc-50 border border-zinc-200/80 p-8 rounded-[32px] shadow-sm flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-babun-primary/15 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 left-0 h-2 bg-babun-primary" />
+              <div>
+                <div className="flex justify-between items-start mb-6 gap-2">
+                  <div>
+                    <span className="inline-block px-3 py-1 bg-babun-primary/10 text-babun-primary text-xs font-black rounded-full mb-3">
+                      עדכון על מחזור קרוב
+                    </span>
+                    <h3 className="text-2xl font-display font-black text-babun-primary">קורס פרונטלי</h3>
+                  </div>
+                  <div className="text-left shrink-0">
+                    <span className="text-2xl font-black text-babun-primary">2,500 ₪</span>
+                    <p className="text-xs text-zinc-500 font-light">לרישום לעדכונים</p>
+                  </div>
+                </div>
+
+                <p className="text-zinc-600 text-sm leading-relaxed mb-6 font-light">
+                  מפגשים קבוצתיים פרונטליים, דיוני עומק, למידת עמיתים ישירה ומענה פנים-אל-פנים לשאלות הלב שלכם. צרו קשר לקבלת עדכונים על קורס חדש שיפתח בקרוב.
+                </p>
+
+                {frontalStatus === "success" ? (
+                  <div className="p-6 bg-babun-primary/10 border border-babun-primary text-babun-primary font-bold text-center rounded-2xl text-sm animate-fade-in my-6">
+                    ✓ תודה רבה! פרטיך נקלטו במערכת לעדכונים על פתיחת קורס פרונטלי קרוב. נהיה בקשר בהקדם!
+                  </div>
+                ) : (
+                  <form onSubmit={handleRegisterFrontal} className="space-y-3 mb-6 bg-white p-5 rounded-2xl border border-zinc-200/60 shadow-inner">
+                    <span className="text-xs font-black text-babun-primary block mb-1">טופס רישום לעדכונים</span>
+                    
+                    <div className="space-y-1">
+                      <input 
+                        required
+                        type="text"
+                        placeholder="שם מלא"
+                        className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 focus:border-babun-primary focus:outline-none text-right"
+                        value={frontalFormData.name}
+                        onChange={e => setFrontalFormData({...frontalFormData, name: e.target.value})}
+                      />
+                    </div>
+                    
+                    <div className="space-y-1 font-sans">
+                      <input 
+                        required
+                        type="tel"
+                        placeholder="מספר טלפון"
+                        className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 focus:border-babun-primary focus:outline-none text-right"
+                        value={frontalFormData.phone}
+                        onChange={e => setFrontalFormData({...frontalFormData, phone: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="space-y-1 font-sans">
+                      <input 
+                        required
+                        type="email"
+                        placeholder="כתובת מייל"
+                        className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 focus:border-babun-primary focus:outline-none text-right"
+                        value={frontalFormData.email}
+                        onChange={e => setFrontalFormData({...frontalFormData, email: e.target.value})}
+                      />
+                    </div>
+
+                    <button 
+                      type="submit"
+                      disabled={frontalStatus === "loading"}
+                      className="w-full bg-babun-primary text-white font-black py-2.5 rounded-lg text-xs hover:bg-babun-primary/90 transition-colors mt-2 cursor-pointer"
+                    >
+                      {frontalStatus === "loading" ? "שולח..." : "אישור ושמירת פרטים ←"}
+                    </button>
+                  </form>
+                )}
+              </div>
+
+              <div>
+                <span className="block text-center text-xs text-zinc-400 font-light italic">הירשמו כעת לעדכונים ללא כל עלות</span>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>

@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Suspense, lazy } from "react";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { Suspense, lazy, useEffect } from "react";
 import { MessageCircle } from "lucide-react";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
@@ -14,9 +14,21 @@ const Consulting = lazy(() => import("./pages/Consulting"));
 const Book = lazy(() => import("./pages/Book"));
 const Articles = lazy(() => import("./pages/Articles"));
 
+// Component to scroll to top on route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="flex flex-col min-h-screen bg-babun-light selection:bg-babun-accent selection:text-babun-primary font-sans antialiased" dir="rtl">
         <Navbar />
         <main className="flex-grow">

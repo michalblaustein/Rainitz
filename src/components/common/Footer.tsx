@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="bg-babun-primary text-white pt-24 pb-12 overflow-hidden relative" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-24 border-b border-white/10 pb-20 text-right">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16 mb-24 border-b border-white/10 pb-20 text-right">
           
           {/* COLUMN 1 - RIGHT: LOGO & ABOUT */}
           <div className="flex flex-col items-start">
@@ -51,6 +51,57 @@ export default function Footer() {
                 <span className="group-hover:text-white transition-colors max-w-[200px]">מצדה 3, מרכז עסקים, בני ברק</span>
               </li>
             </ul>
+          </div>
+
+          {/* COLUMN 4 - FAR-LEFT: RECENT ARTICLES & PODCASTS */}
+          <div className="flex flex-col items-start w-full">
+            <h5 className="text-xl font-display font-bold text-babun-accent mb-8 w-full">כתבות ופודקאסטים</h5>
+            <div className="space-y-4 w-full">
+              <Link to="/articles" className="group flex items-center gap-4 hover:text-babun-accent transition-colors w-full">
+                <img 
+                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=120&h=120&q=80" 
+                  alt="שוק הנדלן" 
+                  className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="flex flex-col min-w-0">
+                  <span className="line-clamp-2 leading-snug font-normal text-white/90 group-hover:text-babun-accent transition-colors text-sm">
+                    שוק הנדל"ן 2026: מה באמת קורה מאחורי הקלעים?
+                  </span>
+                  <span className="text-xs text-white/30 mt-1">15.05.2026 • טור שבועי</span>
+                </div>
+              </Link>
+              
+              <Link to="/articles" className="group flex items-center gap-4 hover:text-babun-accent transition-colors w-full border-t border-white/5 pt-4">
+                <img 
+                  src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=120&h=120&q=80" 
+                  alt="מדריך למשקיע" 
+                  className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="flex flex-col min-w-0">
+                  <span className="line-clamp-2 leading-snug font-normal text-white/90 group-hover:text-babun-accent transition-colors text-sm">
+                    המדריך המלא למשקיע המתחיל: איך לא ליפול בפח?
+                  </span>
+                  <span className="text-xs text-white/30 mt-1">10.05.2026 • מאמר מקצועי</span>
+                </div>
+              </Link>
+
+              <Link to="/articles" className="group flex items-center gap-4 hover:text-babun-accent transition-colors w-full border-t border-white/5 pt-4">
+                <img 
+                  src="https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=120&h=120&q=80" 
+                  alt="פודקאסט התחדשות עירונית" 
+                  className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="flex flex-col min-w-0">
+                  <span className="line-clamp-2 leading-snug font-normal text-white/90 group-hover:text-babun-accent transition-colors text-sm">
+                    פודקאסט: למה כולם מדברים על התחדשות עירונית?
+                  </span>
+                  <span className="text-xs text-white/30 mt-1">05.05.2026 • פודקאסט</span>
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
 

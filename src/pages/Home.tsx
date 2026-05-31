@@ -662,7 +662,8 @@ export default function Home() {
                allow="autoplay; encrypted-media"
                frameBorder="0"
             />
-            {/* Dark Gradient Overlay */}
+            {/* Dark Gradient Overlay & Black Semi-Transparent Layer */}
+            <div className="absolute inset-0 bg-black/50" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
          </div>
 
