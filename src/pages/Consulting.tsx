@@ -86,25 +86,25 @@ export default function Consulting() {
     },
     {
       title: "ניתוח העסקה / הנכס",
-      desc: "אם יש נכס ספציפי על הפרק — נפרק אותו. מחיר, מיקום, פוטנציאל, סיכונים. מה שאנשים מדלגים עליו — זה מה שנסתכל עליו."
+      desc: "אם יש נכס ספציפי על הפרק - נפרק אותו. מחיר, מיקום, פוטנציאל, סיכונים. מה שאנשים מדלגים עליו - זה מה שנסתכל עליו."
     },
     {
       title: "תוכנית לצעד הבא",
-      desc: "יוצאים מהפגישה עם תמונה ברורה: מה לעשות, מה לבדוק, ועל מה לא להתפשר. לא עוד מידע — כיוון."
+      desc: "יוצאים מהפגישה עם תמונה ברורה: מה לעשות, מה לבדוק, ועל מה לא להתפשר. לא עוד מידע - כיוון."
     }
   ];
 
   const matchingProfiles = [
     {
       title: "זוגות ואברכים לפני רכישת דירה ראשונה",
-      desc: "שמעתם מכל כיוון. לא ברור מאיפה להתחיל. פגישה אחת שמה סדר — בלי שפת מתווכים, בלי בלבול."
+      desc: "שמעתם מכל כיוון. לא ברור מאיפה להתחיל. פגישה אחת שמה סדר - בלי שפת מתווכים, בלי בלבול."
     },
     {
       title: "משקיעים שבוחנים עסקה ספציפית",
-      desc: "יש לך הזדמנות על השולחן. אתה לא בטוח. בואו נסתכל עליה ביחד — לפני שאתה חותם."
+      desc: "יש לך הזדמנות על השולחן. אתה לא בטוח. בואו נסתכל עליה ביחד - לפני שאתה חותם."
     },
     {
-      title: "מי שכבר עשה טעות — ורוצה להבין מה קרה",
+      title: "מי שכבר עשה טעות - ורוצה להבין מה קרה",
       desc: "לא כדי לשפוט. כדי לא לחזור על זה. ולדעת אם יש מה לתקן עכשיו."
     },
     {
@@ -116,23 +116,23 @@ export default function Consulting() {
   const faqData = [
     {
       q: "האם אפשר לשלוח חומר לפני הפגישה?",
-      a: "כן — ומומלץ. ככל שתשלח יותר מידע מראש, כך הפגישה תהיה ממוקדת יותר."
+      a: "כן - ומומלץ. ככל שתשלח יותר מידע מראש, כך הפגישה תהיה ממוקדת יותר."
     },
     {
       q: "האם פגישה אחת מספיקה?",
-      a: "לרוב הלקוחות — כן. לפעמים יש צורך בהמשך. נדבר על זה בסוף הפגישה."
+      a: "לרוב הלקוחות - כן. לפעמים יש צורך בהמשך. נדבר על זה בסוף הפגישה."
     },
     {
       q: "האם אתה מייצג קבלנים או יזמים?",
-      a: "לא. בכלל. אני עובד בשביל מי ששילם לי — זה אתה."
+      a: "לא. בכלל. אני עובד בשביל מי ששילם לי - זה אתה."
     },
     {
       q: "האם הפגישה סודית?",
-      a: "כמובן. כל מה שנאמר — נשאר בינינו."
+      a: "כמובן. כל מה שנאמר - נשאר בינינו."
     },
     {
       q: "האם אפשר בזום?",
-      a: "כן. הפגישה עובדת באותה איכות — פנים מול מסך."
+      a: "כן. הפגישה עובדת באותה איכות - פנים מול מסך."
     }
   ];
 
@@ -141,9 +141,20 @@ export default function Consulting() {
       
       {/* 1. HERO SECTION */}
       <section className="bg-babun-primary text-white pt-40 pb-28 relative overflow-hidden">
-        <div className="absolute inset-0 mesh-grid opacity-15 z-0" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-babun-accent/10 rounded-full filter blur-[150px] -z-10" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full filter blur-[100px] -z-10" />
+        {/* Video Background */}
+        <div className="absolute inset-0 z-0 opacity-40 select-none pointer-events-none">
+          <iframe 
+            className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150"
+            src="https://www.youtube.com/embed/FaIjjdPNoiI?autoplay=1&mute=1&loop=1&playlist=FaIjjdPNoiI&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
+            allow="autoplay; encrypted-media"
+            frameBorder="0"
+          />
+          {/* Transparent click/tap block layer */}
+          <div className="absolute inset-0 bg-transparent z-[10] pointer-events-auto" />
+          {/* Dark Gradient Overlay & Black Semi-Transparent Layer */}
+          <div className="absolute inset-0 bg-black/60 z-[1]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-babun-primary via-transparent to-babun-primary/80 z-[2]" />
+        </div>
 
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10 text-center">
           <motion.div 
@@ -231,10 +242,10 @@ export default function Consulting() {
             
             <div className="space-y-6 text-lg text-babun-primary/80 leading-relaxed font-light">
               <p>
-                רוב האנשים שמגיעים אלי — מגיעים אחרי שחתמו. אחרי שגילו שהנכס שרכשו שווה פחות ממה שחשבו. אחרי שלקחו משכנתא שלא הבינו לגמרי. אחרי שהמתווך "עזר" — לצד השני.
+                רוב האנשים שמגיעים אלי - מגיעים אחרי שחתמו. אחרי שגילו שהנכס שרכשו שווה פחות ממה שחשבו. אחרי שלקחו משכנתא שלא הבינו לגמרי. אחרי שהמתווך "עזר" - לצד השני.
               </p>
               <p className="border-r-4 border-babun-accent pr-6 py-2 bg-babun-accent/5 font-normal text-babun-primary">
-                שאלה אחת לפני החתימה יכולה לשנות את כל התמונה. שאלה אחת אחרי — עולה הרבה יותר.
+                שאלה אחת לפני החתימה יכולה לשנות את כל התמונה. שאלה אחת אחרי - עולה הרבה יותר.
               </p>
               <p className="text-xl font-medium text-babun-primary pt-2">
                 הפגישה הזו קיימת כדי שאתה תשאל לפני.
@@ -310,7 +321,7 @@ export default function Consulting() {
                 </tr>
                 <tr className="bg-white hover:bg-babun-light/50 transition-colors">
                   <td className="py-4.5 px-6 font-bold text-babun-primary">מיקום</td>
-                  <td className="py-4.5 px-6 text-babun-primary/80">מצדה 3, בני ברק — או זום</td>
+                  <td className="py-4.5 px-6 text-babun-primary/80">מצדה 3, בני ברק - או זום</td>
                 </tr>
                 <tr className="bg-babun-light/20 hover:bg-babun-light/50 transition-colors">
                   <td className="py-4.5 px-6 font-bold text-babun-primary">שפה</td>
@@ -318,7 +329,7 @@ export default function Consulting() {
                 </tr>
                 <tr className="bg-white hover:bg-babun-light/50 transition-colors">
                   <td className="py-4.5 px-6 font-bold text-babun-primary">זמינות</td>
-                  <td className="py-4.5 px-6 text-babun-primary/80">ימי א'–ה'</td>
+                  <td className="py-4.5 px-6 text-babun-primary/80">ימי א'-ה'</td>
                 </tr>
               </tbody>
             </table>
@@ -395,13 +406,13 @@ export default function Consulting() {
 
               <div className="space-y-6 text-base md:text-lg text-babun-primary/80 leading-relaxed font-light">
                 <p>
-                  התחלתי כעיתונאי כלכלי — כיסיתי שוק הנדל"ן מבחוץ. ראיתי מה קורה כשאנשים חותמים בלי ידע. כשעברתי לייעוץ, החלטתי: <span className="font-semibold text-babun-primary">עצמאות מלאה.</span>
+                  התחלתי כעיתונאי כלכלי - כיסיתי שוק הנדל"ן מבחוץ. ראיתי מה קורה כשאנשים חותמים בלי ידע. כשעברתי לייעוץ, החלטתי: <span className="font-semibold text-babun-primary">עצמאות מלאה.</span>
                 </p>
                 <p>
                   אני לא מחויב לאף קבלן. לאף יזם. לאף גורם בשוק. מה שתשמע ממני עובר דרך שאלה אחת בלבד: <span className="font-semibold text-babun-primary">האם זה נכון לך?</span>
                 </p>
                 <p className="text-babun-primary bg-babun-light/60 p-4 rounded border-r-4 border-babun-primary font-medium text-base">
-                  ספר "שליש בקרקע". טור שבועי ב"המודיע". מאות עסקאות מלוות. לא כדי להתרברב — כדי שתדע ממי אתה שואל.
+                  ספר "שליש בקרקע". טור שבועי ב"המודיע". מאות עסקאות מלוות. לא כדי להתרברב - כדי שתדע ממי אתה שואל.
                 </p>
               </div>
             </div>

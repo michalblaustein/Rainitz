@@ -156,7 +156,7 @@ export default function Home() {
             </div>
 
             {/* Text Side (Right) */}
-            <div className="lg:col-span-7 order-1 flex flex-col items-start text-right">
+            <div className="lg:col-span-7 order-1 flex flex-col items-start text-right w-[1000px] h-[500px]" id="hero-text-side">
               <motion.div
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -655,16 +655,18 @@ export default function Home() {
       {/* NEWSLETTER */}
       <section className="relative py-24 md:py-32 overflow-hidden bg-[#121212] flex items-center">
          {/* Video Background */}
-         <div className="absolute inset-0 z-0 opacity-60">
+         <div className="absolute inset-0 z-0 opacity-60 select-none pointer-events-none">
             <iframe 
                className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150"
-               src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
+               src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
                allow="autoplay; encrypted-media"
                frameBorder="0"
             />
+            {/* Transparent click/tap block layer */}
+            <div className="absolute inset-0 bg-transparent z-[10] pointer-events-auto" />
             {/* Dark Gradient Overlay & Black Semi-Transparent Layer */}
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+            <div className="absolute inset-0 bg-black/50 z-[1]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 z-[2]" />
          </div>
 
          <div className="w-full max-w-none px-4 md:px-12 lg:px-24 relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16 text-right">
@@ -723,7 +725,7 @@ export default function Home() {
               className="lg:flex-[2] text-right flex flex-col items-start"
             >
                <div className="text-lg md:text-xl lg:text-2xl font-display font-medium text-black mb-3 leading-tight">
-                  <p>כשה<span className="font-bold">מתווך</span> עובד בשביל העמלה, וה<span className="font-bold">בנק</span> עובד בשביל עצמו – הגיע הזמן שהוא יעבוד בשבילך.</p>
+                  <p>כשה<span className="font-bold">מתווך</span> עובד בשביל העמלה, וה<span className="font-bold">בנק</span> עובד בשביל עצמו - הגיע הזמן שהוא יעבוד בשבילך.</p>
                </div>
                
                <div className="mb-6">

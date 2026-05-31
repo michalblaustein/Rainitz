@@ -88,123 +88,24 @@ export default function Book() {
   return (
     <div className="bg-babun-light min-h-screen text-right font-sans" dir="rtl">
       
-      {/* Editorial Dashboard / Publishing Notes Drawer Trigger */}
-      <div className="fixed bottom-6 left-6 z-50">
-        <button 
-          onClick={() => setShowNotes(!showNotes)}
-          className={`px-4 py-2.5 rounded-full shadow-lg text-xs font-bold flex items-center gap-2 cursor-pointer transition-all duration-300 ${
-            showNotes ? 'bg-babun-accent text-babun-primary scale-105' : 'bg-babun-primary text-white hover:bg-babun-primary/90'
-          }`}
-        >
-          <ClipboardList size={14} />
-          <span>{showNotes ? 'סגור דף עריכה' : 'הערות עריכה ודגשים ⚠️'}</span>
-        </button>
-      </div>
-
-      {/* Publishing Notes Modal Overlay */}
-      <AnimatePresence>
-        {showNotes && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 text-right"
-          >
-            <motion.div 
-              initial={{ scale: 0.95, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
-              className="bg-white rounded-babun-lg max-w-2xl w-full p-8 relative shadow-2xl overflow-y-auto max-h-[85vh] border border-babun-primary/10"
-            >
-              <button 
-                onClick={() => setShowNotes(false)}
-                className="absolute top-5 left-5 text-babun-primary/30 hover:text-babun-primary p-1.5 rounded-full hover:bg-babun-light transition-all cursor-pointer"
-              >
-                <X size={20} />
-              </button>
-
-              <h4 className="text-xl font-display font-black text-babun-primary border-b border-babun-primary/10 pb-4 mb-6 flex items-center gap-2">
-                <ClipboardList className="text-babun-accent shrink-0" />
-                <span>Notes לפרסום ודגשי קופירייטינג</span>
-              </h4>
-
-              <div className="space-y-6 text-sm text-babun-primary/80 leading-relaxed font-light">
-                <div className="bg-babun-light p-4 rounded border-r-4 border-babun-accent">
-                  <span className="font-bold text-babun-primary block mb-1">🎯 Hero Context:</span>
-                  "מה שאיש לא הסביר לפני שחתמת" — פוגע בדיוק מוחלט בכאב המרכזי של כלל קהלי היעד (זוגות, משקיעים, אברכים).
-                </div>
-
-                <div className="bg-babun-light p-4 rounded border-r-4 border-babun-accent">
-                  <span className="font-bold text-babun-primary block mb-1">📊 דוגמה מספרית בעלת משקל:</span>
-                  ההמחשה של שלוש שאלות פשוטות שמתווך לא יגיד, המובילות לחיסכון של ₪50,000 במשא ומתן אל מול השקעה של ₪149 בספר. יחס החזר השקעה מטורף של פי 335.
-                </div>
-
-                <div className="bg-babun-light p-4 rounded border-r-4 border-babun-accent">
-                  <span className="font-bold text-babun-primary block mb-1">📘 6 חלקי הספר:</span>
-                  המבנה בנוי באופן קורלטיבי ועקבי למבנה קורס הנדל"ן שלנו ליצירת סינרגיה מושלמת בין מוצרי הידע במרכז.
-                </div>
-
-                <div className="bg-babun-light p-4 rounded border-r-4 border-babun-accent">
-                  <span className="font-bold text-babun-primary block mb-1">❓ FAQ Connection:</span>
-                  מציג את גשר המעבר הטבעי שבין הספר לפגישה אישית. הספר מייצר מוכנות פיננסית, והפגישה מיישמת אותה.
-                </div>
-
-                <div className="bg-babun-light p-4 rounded border-r-4 border-babun-primary">
-                  <span className="font-bold text-babun-primary block mb-1">📝 הנחיית גביית עדויות ומשוב ( WhatsApp ):</span>
-                  <p>לשלוח WhatsApp אישי לקוראים שסיימו את הספר עם שתי שאלות מדויקות שמייצרות המלצות זהב:</p>
-                  <ol className="list-decimal list-inside pr-2 mt-2 space-y-1 font-normal text-babun-primary">
-                    <li>"מה בספר הפתיע אותך הכי הרבה?"</li>
-                    <li>"האם יש שאלה שהספר לימד אותך לשאול — ומה קרה כשאמרת אותה?"</li>
-                  </ol>
-                  <p className="mt-2 text-xs text-babun-primary/60 italic">תשובות לשאלות הללו הן העדויות האולטימטיביות, ולא סלוגן שחוק של "ספר מומלץ".</p>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-4 border-t border-babun-primary/5 flex justify-end">
-                <button 
-                  onClick={() => setShowNotes(false)}
-                  className="bg-babun-primary text-white font-bold py-3 px-6 rounded-babun-full cursor-pointer text-xs"
-                >
-                  הבנתי, חזרה לדף
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ⚠️ INTERNAL EDITOR WARNING BANNER AT THE TOP */}
-      <div className="bg-babun-accent/15 border-b border-babun-accent/30 py-3.5 px-4 text-center z-40 relative">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-2.5 text-xs text-babun-primary font-medium">
-          <AlertTriangle size={15} className="text-babun-primary shrink-0" />
-          <span>
-            <strong>הערה לפני פרסום של הדף:</strong> יש לאמת עם יעקב מה מחיר המשלוח המדויק.
-          </span>
-          <button 
-            onClick={() => setShowNotes(true)}
-            className="underline hover:text-babun-primary/80 font-bold max-md:mt-1.5"
-          >
-            להצגת הערות הפקה נוספות
-          </button>
-        </div>
-      </div>
-
       {/* 1. HERO SECTION */}
-      <section className="bg-babun-primary text-white pt-32 pb-24 relative overflow-hidden">
+      <section className="bg-babun-primary text-white pt-32 pb-24 relative overflow-visible z-10">
         {/* Video Background */}
-        <div className="absolute inset-0 z-0 opacity-40">
+        <div className="absolute inset-0 z-0 opacity-40 select-none overflow-hidden pointer-events-none">
           <iframe 
             className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150"
-            src="https://www.youtube.com/embed/ZtiNxcUOgeI?autoplay=1&mute=1&loop=1&playlist=ZtiNxcUOgeI&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
+            src="https://www.youtube.com/embed/ZtiNxcUOgeI?autoplay=1&mute=1&loop=1&playlist=ZtiNxcUOgeI&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
             allow="autoplay; encrypted-media"
             frameBorder="0"
           />
+          {/* Transparent click/tap block layer */}
+          <div className="absolute inset-0 bg-transparent z-[10] pointer-events-auto" />
           {/* Dark Gradient Overlay & Black Semi-Transparent Layer */}
-          <div className="absolute inset-0 bg-black/60" />
-          <div className="absolute inset-0 bg-gradient-to-t from-babun-primary via-transparent to-babun-primary/80" />
+          <div className="absolute inset-0 bg-black/60 z-[1]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-babun-primary via-transparent to-babun-primary/80 z-[2]" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 mt-[100px]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             
             {/* HERO RIGHT: COPY & MAIN CTA */}
@@ -236,7 +137,7 @@ export default function Book() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="text-lg md:text-xl text-white/85 max-w-2xl lg:max-w-none mx-auto leading-relaxed font-light"
               >
-                <strong className="font-semibold text-white">"שליש בקרקע"</strong> — המדריך המעשי לרוכשי ומשקיעי נדל"ן בישראל.
+                <strong className="font-semibold text-white">"שליש בקרקע"</strong> - המדריך המעשי לרוכשי ומשקיעי נדל"ן בישראל.
               </motion.p>
 
               <motion.div
@@ -250,30 +151,24 @@ export default function Book() {
                   className="w-full sm:w-auto bg-babun-accent hover:bg-white text-babun-primary font-bold px-8 py-4.5 rounded-babun-md text-base shadow-xl hover:shadow-babun-accent/15 transition-all duration-350 cursor-pointer flex items-center justify-center gap-2.5 transform hover:-translate-y-0.5"
                 >
                   <ArrowLeft size={18} className="stroke-[2.5]" />
-                  <span>רכוש את הספר — ₪149</span>
-                </button>
-                <button 
-                  onClick={() => scrollToId("options-section")}
-                  className="w-full sm:w-auto bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold px-8 py-4.5 rounded-babun-md text-base transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <span>לפרטי הספר</span>
+                  <span>רכוש את הספר</span>
                 </button>
               </motion.div>
             </div>
 
             {/* HERO LEFT: ACTUAL BOOK COVER IMAGE */}
-            <div className="lg:col-span-5 flex justify-center pt-8 lg:pt-0">
+            <div className="lg:col-span-5 flex justify-center pt-12 lg:pt-0 relative z-20">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 15 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
+                animate={{ opacity: 1, scale: 1.3, y: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="relative cursor-pointer"
+                className="relative cursor-pointer lg:mt-[-50px] md:mb-[-220px] lg:mb-[-260px] mb-[-140px]"
                 onClick={() => scrollToId("checkout-form-section")}
               >
                 <img 
                   src="https://lh3.googleusercontent.com/d/1YATeihtnryr9oCFr2-byVjsEYCnxVtIl" 
                   alt="הספר שליש בקרקע" 
-                  className="w-full max-w-xs md:max-w-sm drop-shadow-[20px_35px_60px_rgba(0,0,0,0.4)] hover:scale-[1.03] transition-transform duration-500"
+                  className="w-full max-w-[380px] md:max-w-[480px] lg:max-w-[540px] drop-shadow-[40px_60px_100px_rgba(0,0,0,0.75)] hover:scale-[1.05] transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />
               </motion.div>
@@ -310,7 +205,7 @@ export default function Book() {
                   <ShoppingBag size={24} />
                 </div>
                 <h3 className="text-2xl font-display font-black text-babun-primary mb-2">
-                  ספר מודפס — מהדורה פיזית
+                  ספר מודפס - מהדורה פיזית
                 </h3>
                 <p className="text-babun-primary/60 text-base font-light mb-6">
                   העותק המלא בכריכה רכה. מושלם לקריאה ממוקדת של ערב אחד, הדגשת שורות מפתח ועבודה בשטח עם רשימות הבדיקה.
@@ -319,7 +214,7 @@ export default function Book() {
                 <div className="space-y-3 mb-8">
                   <div className="flex items-center gap-3 justify-start flex-row">
                     <CheckCircle2 size={16} className="text-babun-primary shrink-0" />
-                    <span className="text-sm font-medium text-babun-primary/95">משלוח עד הבית — עד 5 ימי עסקים</span>
+                    <span className="text-sm font-medium text-babun-primary/95">משלוח עד הבית - עד 5 ימי עסקים</span>
                   </div>
                   <div className="flex items-center gap-3 justify-start flex-row">
                     <CheckCircle2 size={16} className="text-babun-primary shrink-0" />
@@ -333,8 +228,8 @@ export default function Book() {
               </div>
 
               <div>
-                <div className="text-3xl font-display font-black text-babun-primary mb-6">
-                  ₪149 <span className="text-sm font-light text-babun-primary/50">חלוקת משלוח בקופה</span>
+                <div className="text-2xl font-display font-bold text-babun-primary mb-6">
+                  מהדורת כריכה רכה <span className="text-sm font-light text-babun-primary/50">| חלוקת משלוח בקופה</span>
                 </div>
                 <button 
                   onClick={() => scrollToId("checkout-form-section")}
@@ -377,12 +272,12 @@ export default function Book() {
             </h3>
             
             <p className="text-lg text-white/90 leading-relaxed font-light mb-8">
-              זו השאלה שאני שומע הכי הרבה. מאנשים שרוצים לקנות דירה ראשונה. מאנשים שרוצים להשקיע ולא יודעים בדיוק איך. מאנשים שכבר קנו — ואחר כך הבינו שהיו שאלות שלא שאלו.
+              זו השאלה שאני שומע הכי הרבה. מאנשים שרוצים לקנות דירה ראשונה. מאנשים שרוצים להשקיע ולא יודעים בדיוק איך. מאנשים שכבר קנו - ואחר כך הבינו שהיו שאלות שלא שאלו.
             </p>
 
             <p className="text-xl md:text-2xl font-bold text-white border-t border-white/10 pt-8">
               כתבתי את הספר הזה בשבילם. <br className="md:hidden" />
-              <span className="text-babun-accent">148 עמודים של מה שאני אומר בפגישות — ב-₪149.</span>
+              <span className="text-babun-accent">148 עמודים של מה שאני אומר בפגישות ייעוץ.</span>
             </p>
           </div>
         </div>
@@ -420,7 +315,7 @@ export default function Book() {
                   אתה רואה דירה שמוצאת חן בעיניך, המתווך אומר לך שזה מחיר מציאה ושוק הנדל"ן רותח, ויש עוד שלושה קונים פוטנציאליים שמחכים בתור.
                 </p>
                 <p className="text-babun-primary/75 mt-4 leading-relaxed font-light">
-                  אתה חותם על חוזה רכישה בעיניים עצומות. אתה מרוצה מהנכס, אבל לא מבין שהעסקה נסגרה בתנאים הטובים ביותר — אבל למתווך ולקבלן, לא לך.
+                  אתה חותם על חוזה רכישה בעיניים עצומות. אתה מרוצה מהנכס, אבל לא מבין שהעסקה נסגרה בתנאים הטובים ביותר - אבל למתווך ולקבלן, לא לך.
                 </p>
               </div>
 
@@ -469,14 +364,14 @@ export default function Book() {
             
             <div className="relative z-10 max-w-2xl mx-auto space-y-4">
               <h4 className="text-xl md:text-2xl font-bold font-display text-babun-accent">
-                ₪50,000 פחות — בגלל שאלה אחת פשוטה שידעת לשאול.
+                ₪50,000 פחות - בגלל שאלה אחת פשוטה שידעת לשאול.
               </h4>
               <p className="text-base text-white/70 font-light">
-                עלות הספר החדש של יעקב רייניץ היא ₪149 בלבד. פער בלתי נתפס בקנה מידה פיננסי.
+                עלות הספר החדש של יעקב רייניץ היא סמלית בלבד. פער בלתי נתפס בקנה מידה פיננסי.
               </p>
               <div className="text-2xl md:text-3xl font-black font-display text-white border-t border-white/10 pt-4 flex flex-col md:flex-row items-center justify-center gap-2">
                 <span>הפרש נקי לכיס שלך:</span>
-                <span className="text-babun-accent font-black">₪49,851</span>
+                <span className="text-babun-accent font-black">עשרות אלפי שקלים</span>
               </div>
             </div>
           </div>
@@ -524,7 +419,7 @@ export default function Book() {
                 תכנון פיננסי ומשכנתא
               </h3>
               <p className="text-babun-primary/70 text-sm leading-relaxed font-light">
-                כמה אתה יכול לקחת — ולא רק כמה הבנק מאשר לך. ההבדל ביניהם לפעמים עולה ₪200,000.
+                כמה אתה יכול לקחת - ולא רק כמה הבנק מאשר לך. ההבדל ביניהם לפעמים עולה ₪200,000.
               </p>
             </div>
 
@@ -765,7 +660,7 @@ export default function Book() {
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                   >
                     <div className="px-6 md:px-8 pb-6 border-t border-babun-primary/5 text-base text-babun-primary/75 font-light leading-relaxed">
-                      לכל שלב. לפני שמתחילים לחפש דירה, תוך כדי התנעה, ואפילו אחרי שביצעתם רכישה ראשונה — כדי להבין מה ואיך אפשר לשפר לקראת הפעם הבאה.
+                      לכל שלב. לפני שמתחילים לחפש דירה, תוך כדי התנעה, ואפילו אחרי שביצעתם רכישה ראשונה - כדי להבין מה ואיך אפשר לשפר לקראת הפעם הבאה.
                     </div>
                   </motion.div>
                 )}
@@ -815,7 +710,7 @@ export default function Book() {
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                   >
                     <div className="px-6 md:px-8 pb-6 border-t border-babun-primary/5 text-base text-babun-primary/75 font-light leading-relaxed">
-                      כן בהחלט. חלקים גדולים ומכובדים בספר מוקדשים ומוכוונים לפרספקטיבה של משקיעים — ניתוח גובה תשואה, אומדן סיכונים, בדיקת ביקוש שכירות וניתוח היתכנות של עסקאות מורכבות יותר.
+                      כן בהחלט. חלקים גדולים ומכובדים בספר מוקדשים ומוכוונים לפרספקטיבה של משקיעים - ניתוח גובה תשואה, אומדן סיכונים, בדיקת ביקוש שכירות וניתוח היתכנות של עסקאות מורכבות יותר.
                     </div>
                   </motion.div>
                 )}
@@ -895,7 +790,7 @@ export default function Book() {
                     קבל את הספר אליך
                   </h2>
                   <p className="text-sm md:text-base text-babun-primary/60 font-light mt-2">
-                    148 עמודים. כל שאלה שאנשים שואלים אותי — בפנים. קרא לפני שאתה חותם.
+                    148 עמודים. כל שאלה שאנשים שואלים אותי - בפנים. קרא לפני שאתה חותם.
                   </p>
                 </div>
 
@@ -915,7 +810,7 @@ export default function Book() {
                       מזל טוב ומודה לך על הזמנתך. העותק הפיזי שלך נכנס לתהליך אריזה ומשלוח מיידי.
                     </p>
                     <div className="py-2 px-4 bg-babun-primary text-white font-bold text-xs rounded inline-block">
-                      משלוח עד הבית — עד 5 ימי עסקים 🚚
+                      משלוח עד הבית - עד 5 ימי עסקים 🚚
                     </div>
                     <button 
                       onClick={() => setCheckoutStatus(null)}
@@ -1017,12 +912,12 @@ export default function Book() {
                         ) : (
                           <>
                             <ShoppingBag size={18} />
-                            <span>רכוש עכשיו — ₪149</span>
+                            <span>רכוש עכשיו</span>
                           </>
                         )}
                       </button>
                       <p className="text-center text-babun-primary/30 text-[11px] mt-3">
-                        משלוח עד הבית — עד 5 ימי עסקים לכל נקודה בארץ
+                        משלוח עד הבית - עד 5 ימי עסקים לכל נקודה בארץ
                       </p>
                     </div>
                   </form>
@@ -1032,8 +927,8 @@ export default function Book() {
               {/* Promo Visual Sidebar (3D Book and Journey path) */}
               <div className="lg:col-span-5 bg-babun-light p-6 md:p-8 rounded-babun-lg flex flex-col justify-between text-right border border-babun-primary/5">
                 <div>
-                  <div className="text-3xl font-display font-black text-babun-primary mb-3">
-                    ₪149
+                  <div className="text-2xl font-display font-bold text-babun-primary mb-3">
+                    מהדורת נייר מהודרת
                   </div>
                   <div className="text-sm font-bold text-babun-accent bg-babun-primary px-3 py-1 rounded inline-block mb-6">
                     הפגישה שתחסוך לך עשרות אלפים

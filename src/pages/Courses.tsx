@@ -229,14 +229,16 @@ export default function Courses() {
       {/* HERO SECTION */}
       <section className="relative bg-black text-white pt-40 pb-28 overflow-hidden">
         {/* Background YouTube Video */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
           <iframe
             className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150 opacity-100"
-            src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
+            src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
             title="Syllabus Promo Background Video"
             frameBorder="0"
             allow="autoplay; encrypted-media"
           />
+          {/* Transparent click/tap block layer */}
+          <div className="absolute inset-0 bg-transparent z-[10] pointer-events-auto" />
           {/* Black Transparent Overlay & mesh grid */}
           <div className="absolute inset-0 bg-black/75 z-[1]" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/45 z-[2]" />
@@ -410,14 +412,16 @@ export default function Courses() {
       {/* 6 MEETINGS SYLLABUS (6 מפגשים - מה לומדים) */}
       <section id="syllabus-section" className="py-24 bg-zinc-950 relative border-t border-zinc-900 overflow-hidden">
         {/* Animated/Video Background Overlay */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
           <iframe
-            src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
+            src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
             className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150 opacity-100"
             title="Syllabus background video"
             frameBorder="0"
             allow="autoplay; encrypted-media"
           />
+          {/* Transparent click/tap block layer */}
+          <div className="absolute inset-0 bg-transparent z-[10] pointer-events-auto" />
           <div className="absolute inset-0 bg-black/75 z-[1]" />
         </div>
 

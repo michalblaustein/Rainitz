@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Link } from "react-router-dom";
 import { MessageCircle, PlayCircle, BookOpen, Newspaper, ExternalLink, Calendar, ArrowLeft } from "lucide-react";
 
 const mediaCategories = [
@@ -39,27 +40,54 @@ export default function Articles() {
       <section className="bg-babun-primary text-white pt-48 pb-20 relative overflow-hidden">
         <div className="absolute inset-0 mesh-grid opacity-20 z-0" />
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 text-right">
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-8 border-b border-white/10 pb-20">
-            <div className="max-w-3xl">
-              <span className="inline-block text-[11px] font-bold uppercase tracking-[0.5em] text-babun-accent mb-6 px-4 py-1.5 border border-babun-accent/20 bg-babun-accent/5">
-                MEDIA & INSIGHTS
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 border-b border-white/10 pb-20">
+            <div className="lg:col-span-7 space-y-8">
+              <span className="inline-block text-[11px] font-display font-bold uppercase tracking-[0.5em] text-babun-accent px-4 py-1.5 border border-babun-accent/20 bg-babun-accent/5">
+                ידע ששווה כסף
               </span>
-              <h1 className="text-6xl md:text-8xl font-display font-black leading-[0.9] text-white mb-8 lowercase tracking-tighter">
-                Media <br />
-                <span className="text-babun-accent italic">Center.</span>
+              <h1 className="text-4xl md:text-6xl lg:text-[76px] font-display font-black leading-[1.1] text-white">
+                בנדל"ן, <br className="hidden md:block"/>
+                הידע הוא הנכס <span className="text-babun-accent font-black">הכי יקר</span>
               </h1>
-            </div>
-            <div className="lg:max-w-md pt-12">
-              <h2 className="text-2xl font-display font-bold text-white mb-4">הידע פה. קח.</h2>
-              <p className="text-white/60 text-lg leading-relaxed font-light">
-                טור שבועי. פודקאסט. ראיונות. כתבות. כל מה שכתבתי - במקום אחד.
+              <p className="text-white/80 text-lg md:text-xl font-light leading-relaxed max-w-xl">
+                טור שבועי. פודקאסטים. ראיונות. כתבות. שנים של ניסיון - בפורמטים שאפשר לצרוך בדרך.
               </p>
+              
+              <div className="pt-4 flex flex-col sm:flex-row items-center gap-4 justify-start">
+                <button 
+                  onClick={() => {
+                    const el = document.getElementById("content-section");
+                    el?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="w-full sm:w-auto bg-babun-accent hover:bg-white text-babun-primary font-bold px-8 py-4.5 rounded-babun-md text-base shadow-xl hover:shadow-babun-accent/15 transition-all cursor-pointer flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
+                >
+                  <ArrowLeft size={18} />
+                  <span>לפודקאסטים וראיונות</span>
+                </button>
+                <span className="text-white/40 text-sm font-light">
+                  (או גלול למטה לכל הסוגים)
+                </span>
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 flex flex-col justify-center space-y-6 lg:border-r lg:border-white/10 lg:pr-12">
+              <h3 className="text-2xl font-display font-bold text-babun-accent">
+                למה כל התוכן הזה קיים?
+              </h3>
+              <div className="space-y-4 text-base md:text-lg text-white/85 font-light leading-relaxed">
+                <p>
+                  אפשר לייעץ לאדם אחד בכל פגישה. אי אפשר לייעץ לכל מי שצריך.
+                </p>
+                <p>
+                  לכן כל ראיון, כתבה, ופרק פודקאסט - הוא פגישת ייעוץ שיכולה להגיע לכל בית. אין מה לקנות. אין מה לשלם. רק לקחת.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-24">
+      <div id="content-section" className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-24">
         {/* Categories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-32">
            {mediaCategories.map((cat, i) => (
@@ -137,6 +165,17 @@ export default function Articles() {
            <Newspaper className="absolute -bottom-10 -right-10 text-white/5" size={250} />
         </section>
       </div>
+
+      {/* FINAL CTA */}
+      <section className="py-40 text-center bg-white border-t border-babun-primary/5">
+         <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-4xl md:text-6xl font-display font-black text-babun-primary mb-10 leading-tight">לא בטוח מאיפה להתחיל?</h2>
+            <p className="text-xl text-babun-primary/60 font-light mb-12 max-w-2xl mx-auto leading-relaxed">
+               שאלה אחת נכונה שווה יותר מעשרה ייעוצים. קבע פגישה. 60 דקות. ₪1,200. ותצא עם תמונה ברורה.
+            </p>
+            <Link to="/consulting" className="btn-babun-primary inline-block px-16 py-6 shadow-2xl">קביעת פגישה ←</Link>
+         </div>
+      </section>
     </div>
   );
 }
