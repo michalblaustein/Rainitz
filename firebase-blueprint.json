@@ -1,86 +1,73 @@
 {
   "entities": {
-    "Job": {
-      "title": "Job Posting",
-      "description": "Job listings on the board",
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "companyId": { "type": "string" },
-        "companyName": { "type": "string" },
-        "companyLogo": { "type": "string" },
-        "location": { "type": "string" },
-        "type": { "type": "string", "enum": ["full-time", "part-time", "contract", "freelance"] },
-        "category": { "type": "string" },
-        "description": { "type": "string" },
-        "requirements": { "type": "string" },
-        "salary": { "type": "string" },
-        "isRemote": { "type": "boolean" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "expiresAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["title", "companyName", "location", "type", "description", "createdAt"]
-    },
-    "Application": {
-      "title": "Job Application",
-      "description": "Candidate applications for jobs",
-      "type": "object",
-      "properties": {
-        "jobId": { "type": "string" },
-        "jobTitle": { "type": "string" },
-        "candidateName": { "type": "string" },
-        "candidateEmail": { "type": "string", "format": "email" },
-        "candidatePhone": { "type": "string" },
-        "resumeUrl": { "type": "string" },
-        "coverLetter": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending", "reviewed", "interviewing", "accepted", "rejected"] },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["jobId", "candidateName", "candidateEmail", "createdAt"]
-    },
-    "Company": {
-      "title": "Employer Profile",
-      "description": "Details about hiring companies",
+    "Lead": {
+      "title": "Lead",
+      "description": "General consultation or contact lead",
       "type": "object",
       "properties": {
         "name": { "type": "string" },
-        "logo": { "type": "string" },
-        "description": { "type": "string" },
-        "industry": { "type": "string" },
-        "website": { "type": "string" },
-        "contactEmail": { "type": "string", "format": "email" },
-        "location": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["name", "contactEmail", "createdAt"]
+      "required": ["name", "email", "phone", "createdAt"]
     },
-    "NewsletterSubscriber": {
+    "Subscriber": {
       "title": "Newsletter Subscriber",
-      "description": "Subscribers for updates",
+      "description": "Newsletter subscribers",
       "type": "object",
       "properties": {
         "email": { "type": "string", "format": "email" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["email", "createdAt"]
+    },
+    "CourseSignup": {
+      "title": "Course Signup",
+      "description": "Courses registration and signup details",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "courseType": { "type": "string", "enum": ["physical", "digital"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "phone", "courseType", "createdAt"]
+    },
+    "Article": {
+      "title": "Article",
+      "description": "A media article, columns, and podcasts",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string", "enum": ["טור שבועי", "כתבות ומאמרים", "פודקאסטים", "קווי מידע"] },
+        "categoryId": { "type": "string", "enum": ["weekly", "articles", "podcast", "kavei"] },
+        "date": { "type": "string" },
+        "image": { "type": "string" },
+        "content": { "type": "string" },
+        "link": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "category", "categoryId", "date", "image", "content"]
     }
   },
   "firestore": {
-    "/jobs/{jobId}": {
-      "schema": "Job",
-      "description": "Job listings"
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Consultation and contact leads"
     },
-    "/applications/{applicationId}": {
-      "schema": "Application",
-      "description": "Job applications"
+    "/subscribers/{subscriberId}": {
+      "schema": "Subscriber",
+      "description": "Newsletter subscriptions"
     },
-    "/companies/{companyId}": {
-      "schema": "Company",
-      "description": "Employer profiles"
+    "/course_signups/{signupId}": {
+      "schema": "CourseSignup",
+      "description": "Signups for real estate courses"
     },
-    "/newsletter_subscribers/{subscriberId}": {
-      "schema": "NewsletterSubscriber",
-      "description": "Newsletter subscribers"
+    "/articles/{articleId}": {
+      "schema": "Article",
+      "description": "Media library articles and columns"
     }
   }
 }

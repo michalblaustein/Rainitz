@@ -50,6 +50,19 @@ service cloud.firestore {
              data.createdAt == request.time;
     }
 
+    function isValidArticle(data) {
+      return data.keys().hasAll(['title', 'category', 'categoryId', 'date', 'image', 'content', 'createdAt']) &&
+             data.keys().size() >= 7 &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+             data.category in ['טור שבועי', 'כתבות ומאמרים', 'פודקאסטים', 'קווי מידע'] &&
+             data.categoryId in ['weekly', 'articles', 'podcast', 'kavei'] &&
+             data.date is string && data.date.size() > 0 && data.date.size() <= 30 &&
+             data.image is string && data.image.size() > 0 && data.image.size() <= 1000 &&
+             data.content is string && data.content.size() > 0 && data.content.size() <= 100000 &&
+             (data.keys().hasAny(['link']) ? (data.link is string && data.link.size() <= 1000) : true) &&
+             data.createdAt == request.time;
+    }
+
     // 1. Master Gate Collection Rules
     match /leads/{leadId} {
       allow create: if isValidId(leadId) && isValidLead(incoming());
@@ -64,6 +77,13 @@ service cloud.firestore {
     match /course_signups/{signupId} {
       allow create: if isValidId(signupId) && isValidCourseSignup(incoming());
       allow read, update, delete: if isAdmin();
+    }
+
+    match /articles/{articleId} {
+      allow read: if true;
+      allow create: if isValidId(articleId) && isAdmin() && isValidArticle(incoming());
+      allow update: if isValidId(articleId) && isAdmin() && isValidArticle(incoming());
+      allow delete: if isValidId(articleId) && isAdmin();
     }
 
     // Admins collection - managed manually or via Firebase Console for now

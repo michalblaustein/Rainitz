@@ -105,74 +105,34 @@ export default function Book() {
           <div className="absolute inset-0 bg-gradient-to-t from-babun-primary via-transparent to-babun-primary/80 z-[2]" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 mt-[100px]">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 mt-[100px] text-center">
+          <div className="flex flex-col items-center justify-center space-y-8">
             
-            {/* HERO RIGHT: COPY & MAIN CTA */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-right">
-              <motion.div 
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-babun-accent/30 bg-babun-accent/10 text-babun-accent font-medium text-xs justify-center"
-              >
-                <Sparkles size={12} className="shrink-0" />
-                <span>הספר שמשנה את כללי המשחק</span>
-              </motion.div>
+            <motion.h1 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-display font-black leading-tight text-white mb-4 tracking-tight text-center"
+              id="book-main-title"
+            >
+              הספר שמסביר לך את מה <br className="hidden md:inline" />
+              <span className="text-babun-accent font-black">שאיש לא הסביר לפני שחתמת.</span>
+            </motion.h1>
 
-              <motion.h1 
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="text-4xl md:text-5xl lg:text-6xl font-display font-black leading-tight text-white mb-4 tracking-tight"
-                id="book-main-title"
-              >
-                הספר שמסביר לך את מה <br className="hidden md:inline" />
-                <span className="text-babun-accent font-black">שאיש לא הסביר לפני שחתמת.</span>
-              </motion.h1>
-
-              <motion.p 
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-lg md:text-xl text-white/85 max-w-2xl lg:max-w-none mx-auto leading-relaxed font-light"
-              >
-                <strong className="font-semibold text-white">"שליש בקרקע"</strong> - המדריך המעשי לרוכשי ומשקיעי נדל"ן בישראל.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="pt-6 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start"
-              >
-                <button 
-                  onClick={() => scrollToId("checkout-form-section")}
-                  className="w-full sm:w-auto bg-babun-accent hover:bg-white text-babun-primary font-bold px-8 py-4.5 rounded-babun-md text-base shadow-xl hover:shadow-babun-accent/15 transition-all duration-350 cursor-pointer flex items-center justify-center gap-2.5 transform hover:-translate-y-0.5"
-                >
-                  <ArrowLeft size={18} className="stroke-[2.5]" />
-                  <span>רכוש את הספר</span>
-                </button>
-              </motion.div>
-            </div>
-
-            {/* HERO LEFT: ACTUAL BOOK COVER IMAGE */}
-            <div className="lg:col-span-5 flex justify-center pt-12 lg:pt-0 relative z-20">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 15 }}
-                animate={{ opacity: 1, scale: 1.3, y: 0 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="relative cursor-pointer lg:mt-[-50px] md:mb-[-220px] lg:mb-[-260px] mb-[-140px]"
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="pt-2 flex flex-col sm:flex-row items-center gap-4 justify-center"
+            >
+              <button 
                 onClick={() => scrollToId("checkout-form-section")}
+                className="w-full sm:w-auto bg-babun-accent hover:bg-white text-babun-primary font-bold px-8 py-4.5 rounded-babun-md text-base shadow-xl hover:shadow-babun-accent/15 transition-all duration-350 cursor-pointer flex items-center justify-center gap-2.5 transform hover:-translate-y-0.5"
               >
-                <img 
-                  src="https://lh3.googleusercontent.com/d/1YATeihtnryr9oCFr2-byVjsEYCnxVtIl" 
-                  alt="הספר שליש בקרקע" 
-                  className="w-full max-w-[380px] md:max-w-[480px] lg:max-w-[540px] drop-shadow-[40px_60px_100px_rgba(0,0,0,0.75)] hover:scale-[1.05] transition-transform duration-500"
-                  referrerPolicy="no-referrer"
-                />
-              </motion.div>
-            </div>
+                <ArrowLeft size={18} className="stroke-[2.5]" />
+                <span>רכוש את הספר</span>
+              </button>
+            </motion.div>
 
           </div>
         </div>
