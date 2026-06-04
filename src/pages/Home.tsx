@@ -128,7 +128,9 @@ export default function Home() {
                     }}
                     className="absolute top-1/4 -right-12 z-20 bg-white p-6 rounded-babun-lg shadow-2xl text-black text-center min-w-[180px]"
                  >
-                    <div className="text-4xl font-display font-black text-babun-primary">+5,000</div>
+                    <div className="text-4xl font-display font-black text-babun-primary">
+                      <AnimatedNumber value={4981} />
+                    </div>
                     <div className="text-sm font-bold opacity-80 mt-1">פגישות ייעוץ</div>
                  </motion.div>
 
@@ -172,7 +174,8 @@ export default function Home() {
                   </span>
                 </h1>
                 <h2 className="text-2xl md:text-3xl font-normal text-white mb-12 leading-tight text-right w-full">
-                  חושבים להשקיע בנדל״ן? בואו להבין את היכולות שלכם, המספרים, הסיכונים וההזדמנויות.
+                  <span>חושבים להשקיע בנדל״ן?</span>
+                  <span className="block mt-1">בואו להבין את היכולות שלכם, המספרים, הסיכונים וההזדמנויות.</span>
                 </h2>
                 <div className="flex flex-wrap gap-6 justify-start items-center w-full">
                    <Link 
@@ -325,7 +328,7 @@ export default function Home() {
                />
  
                {/* Phone Icon Tag (Top-Right) */}
-               <div className="absolute top-10 right-[-20px] md:right-[-40px] bg-white p-6 md:p-10 rounded-full shadow-2xl text-babun-primary z-20 flex items-center justify-center aspect-square">
+               <div className="absolute top-10 right-[-20px] md:right-[-40px] bg-white/80 backdrop-blur-md p-6 md:p-10 rounded-full shadow-2xl text-babun-primary z-20 flex items-center justify-center aspect-square">
                  <motion.div
                    animate={{ scale: [1, 1.05, 1], rotate: [0, 2, -2, 0] }}
                    transition={{ repeat: Infinity, duration: 4 }}
@@ -351,9 +354,9 @@ export default function Home() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="mt-12 lg:mt-[60px] lg:-mr-[260px] lg:translate-y-[120px] bg-white/95 backdrop-blur-md p-8 md:p-12 rounded-[25px] shadow-[0_30px_70px_rgba(0,0,0,0.4)] relative z-30 lg:w-[500px] lg:h-[330px] w-full border border-black/5 flex flex-col justify-center"
+              className="mt-12 lg:mt-[60px] lg:-mr-[260px] lg:-translate-x-[100px] lg:translate-y-[15px] bg-white/80 backdrop-blur-md p-8 md:p-10 lg:p-12 rounded-full shadow-[0_30px_70px_rgba(0,0,0,0.4)] relative z-30 w-[310px] sm:w-[350px] md:w-[380px] lg:w-[400px] aspect-square border border-black/5 flex flex-col justify-center items-center text-center mx-auto lg:mx-0"
             >
-              <div className="bg-[#fe0000] text-white px-4 py-1.5 rounded-[100px] font-black text-sm md:text-base inline-block mb-8 shadow-sm self-start">
+              <div className="bg-[#fe0000] text-white px-4 py-1.5 rounded-[100px] font-black text-xs md:text-sm inline-block mb-4 shadow-sm self-center">
                 מחזור חדש נפתח!
               </div>
 
@@ -361,23 +364,23 @@ export default function Home() {
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-babun-accent/10 p-6 rounded-2xl border border-babun-accent/30 text-center"
+                  className="bg-babun-accent/10 p-6 rounded-2xl border border-babun-accent/30 text-center w-full"
                 >
-                  <div className="text-babun-primary font-bold text-xl mb-1">נשלח! תבדוק את המייל שלך</div>
+                  <div className="text-babun-primary font-bold text-lg mb-1">נשלח! תבדוק את המייל שלך</div>
                 </motion.div>
               ) : (
                 <div className="w-full">
-                  <p className="text-babun-primary/60 text-xl mb-8 font-medium leading-tight">
+                  <p className="text-babun-primary/60 text-sm md:text-base lg:text-lg mb-4 font-medium leading-tight">
                     לקבלת הסילבוס המלא לקורס,
                     <br />
                     הכנס את המייל שלך:
                   </p>
-                  <form onSubmit={handleCourseSyllabus} className="flex flex-col sm:flex-row gap-4">
+                  <form onSubmit={handleCourseSyllabus} className="flex flex-col gap-3 w-full max-w-[220px] sm:max-w-xs mx-auto">
                     <input 
                       required 
                       type="email" 
                       placeholder="המייל שלך"
-                      className="flex-1 h-[72px] bg-gray-50 px-8 rounded-2xl outline-none border border-gray-200 focus:border-babun-accent text-babun-primary text-right text-lg placeholder:text-gray-400"
+                      className="w-full h-11 sm:h-12 bg-gray-50 px-6 rounded-2xl outline-none border border-gray-200 focus:border-babun-accent text-babun-primary text-center text-sm placeholder:text-gray-400"
                       value={courseEmail}
                       onChange={e => setCourseEmail(e.target.value)}
                     />
@@ -385,13 +388,13 @@ export default function Home() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       disabled={courseStatus === "loading"}
-                      className="bg-babun-primary text-white font-bold px-10 h-[72px] rounded-2xl shadow-lg transition-colors hover:bg-black disabled:opacity-50 flex items-center justify-center min-w-[120px]"
+                      className="bg-babun-primary text-white font-bold w-full h-11 sm:h-12 rounded-2xl shadow-lg transition-colors hover:bg-black disabled:opacity-50 flex items-center justify-center text-sm"
                     >
                       {courseStatus === "loading" ? (
                         <motion.div
                           animate={{ rotate: 360 }}
                           transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                          className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full"
+                          className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
                         />
                       ) : (
                         "שלח"
@@ -710,81 +713,9 @@ export default function Home() {
          </div>
       </section>
 
-      {/* BOOK SECTION */}
-      <section className="relative mt-20 mb-8 lg:mt-32 lg:mb-10 px-4 md:px-8" id="book-section">
-        {/* Yellow Strip Background - Expanded upwards */}
-        <div className="absolute -top-12 left-0 right-0 bg-[#FFFBEB] z-0 h-[400px]" />
-        
-        <div className="max-w-7xl mx-auto relative z-10 py-20">
-          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-            {/* Text (Right) */}
-            <motion.div 
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="lg:flex-[2] text-right flex flex-col items-start"
-            >
-               <div className="text-lg md:text-xl lg:text-2xl font-display font-medium text-black mb-3 leading-tight">
-                  <p>כשה<span className="font-bold">מתווך</span> עובד בשביל העמלה, וה<span className="font-bold">בנק</span> עובד בשביל עצמו - הגיע הזמן שהוא יעבוד בשבילך.</p>
-               </div>
-               
-               <div className="mb-6">
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-black text-black leading-[1.1] tracking-tight">
-                    לך נשאר לרכוש כלים ולגלות <br />
-                    איפה מסתתר <span className="text-babun-accent">הרווח</span> בעסקאות נדל״ן
-                  </h2>
-               </div>
 
-               <p className="text-sm md:text-base lg:text-lg text-black font-bold mb-10 text-right">
-                 בין הנושאים בספר: משכנתאות • מחיר למשתכן • קבוצות רכישה <br />
-                 תמ״א • משא ומתן • מיסוי • ועוד...
-               </p>
 
-               <div className="flex justify-start w-full">
-                 <Link 
-                  to="/book" 
-                  className="group bg-black text-white px-8 md:px-12 py-3 md:py-4 rounded-full font-black text-lg md:text-xl hover:scale-105 transition-all shadow-xl hover:shadow-black/20 flex items-center gap-3"
-                 >
-                   <span>לרכישה</span>
-                   <motion.div
-                     animate={{ x: [0, -5, 0] }}
-                     transition={{ repeat: Infinity, duration: 1.5 }}
-                   >
-                     <MoveLeft className="w-6 h-6 transition-transform group-hover:-translate-x-1" />
-                   </motion.div>
-                 </Link>
-               </div>
-            </motion.div>
 
-            {/* Image (Left) - Pop out of the strip */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8, x: -50 }}
-              whileInView={{ opacity: 1, scale: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="flex-1 relative flex justify-center lg:justify-end"
-            >
-              <img 
-                src="https://lh3.googleusercontent.com/d/1YATeihtnryr9oCFr2-byVjsEYCnxVtIl" 
-                alt="הספר שליש בקרקע" 
-                className="w-full max-w-sm lg:max-w-md drop-shadow-[30px_50px_80px_rgba(0,0,0,0.25)] hover:scale-105 transition-transform duration-700"
-                referrerPolicy="no-referrer"
-              />
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* FINAL CTA */}
-      <section className="py-40 text-center">
-         <div className="max-w-4xl mx-auto px-4">
-            <h2 className="text-4xl md:text-6xl font-display font-black text-babun-primary mb-10 leading-tight">לא בטוח מאיפה להתחיל?</h2>
-            <p className="text-xl text-babun-primary/60 font-light mb-12 max-w-2xl mx-auto leading-relaxed">
-               שאלה אחת נכונה שווה יותר מעשרה ייעוצים. קבע פגישה. 60 דקות. ₪1,200. ותצא עם תמונה ברורה.
-            </p>
-            <Link to="/consulting" className="btn-babun-primary px-16 py-6 shadow-2xl">קביעת פגישה ←</Link>
-         </div>
-      </section>
     </div>
   );
 }
