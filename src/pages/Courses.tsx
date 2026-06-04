@@ -233,7 +233,7 @@ export default function Courses() {
         <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
           <iframe
             className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150 opacity-100"
-            src="https://www.youtube.com/embed/VJERj5NQgNs?autoplay=1&mute=1&loop=1&playlist=VJERj5NQgNs&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
+            src="https://www.youtube.com/embed/psnj6fJJlRE?autoplay=1&mute=1&loop=1&playlist=psnj6fJJlRE&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
             title="Syllabus Promo Background Video"
             frameBorder="0"
             allow="autoplay; encrypted-media"
@@ -428,7 +428,7 @@ export default function Courses() {
         {/* Animated/Video Background Overlay */}
         <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
           <iframe
-            src="https://www.youtube.com/embed/VJERj5NQgNs?autoplay=1&mute=1&loop=1&playlist=VJERj5NQgNs&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
+            src="https://www.youtube.com/embed/psnj6fJJlRE?autoplay=1&mute=1&loop=1&playlist=psnj6fJJlRE&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
             className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150 opacity-100"
             title="Syllabus background video"
             frameBorder="0"

@@ -106,7 +106,7 @@ export default function Book() {
         </div>
 
         <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 mt-[100px] text-right">
-          <div className="flex flex-col items-start justify-start space-y-8">
+          <div className="flex flex-col items-start justify-start space-y-8 pr-0 pl-[5px] -mr-[92px]">
             
             <motion.h1 
               initial={{ opacity: 0, y: 15 }}
