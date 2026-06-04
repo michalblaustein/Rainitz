@@ -12,7 +12,8 @@ import {
   ChevronDown, 
   MessageSquare, 
   BookOpen, 
-  Check 
+  Check,
+  Phone
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -86,43 +87,43 @@ export default function Courses() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Firestore submission states
-  const [digitalFormData, setDigitalFormData] = useState({ name: "", phone: "", email: "" });
-  const [frontalFormData, setFrontalFormData] = useState({ name: "", phone: "", email: "" });
-  const [digitalStatus, setDigitalStatus] = useState<null | "loading" | "success">(null);
-  const [frontalStatus, setFrontalStatus] = useState<null | "loading" | "success">(null);
+  // Firestore submission states and active registration course
+  const [activeRegisterCourse, setActiveRegisterCourse] = useState<"phone" | "digital" | "frontal" | null>(null);
+  const [formData, setFormData] = useState({ name: "", phone: "", email: "" });
+  const [registrationStatus, setRegistrationStatus] = useState<null | "loading" | "success">(null);
+  const formStripRef = useRef<HTMLDivElement>(null);
 
-  const handleRegisterDigital = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setDigitalStatus("loading");
-    try {
-      await addDoc(collection(db, "course_registrations"), {
-        ...digitalFormData,
-        type: "קורס דיגיטלי - רישום מוקדם",
-        createdAt: serverTimestamp(),
-      });
-      setDigitalStatus("success");
-      setDigitalFormData({ name: "", phone: "", email: "" });
-    } catch (err) {
-      console.error(err);
-      setDigitalStatus(null);
-    }
+  const handleCourseSelect = (courseKey: "phone" | "digital" | "frontal") => {
+    setActiveRegisterCourse(courseKey);
+    setRegistrationStatus(null);
+    setFormData({ name: "", phone: "", email: "" });
+    
+    // Smooth scroll down to the bottom form strip after state updates
+    setTimeout(() => {
+      formStripRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 100);
   };
 
-  const handleRegisterFrontal = async (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFrontalStatus("loading");
+    if (!activeRegisterCourse) return;
+    setRegistrationStatus("loading");
     try {
+      let typeName = "";
+      if (activeRegisterCourse === "phone") typeName = "קורס טלפוני - השארת פרטים";
+      if (activeRegisterCourse === "digital") typeName = "קורס דיגיטלי - רישום מוקדם";
+      if (activeRegisterCourse === "frontal") typeName = "קורס פרונטלי - רישום לעדכונים";
+
       await addDoc(collection(db, "course_registrations"), {
-        ...frontalFormData,
-        type: "קורס פרונטלי - רישום לעדכונים",
+        ...formData,
+        type: typeName,
         createdAt: serverTimestamp(),
       });
-      setFrontalStatus("success");
-      setFrontalFormData({ name: "", phone: "", email: "" });
+      setRegistrationStatus("success");
+      setFormData({ name: "", phone: "", email: "" });
     } catch (err) {
       console.error(err);
-      setFrontalStatus(null);
+      setRegistrationStatus(null);
     }
   };
 
@@ -232,7 +233,7 @@ export default function Courses() {
         <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
           <iframe
             className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150 opacity-100"
-            src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
+            src="https://www.youtube.com/embed/db5sSZJhvkM?autoplay=1&mute=1&loop=1&playlist=db5sSZJhvkM&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
             title="Syllabus Promo Background Video"
             frameBorder="0"
             allow="autoplay; encrypted-media"
@@ -386,11 +387,11 @@ export default function Courses() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-5">
             {whatYouGet.map((item, index) => (
               <div 
                 key={index}
-                className="bg-zinc-50 p-8 md:p-10 rounded-babun-lg border border-zinc-100 hover:border-babun-accent hover:bg-white transition-all duration-300 group shadow-sm flex flex-col justify-between"
+                className="bg-zinc-50 p-6 lg:p-8 rounded-babun-lg border border-zinc-100 hover:border-babun-accent hover:bg-white transition-all duration-300 group shadow-sm flex flex-col justify-between"
               >
                 <div>
                   <div className="w-12 h-12 rounded-full bg-babun-accent/10 flex items-center justify-center text-babun-primary mb-6 group-hover:bg-babun-accent transition-colors">
@@ -414,7 +415,7 @@ export default function Courses() {
         {/* Animated/Video Background Overlay */}
         <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
           <iframe
-            src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
+            src="https://www.youtube.com/embed/db5sSZJhvkM?autoplay=1&mute=1&loop=1&playlist=db5sSZJhvkM&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
             className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150 opacity-100"
             title="Syllabus background video"
             frameBorder="0"
@@ -450,6 +451,16 @@ export default function Courses() {
                 </p>
               </div>
             ))}
+          </div>
+
+          <div className="mt-16 flex justify-start">
+            <button 
+              onClick={() => scrollToSection("register-section")}
+              className="bg-babun-accent hover:bg-babun-accent/90 text-babun-primary text-lg px-12 py-4 font-black rounded-[100px] shadow-lg shadow-babun-accent/25 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-3 group cursor-pointer"
+            >
+              <span className="font-display">להרשמה לקורס</span>
+              <ArrowLeft size={20} className="group-hover:translate-x-[-6px] transition-transform duration-300" />
+            </button>
           </div>
         </div>
       </section>
@@ -512,7 +523,7 @@ export default function Courses() {
 
 
       {/* TALMUDIC QUOTE BANNER (ציטוט חז"ל - שליש בקרקע) */}
-      <section className="relative py-28 overflow-hidden text-center">
+      <section className="relative py-28 overflow-hidden text-right">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img 
@@ -523,9 +534,9 @@ export default function Courses() {
           />
         </div>
 
-        <div className="max-w-4xl mx-auto px-6 relative z-10">
-          <div className="space-y-6">
-            <h3 className="text-2xl md:text-3.5xl font-display font-black text-black leading-relaxed max-w-3xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="space-y-6 max-w-4xl">
+            <h3 className="text-2xl md:text-3.5xl font-display font-black text-black leading-relaxed">
               "לעולם ישליש אדם את מעותיו: שליש בקרקע, ושליש בפרקמטיה (מסחר/עסקים), ושליש תחת ידו (מזומן נזיל)."
             </h3>
             <cite className="block text-xs md:text-sm font-bold text-zinc-800 not-italic pt-1">
@@ -621,13 +632,23 @@ export default function Courses() {
               </div>
             ))}
           </div>
+
+          <div className="mt-16 flex justify-center">
+            <button 
+              onClick={() => scrollToSection("register-section")}
+              className="bg-babun-primary hover:bg-babun-primary/95 text-white text-lg px-12 py-4 font-black rounded-[100px] shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-3 group cursor-pointer"
+            >
+              <span className="font-display">להרשמה לקורס</span>
+              <ArrowLeft size={20} className="group-hover:translate-x-[-6px] transition-transform duration-300" />
+            </button>
+          </div>
         </div>
       </section>
 
       {/* FAQ SECTION (שאלות נפוצות) */}
       <section className="py-24 bg-white relative">
         <div className="max-w-4xl mx-auto px-4 md:px-8 text-right">
-          <div className="text-center mb-16">
+          <div className="text-right mb-16">
             <h2 className="text-3xl md:text-5xl font-display font-black text-babun-primary">
               שאלות נפוצות
             </h2>
@@ -673,225 +694,313 @@ export default function Courses() {
       </section>
 
       {/* REGISTRATION SECTION (הרשמה) */}
-      <section id="register-section" className="py-24 bg-white relative scroll-mt-20">
+      <section id="register-section" className="py-24 bg-babun-accent relative scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-display font-black text-babun-primary">
-              מסלולי הלימוד והרשמה
+          <div className="text-right mb-16">
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-display font-black text-babun-primary">
+              תוכניות הלימוד והרשמה
             </h2>
-            <p className="text-zinc-600 mt-4 text-base md:text-lg max-w-2xl mx-auto font-light">
-              בחרו את מסלול הלימוד המתאים לכם ביותר: קורס טלפוני זמין, קורס דיגיטלי מתקדם או קורס פרונטלי מעמיק בקבוצה.
+            <p className="text-babun-primary/70 mt-4 text-lg md:text-xl max-w-2xl font-light leading-relaxed">
+              בחרו את מסלול ההתקדמות המקצועי המועדף עליכם והצטרפו למאות בוגרים שכבר שומרים על הכסף שלהם בשטח:
             </p>
           </div>
 
+          {/* 3 PREMIUM COURSE CARDS */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
             
-            {/* CARD 1: PHONE COURSE */}
-            <div className="bg-zinc-50 border border-zinc-200/80 p-8 rounded-[32px] shadow-sm flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-babun-primary/10 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 left-0 h-2 bg-babun-primary/20" />
+            {/* Card 1: Phone Course */}
+            <motion.div 
+              whileHover={{ y: -6 }}
+              className={`bg-white border rounded-[32px] p-8 md:p-10 shadow-[0_15px_30px_rgba(0,0,0,0.05)] flex flex-col justify-between transition-all duration-300 relative ${
+                activeRegisterCourse === "phone" ? "ring-4 ring-babun-primary border-transparent" : "border-zinc-200/80"
+              }`}
+            >
               <div>
-                <div className="flex justify-between items-start mb-6 gap-2">
-                  <div>
-                    <span className="inline-block px-3 py-1 bg-babun-primary/10 text-babun-primary text-xs font-black rounded-full mb-3">
-                      במערכת אור עולם
-                    </span>
-                    <h3 className="text-2xl font-display font-black text-babun-primary">קורס טלפוני</h3>
+                <div className="flex justify-between items-start mb-6">
+                  <div className="w-14 h-14 bg-babun-accent/15 rounded-2xl flex items-center justify-center text-babun-primary mb-4">
+                    <Phone size={28} className="text-babun-primary" />
                   </div>
-                  <div className="text-left shrink-0">
-                    <span className="text-2xl font-black text-babun-primary">1,200 ₪</span>
-                    <p className="text-xs text-zinc-500 font-light">מחיר חד פעמי</p>
+                  <div className="text-left bg-babun-primary/5 px-4 py-2 rounded-2xl border border-babun-primary/5">
+                    <span className="text-xs text-zinc-500 font-bold block">מחיר מיוחד</span>
+                    <span className="text-2xl font-black text-babun-primary font-display">1,200 ₪</span>
                   </div>
                 </div>
 
-                <p className="text-zinc-600 text-sm leading-relaxed mb-6 font-light">
+                <h3 className="text-2xl md:text-3xl font-display font-black text-babun-primary mb-3">
+                  קורס טלפוני
+                </h3>
+                <span className="inline-block px-3 py-1 bg-babun-primary/10 text-babun-primary text-xs font-black rounded-full mb-6">
+                  במערכת אור עולם
+                </span>
+
+                <p className="text-zinc-600 text-base leading-relaxed mb-6 font-light">
                   לימוד נוח וזמין ישירות מהטלפון האישי שלך, בקצב שלך ובזמן שלך באמצעות מערכת הטלפוניה המתקדמת. הקורס מועבר במערכת הטלפונית של חסידות אור עולם ופתוח להאזנה בכל עת.
                 </p>
 
-                <div className="space-y-4 bg-white/60 backdrop-blur-sm p-5 rounded-2xl border border-zinc-200/60 mb-6">
-                  <div className="flex justify-between items-center text-sm border-b border-zinc-100 pb-3">
-                    <span className="text-zinc-500">מערכת:</span>
-                    <span className="font-bold text-babun-primary">אור עולם</span>
+                <div className="space-y-3 pt-4 border-t border-zinc-100 mb-8 text-sm text-zinc-700">
+                  <div className="flex items-center gap-2">
+                    <Check size={18} className="text-babun-primary shrink-0" />
+                    <span>האזנה חופשית לכל המפגשים 24/6</span>
                   </div>
-                  <div className="flex justify-between items-center text-sm border-b border-zinc-100 pb-3">
-                    <span className="text-zinc-500">טלפון בחיוג ישיר:</span>
-                    <a href="tel:0733454545" className="font-black text-babun-primary hover:text-babun-accent hover:underline">073-3454545</a>
+                  <div className="flex items-center gap-2">
+                    <Check size={18} className="text-babun-primary shrink-0" />
+                    <span>מתאים למגזר התורני ולמחזיקי טלפון כשר</span>
                   </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-zinc-500">שלוחה להרשמה:</span>
-                    <span className="font-black text-babun-primary bg-zinc-100 px-2 py-0.5 rounded text-xs">שלוחה 6-2-2</span>
+                  <div className="flex items-center gap-2">
+                    <Check size={18} className="text-babun-primary shrink-0" />
+                    <span>גישה ישירה ומענה לשאלות במערכת</span>
                   </div>
                 </div>
               </div>
 
               <div>
-                <a 
-                  href="tel:0733454545"
-                  className="w-full btn-babun-primary text-center justify-center font-black py-4 rounded-xl flex items-center gap-2 shadow-md hover:scale-[1.02] transition-transform"
+                <button
+                  onClick={() => handleCourseSelect("phone")}
+                  className={`w-full py-4 px-6 rounded-2xl text-lg font-black transition-all duration-300 flex items-center justify-center gap-2 shadow-lg group cursor-pointer ${
+                    activeRegisterCourse === "phone"
+                      ? "bg-babun-primary text-white hover:bg-babun-primary/95"
+                      : "bg-babun-accent text-babun-primary hover:bg-babun-accent/90"
+                  }`}
                 >
-                  <span>☏ התקשרו עכשיו: 073-3454545</span>
-                </a>
-                <p className="text-center text-xs text-zinc-400 mt-3 font-light">שלוחה להאזנה וכל הפרטים: 6-2-2</p>
+                  <span>להרשמה למסלול</span>
+                  <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                </button>
               </div>
-            </div>
+            </motion.div>
 
-            {/* CARD 2: DIGITAL COURSE */}
-            <div className="bg-zinc-50 border border-zinc-200/80 p-8 rounded-[32px] shadow-sm flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-babun-accent/30 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 left-0 h-2 bg-babun-accent" />
+            {/* Card 2: Digital Course */}
+            <motion.div 
+              whileHover={{ y: -6 }}
+              className={`bg-white border rounded-[32px] p-8 md:p-10 shadow-[0_15px_30px_rgba(0,0,0,0.05)] flex flex-col justify-between transition-all duration-300 relative ${
+                activeRegisterCourse === "digital" ? "ring-4 ring-babun-primary border-transparent" : "border-zinc-200/80"
+              }`}
+            >
               <div>
-                <div className="flex justify-between items-start mb-6 gap-2">
-                  <div>
-                    <span className="inline-block px-3 py-1 bg-babun-accent/15 text-babun-accent text-[11px] font-black rounded-full mb-3">
-                      יפתח בקרוב
-                    </span>
-                    <h3 className="text-2xl font-display font-black text-babun-primary">קורס דיגיטלי</h3>
+                <div className="flex justify-between items-start mb-6">
+                  <div className="w-14 h-14 bg-babun-accent/15 rounded-2xl flex items-center justify-center text-babun-primary mb-4">
+                    <Video size={28} className="text-babun-primary" />
                   </div>
-                  <div className="text-left shrink-0">
-                    <span className="text-2xl font-black text-babun-primary">1,700 ₪</span>
-                    <p className="text-xs text-zinc-500 font-light">לרוכשים ברישום מוקדם</p>
+                  <div className="text-left bg-babun-primary/5 px-4 py-2 rounded-2xl border border-babun-primary/5">
+                    <span className="text-xs text-zinc-500 font-bold block">רישום מוקדם</span>
+                    <span className="text-2xl font-black text-babun-primary font-display">1,700 ₪</span>
                   </div>
                 </div>
 
-                <p className="text-zinc-600 text-sm leading-relaxed mb-6 font-light">
+                <h3 className="text-2xl md:text-3xl font-display font-black text-babun-primary mb-3">
+                  קורס דיגיטלי
+                </h3>
+                <span className="inline-block px-3 py-1 bg-babun-accent text-babun-primary text-xs font-black rounded-full mb-6">
+                  הטבה לרישום מוקדם
+                </span>
+
+                <p className="text-zinc-600 text-base leading-relaxed mb-6 font-light">
                   המסלול המושלם ללמידה עצמית דינמית בקצב שלכם ובמכשיר שלכם. הרשמו עכשיו ללא כל התחייבות כספית כדי לשריין את הטבת הרישום המוקדם במועד ההשקה הקרוב.
                 </p>
 
-                {digitalStatus === "success" ? (
-                  <div className="p-6 bg-babun-accent/20 border border-babun-accent text-babun-primary font-bold text-center rounded-2xl text-sm animate-fade-in my-6">
-                    ✓ נרשמת בהצלחה לרישום מוקדם לקורס הדיגיטלי! נעדכן אותך ראשון ברגע ההשקה עם מחיר ההטבה.
+                <div className="space-y-3 pt-4 border-t border-zinc-100 mb-8 text-sm text-zinc-700">
+                  <div className="flex items-center gap-2">
+                    <Check size={18} className="text-babun-primary shrink-0" />
+                    <span>6 מפגשים מצולמים באיכות HD מסודרים פרקטית</span>
                   </div>
-                ) : (
-                  <form onSubmit={handleRegisterDigital} className="space-y-3 mb-6 bg-white p-5 rounded-2xl border border-zinc-200/60 shadow-inner">
-                    <span className="text-xs font-black text-babun-primary block mb-1">טופס רישום מוקדם</span>
-                    
-                    <div className="space-y-1">
-                      <input 
-                        required
-                        type="text"
-                        placeholder="שם מלא"
-                        className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 focus:border-babun-accent focus:outline-none text-right"
-                        value={digitalFormData.name}
-                        onChange={e => setDigitalFormData({...digitalFormData, name: e.target.value})}
-                      />
-                    </div>
-                    
-                    <div className="space-y-1 font-sans">
-                      <input 
-                        required
-                        type="tel"
-                        placeholder="מספר טלפון"
-                        className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 focus:border-babun-accent focus:outline-none text-right"
-                        value={digitalFormData.phone}
-                        onChange={e => setDigitalFormData({...digitalFormData, phone: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="space-y-1 font-sans">
-                      <input 
-                        required
-                        type="email"
-                        placeholder="כתובת מייל"
-                        className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 focus:border-babun-accent focus:outline-none text-right"
-                        value={digitalFormData.email}
-                        onChange={e => setDigitalFormData({...digitalFormData, email: e.target.value})}
-                      />
-                    </div>
-
-                    <button 
-                      type="submit"
-                      disabled={digitalStatus === "loading"}
-                      className="w-full bg-babun-accent text-babun-primary font-black py-2.5 rounded-lg text-xs hover:bg-babun-accent/90 transition-colors mt-2 cursor-pointer"
-                    >
-                      {digitalStatus === "loading" ? "שולח..." : "אישור ושמירת מקום ←"}
-                    </button>
-                  </form>
-                )}
+                  <div className="flex items-center gap-2">
+                    <Check size={18} className="text-babun-primary shrink-0" />
+                    <span>חומרי עזר מקצועיים ורשימות בדיקה להורדה</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check size={18} className="text-babun-primary shrink-0" />
+                    <span>שריון הנחת רישום מוקדם ללא צורך באשראי</span>
+                  </div>
+                </div>
               </div>
 
               <div>
-                <span className="block text-center text-xs text-zinc-400 font-light italic">הרשמה מוקדמת ללא צורך בכרטיס אשראי</span>
+                <button
+                  onClick={() => handleCourseSelect("digital")}
+                  className={`w-full py-4 px-6 rounded-2xl text-lg font-black transition-all duration-300 flex items-center justify-center gap-2 shadow-lg group cursor-pointer ${
+                    activeRegisterCourse === "digital"
+                      ? "bg-babun-primary text-white hover:bg-babun-primary/95"
+                      : "bg-babun-accent text-babun-primary hover:bg-babun-accent/90"
+                  }`}
+                >
+                  <span>להרשמה למסלול</span>
+                  <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                </button>
               </div>
-            </div>
+            </motion.div>
 
-            {/* CARD 3: FRONTAL COURSE */}
-            <div className="bg-zinc-50 border border-zinc-200/80 p-8 rounded-[32px] shadow-sm flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-babun-primary/15 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 left-0 h-2 bg-babun-primary" />
+            {/* Card 3: Frontal Course */}
+            <motion.div 
+              whileHover={{ y: -6 }}
+              className={`bg-white border rounded-[32px] p-8 md:p-10 shadow-[0_15px_30px_rgba(0,0,0,0.05)] flex flex-col justify-between transition-all duration-300 relative ${
+                activeRegisterCourse === "frontal" ? "ring-4 ring-babun-primary border-transparent" : "border-zinc-200/80"
+              }`}
+            >
               <div>
-                <div className="flex justify-between items-start mb-6 gap-2">
-                  <div>
-                    <span className="inline-block px-3 py-1 bg-babun-primary/10 text-babun-primary text-xs font-black rounded-full mb-3">
-                      עדכון על מחזור קרוב
-                    </span>
-                    <h3 className="text-2xl font-display font-black text-babun-primary">קורס פרונטלי</h3>
+                <div className="flex justify-between items-start mb-6">
+                  <div className="w-14 h-14 bg-babun-accent/15 rounded-2xl flex items-center justify-center text-babun-primary mb-4">
+                    <Users size={28} className="text-babun-primary" />
                   </div>
-                  <div className="text-left shrink-0">
-                    <span className="text-2xl font-black text-babun-primary">2,500 ₪</span>
-                    <p className="text-xs text-zinc-500 font-light">לרישום לעדכונים</p>
+                  <div className="text-left bg-babun-primary/5 px-4 py-2 rounded-2xl border border-babun-primary/5">
+                    <span className="text-xs text-zinc-500 font-bold block">מחזור קרוב</span>
+                    <span className="text-2xl font-black text-babun-primary font-display font-black">2,500 ₪</span>
                   </div>
                 </div>
 
-                <p className="text-zinc-600 text-sm leading-relaxed mb-6 font-light">
+                <h3 className="text-2xl md:text-3xl font-display font-black text-babun-primary mb-3">
+                  קורס פרונטלי
+                </h3>
+                <span className="inline-block px-3 py-1 bg-babun-primary/10 text-babun-primary text-xs font-black rounded-full mb-6">
+                  מפגשים אישיים וקבוצתיים
+                </span>
+
+                <p className="text-zinc-600 text-base leading-relaxed mb-6 font-light">
                   מפגשים קבוצתיים פרונטליים, דיוני עומק, למידת עמיתים ישירה ומענה פנים-אל-פנים לשאלות הלב שלכם. צרו קשר לקבלת עדכונים על קורס חדש שיפתח בקרוב.
                 </p>
 
-                {frontalStatus === "success" ? (
-                  <div className="p-6 bg-babun-primary/10 border border-babun-primary text-babun-primary font-bold text-center rounded-2xl text-sm animate-fade-in my-6">
-                    ✓ תודה רבה! פרטיך נקלטו במערכת לעדכונים על פתיחת קורס פרונטלי קרוב. נהיה בקשר בהקדם!
+                <div className="space-y-3 pt-4 border-t border-zinc-100 mb-8 text-sm text-zinc-700">
+                  <div className="flex items-center gap-2">
+                    <Check size={18} className="text-babun-primary shrink-0" />
+                    <span>קבוצה אינטימית למפגש דינמי ומענה אישי מעמיק</span>
                   </div>
-                ) : (
-                  <form onSubmit={handleRegisterFrontal} className="space-y-3 mb-6 bg-white p-5 rounded-2xl border border-zinc-200/60 shadow-inner">
-                    <span className="text-xs font-black text-babun-primary block mb-1">טופס רישום לעדכונים</span>
-                    
-                    <div className="space-y-1">
-                      <input 
-                        required
-                        type="text"
-                        placeholder="שם מלא"
-                        className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 focus:border-babun-primary focus:outline-none text-right"
-                        value={frontalFormData.name}
-                        onChange={e => setFrontalFormData({...frontalFormData, name: e.target.value})}
-                      />
-                    </div>
-                    
-                    <div className="space-y-1 font-sans">
-                      <input 
-                        required
-                        type="tel"
-                        placeholder="מספר טלפון"
-                        className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 focus:border-babun-primary focus:outline-none text-right"
-                        value={frontalFormData.phone}
-                        onChange={e => setFrontalFormData({...frontalFormData, phone: e.target.value})}
-                      />
-                    </div>
-
-                    <div className="space-y-1 font-sans">
-                      <input 
-                        required
-                        type="email"
-                        placeholder="כתובת מייל"
-                        className="w-full text-xs p-2.5 rounded-lg border border-zinc-200 focus:border-babun-primary focus:outline-none text-right"
-                        value={frontalFormData.email}
-                        onChange={e => setFrontalFormData({...frontalFormData, email: e.target.value})}
-                      />
-                    </div>
-
-                    <button 
-                      type="submit"
-                      disabled={frontalStatus === "loading"}
-                      className="w-full bg-babun-primary text-white font-black py-2.5 rounded-lg text-xs hover:bg-babun-primary/90 transition-colors mt-2 cursor-pointer"
-                    >
-                      {frontalStatus === "loading" ? "שולח..." : "אישור ושמירת פרטים ←"}
-                    </button>
-                  </form>
-                )}
+                  <div className="flex items-center gap-2">
+                    <Check size={18} className="text-babun-primary shrink-0" />
+                    <span>סימולציות משא ומתן אינטראקטיביות בשטח</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check size={18} className="text-babun-primary shrink-0" />
+                    <span>הרצאה פנים אל פנים הכוללת ניתוחי מקרים מעשיים</span>
+                  </div>
+                </div>
               </div>
 
               <div>
-                <span className="block text-center text-xs text-zinc-400 font-light italic">הירשמו כעת לעדכונים ללא כל עלות</span>
+                <button
+                  onClick={() => handleCourseSelect("frontal")}
+                  className={`w-full py-4 px-6 rounded-2xl text-lg font-black transition-all duration-300 flex items-center justify-center gap-2 shadow-lg group cursor-pointer ${
+                    activeRegisterCourse === "frontal"
+                      ? "bg-babun-primary text-white hover:bg-babun-primary/95"
+                      : "bg-babun-accent text-babun-primary hover:bg-babun-accent/90"
+                  }`}
+                >
+                  <span>להרשמה למסלול</span>
+                  <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                </button>
               </div>
-            </div>
+            </motion.div>
 
           </div>
+
+          {/* DYNAMIC REGISTRATION DETAIL STRIP CONTAINER */}
+          <AnimatePresence>
+            {activeRegisterCourse && (
+              <motion.div
+                key="register-strip"
+                initial={{ opacity: 0, height: 0, scale: 0.95 }}
+                animate={{ opacity: 1, height: "auto", scale: 1 }}
+                exit={{ opacity: 0, height: 0, scale: 0.95 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="mt-16 bg-babun-primary text-white rounded-[32px] p-8 md:p-12 shadow-[0_30px_60px_rgba(0,0,0,0.25)] border border-babun-primary/20 relative"
+                ref={formStripRef}
+              >
+                
+                {/* Visual badge and header info inside the strip */}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-white/10 pb-8 mb-8 gap-4">
+                  <div>
+                    <span className="inline-block px-3 py-1 bg-babun-accent text-babun-primary text-xs font-black rounded-full mb-3 uppercase tracking-wider">
+                      השארת פרטים מהירה
+                    </span>
+                    <h2 className="text-3xl font-display font-black">
+                      הרשמה אל:{" "}
+                      <span className="text-babun-accent">
+                        {activeRegisterCourse === "phone" && "הקורס הטלפוני"}
+                        {activeRegisterCourse === "digital" && "הקורס הדיגיטלי (רישום מוקדם)"}
+                        {activeRegisterCourse === "frontal" && "הקורס הפרונטלי (קבלת עדכונים)"}
+                      </span>
+                    </h2>
+                    <p className="text-zinc-300 mt-2 text-sm md:text-base font-light">
+                      מלאו את הפרטים הבאים ונציג שירות יחזור אליכם עם כל המידע והפרטים הדרושים לתחילת הלמידה.
+                    </p>
+                  </div>
+                  
+                  {activeRegisterCourse === "phone" && (
+                    <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex flex-col items-center justify-center text-center shrink-0">
+                      <span className="text-xs text-zinc-400 font-bold">או חייגו ישירות:</span>
+                      <a href="tel:0733454545" className="text-xl md:text-2xl font-black text-babun-accent hover:underline mt-1">
+                        073-3454545
+                      </a>
+                      <span className="text-[10px] text-zinc-400 mt-0.5">שלוחה 6-2-2 במערכת אור עולם</span>
+                    </div>
+                  )}
+                </div>
+
+                {registrationStatus === "success" ? (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="p-8 bg-babun-accent/20 border border-babun-accent/30 rounded-2xl text-center text-lg font-bold"
+                  >
+                    <div className="w-16 h-16 bg-babun-accent text-babun-primary rounded-full flex items-center justify-center mx-auto mb-4 font-black text-2xl shadow-lg">✓</div>
+                    <h3 className="text-2xl text-babun-accent font-display font-black mb-2">הרשמתך נקלטה במערכת בהצלחה!</h3>
+                    <p className="text-zinc-200 text-base font-light max-w-lg mx-auto">
+                      תודה רבה שהקדשתם לנו זמן לרכוש כלים לגלות את הרווח. נציג אישי ייצור עמכם קשר טלפוני בהקדם האפשרי.
+                    </p>
+                  </motion.div>
+                ) : (
+                  <form onSubmit={handleRegisterSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                    
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-bold text-zinc-300">שם מלא</label>
+                      <input 
+                        required
+                        type="text"
+                        placeholder="שלמה כהן"
+                        className="w-full text-base p-4 rounded-xl border border-white/10 bg-white/5 text-white focus:border-babun-accent focus:bg-white/10 focus:outline-none transition-all text-right placeholder-zinc-500 font-sans"
+                        value={formData.name}
+                        onChange={e => setFormData({...formData, name: e.target.value})}
+                      />
+                    </div>
+                    
+                    <div className="flex flex-col gap-2 font-sans">
+                      <label className="text-sm font-bold text-zinc-300">מספר טלפון לרישום</label>
+                      <input 
+                        required
+                        type="tel"
+                        placeholder="050-0000000"
+                        className="w-full text-base p-4 rounded-xl border border-white/10 bg-white/5 text-white focus:border-babun-accent focus:bg-white/10 focus:outline-none transition-all text-right placeholder-zinc-500 font-sans"
+                        value={formData.phone}
+                        onChange={e => setFormData({...formData, phone: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2 font-sans">
+                      <label className="text-sm font-bold text-zinc-300">כתובת מייל לעדכונים (רשות)</label>
+                      <input 
+                        type="email"
+                        placeholder="yourname@gmail.com"
+                        className="w-full text-base p-4 rounded-xl border border-white/10 bg-white/5 text-white focus:border-babun-accent focus:bg-white/10 focus:outline-none transition-all text-right placeholder-zinc-500 font-sans"
+                        value={formData.email}
+                        onChange={e => setFormData({...formData, email: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="md:col-span-3 flex justify-end mt-4">
+                      <button 
+                        type="submit"
+                        disabled={registrationStatus === "loading"}
+                        className="w-full md:w-auto bg-babun-accent text-babun-primary font-black py-4 px-12 rounded-xl text-lg hover:bg-babun-accent/90 transition-all duration-300 active:scale-95 shadow-xl shadow-babun-accent/20 cursor-pointer flex items-center justify-center gap-2 text-right"
+                      >
+                        <span>{registrationStatus === "loading" ? "מעבד הרשמה..." : "אישור ושמירת פרטים ←"}</span>
+                      </button>
+                    </div>
+
+                  </form>
+                )}
+
+              </motion.div>
+            )}
+          </AnimatePresence>
+
         </div>
       </section>
 

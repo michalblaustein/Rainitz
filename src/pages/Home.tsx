@@ -284,6 +284,16 @@ export default function Home() {
                 </motion.div>
               ))}
            </div>
+
+            <div className="mt-16 flex justify-center">
+               <Link 
+                  to="/courses" 
+                  className="bg-babun-accent text-babun-primary font-black py-5 px-12 rounded-babun-full text-xl transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-babun-primary/10 flex items-center gap-3"
+               >
+                  <span>להרשמה לקורס</span>
+                  <ArrowLeft size={22} className="text-babun-primary" />
+               </Link>
+            </div>
         </div>
       </section>
 
@@ -661,7 +671,7 @@ export default function Home() {
          <div className="absolute inset-0 z-0 opacity-60 select-none pointer-events-none">
             <iframe 
                className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150"
-               src="https://www.youtube.com/embed/-4PqP8IkpH0?autoplay=1&mute=1&loop=1&playlist=-4PqP8IkpH0&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
+               src="https://www.youtube.com/embed/db5sSZJhvkM?autoplay=1&mute=1&loop=1&playlist=db5sSZJhvkM&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
                allow="autoplay; encrypted-media"
                frameBorder="0"
             />

@@ -26,7 +26,7 @@ export default function Footer() {
           <div className="flex flex-col items-start">
             <h5 className="text-xl font-display font-bold text-babun-accent mb-8">השירותים שלנו</h5>
             <ul className="space-y-5 text-lg text-white/60 font-light">
-              <li><Link to="/courses" className="hover:text-babun-accent transition-colors">קורסים והרצאות</Link></li>
+              <li><Link to="/courses" className="hover:text-babun-accent transition-colors">קורסים</Link></li>
               <li><Link to="/consulting" className="hover:text-babun-accent transition-colors">פגישת ייעוץ</Link></li>
               <li><Link to="/book" className="hover:text-babun-accent transition-colors">הספר "שליש בקרקע"</Link></li>
               <li><Link to="/articles" className="hover:text-babun-accent transition-colors">מאמרים ופודקאסטים</Link></li>

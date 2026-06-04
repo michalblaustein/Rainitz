@@ -4,7 +4,7 @@ import { Menu, X, Phone, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 const navLinks = [
-  { name: "קורסים והרצאות", path: "/courses" },
+  { name: "קורסים", path: "/courses" },
   { name: "פגישת ייעוץ", path: "/consulting" },
   { name: "מחשבונים", path: "/calculators" },
   { name: "הספר", path: "/book" },
