@@ -250,7 +250,7 @@ export default function Courses() {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-babun-accent/10 rounded-full blur-[120px] pointer-events-none z-10" />
         
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 text-right">
-          <div className="max-w-4xl">
+          <div className="max-w-4xl pr-[96px]">
 
             
             <motion.h1 
@@ -523,7 +523,7 @@ export default function Courses() {
 
 
       {/* TALMUDIC QUOTE BANNER (ציטוט חז"ל - שליש בקרקע) */}
-      <section className="relative py-28 overflow-hidden text-right">
+      <section className="relative py-28 overflow-hidden text-center">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img 
@@ -535,7 +535,7 @@ export default function Courses() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="space-y-6 max-w-4xl">
+          <div className="space-y-6 max-w-4xl mx-auto">
             <h3 className="text-2xl md:text-3.5xl font-display font-black text-black leading-relaxed">
               "לעולם ישליש אדם את מעותיו: שליש בקרקע, ושליש בפרקמטיה (מסחר/עסקים), ושליש תחת ידו (מזומן נזיל)."
             </h3>
