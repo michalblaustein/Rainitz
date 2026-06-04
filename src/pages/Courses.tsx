@@ -233,7 +233,7 @@ export default function Courses() {
         <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
           <iframe
             className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150 opacity-100"
-            src="https://www.youtube.com/embed/db5sSZJhvkM?autoplay=1&mute=1&loop=1&playlist=db5sSZJhvkM&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
+            src="https://www.youtube.com/embed/VJERj5NQgNs?autoplay=1&mute=1&loop=1&playlist=VJERj5NQgNs&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
             title="Syllabus Promo Background Video"
             frameBorder="0"
             allow="autoplay; encrypted-media"
@@ -260,7 +260,7 @@ export default function Courses() {
               className="text-4xl md:text-6xl lg:text-[86px] lg:leading-[84px] font-display font-black pt-28 mb-6 tracking-tight text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]"
             >
               רוב הטעויות בנדל"ן <br />
-              <span className="text-babun-accent">קורות מחוסר ידע.</span>
+              <span className="text-white">נובעות</span> <span className="text-babun-accent">מחוסר ידע.</span>
             </motion.h1>
             
             <motion.p 
@@ -362,6 +362,15 @@ export default function Courses() {
                     <span className="block mt-1 text-babun-primary">כי ידע = כסף!</span>
                   </p>
                 </div>
+                <div className="pt-6">
+                  <button 
+                    onClick={() => scrollToSection("register-section")}
+                    className="bg-babun-accent hover:bg-babun-accent/90 text-babun-primary text-lg px-10 py-4 font-black rounded-[100px] shadow-lg shadow-babun-accent/25 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-3 group cursor-pointer w-fit"
+                  >
+                    <span className="font-display">להרשמה לקורס</span>
+                    <ArrowLeft size={18} className="group-hover:translate-x-[-6px] transition-transform duration-300" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -394,7 +403,11 @@ export default function Courses() {
                 className="bg-zinc-50 p-6 lg:p-8 rounded-babun-lg border border-zinc-100 hover:border-babun-accent hover:bg-white transition-all duration-300 group shadow-sm flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-12 h-12 rounded-full bg-babun-accent/10 flex items-center justify-center text-babun-primary mb-6 group-hover:bg-babun-accent transition-colors">
+                  <div className={`${
+                    index === 2 
+                      ? "w-9 h-9 relative right-[6px]" 
+                      : "w-12 h-12"
+                  } rounded-full bg-babun-accent/10 flex items-center justify-center text-babun-primary mb-6 group-hover:bg-babun-accent transition-colors`}>
                     <Check size={24} className="group-hover:scale-110 transition-transform" />
                   </div>
                   <h3 className="text-xl md:text-2xl font-display font-black mb-4 text-babun-primary leading-tight">
@@ -415,7 +428,7 @@ export default function Courses() {
         {/* Animated/Video Background Overlay */}
         <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
           <iframe
-            src="https://www.youtube.com/embed/db5sSZJhvkM?autoplay=1&mute=1&loop=1&playlist=db5sSZJhvkM&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
+            src="https://www.youtube.com/embed/VJERj5NQgNs?autoplay=1&mute=1&loop=1&playlist=VJERj5NQgNs&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
             className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150 opacity-100"
             title="Syllabus background video"
             frameBorder="0"
@@ -516,6 +529,16 @@ export default function Courses() {
                 <span className="block text-zinc-400 text-sm font-bold">בית שמש</span>
               </div>
             </div>
+          </div>
+
+          <div className="flex justify-center mt-12">
+            <button 
+              onClick={() => scrollToSection("register-section")}
+              className="bg-babun-accent hover:bg-babun-accent/90 text-babun-primary text-lg px-12 py-4 font-black rounded-[100px] shadow-lg shadow-babun-accent/25 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-3 group cursor-pointer"
+            >
+              <span className="font-display">להרשמה לקורס</span>
+              <ArrowLeft size={20} className="group-hover:translate-x-[-6px] transition-transform duration-300" />
+            </button>
           </div>
         </div>
       </section>

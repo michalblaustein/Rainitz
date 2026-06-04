@@ -157,22 +157,36 @@ export default function Calculators() {
   ];
 
   return (
-    <div className="bg-babun-light min-h-screen">
+    <div className="bg-babun-light min-h-screen font-sans antialiased selection:bg-babun-accent/30 selection:text-babun-primary text-right">
       {/* PAGE HERO */}
-      <section className="bg-babun-primary text-white pt-48 pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 mesh-grid opacity-20 z-0" />
+      <section className="relative bg-black text-white pt-48 pb-20 overflow-hidden">
+        {/* Background YouTube Video */}
+        <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
+          <iframe
+            className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150 opacity-100"
+            src="https://www.youtube.com/embed/i6-AD36z860?autoplay=1&mute=1&loop=1&playlist=i6-AD36z860&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
+            title="Calculators Promo Background Video"
+            frameBorder="0"
+            allow="autoplay; encrypted-media"
+          />
+          {/* Transparent click/tap block layer */}
+          <div className="absolute inset-0 bg-transparent z-[10] pointer-events-auto" />
+          {/* Black Transparent Overlay & mesh grid */}
+          <div className="absolute inset-0 bg-black/75 z-[1]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/45 z-[2]" />
+          <div className="absolute inset-0 mesh-grid opacity-5 z-[3]" />
+        </div>
+
+        {/* Ambient subtle glow */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-babun-accent/10 rounded-full blur-[120px] pointer-events-none z-10" />
+
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 text-right">
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-8 border-b border-white/10 pb-20">
+          <div className="border-b border-white/10 pb-20">
             <div className="max-w-3xl">
-              <span className="inline-block text-[11px] font-bold uppercase tracking-[0.5em] text-babun-accent mb-6 px-4 py-1.5 border border-babun-accent/20 bg-babun-accent/5">
-                Financial Reality Check
-              </span>
-              <h1 className="text-6xl md:text-8xl font-display font-black leading-[0.9] text-white mb-8 lowercase tracking-tighter">
-                Calculators.
+              <h1 className="text-6xl md:text-8xl font-display font-black leading-[0.9] text-white mb-6 tracking-tighter drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
+                מחשבונים.
               </h1>
-            </div>
-            <div className="lg:max-w-md pt-12">
-              <p className="text-white/60 text-lg leading-relaxed font-light">
+              <p className="text-white text-lg leading-relaxed font-light drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] max-w-xl">
                 חשב לפני שאתה חותם. ארבעה מחשבונים מקצועיים שיעזרו לך להבין את התמונה הפיננסית המלאה לפני כל צעד.
               </p>
             </div>

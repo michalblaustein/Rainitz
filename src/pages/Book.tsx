@@ -89,7 +89,7 @@ export default function Book() {
     <div className="bg-babun-light min-h-screen text-right font-sans" dir="rtl">
       
       {/* 1. HERO SECTION */}
-      <section className="bg-babun-primary text-white pt-32 pb-24 relative overflow-visible z-10">
+      <section className="bg-babun-primary text-white pt-32 pb-24 relative overflow-visible z-10 text-right">
         {/* Video Background */}
         <div className="absolute inset-0 z-0 opacity-40 select-none overflow-hidden pointer-events-none">
           <iframe 
@@ -105,14 +105,14 @@ export default function Book() {
           <div className="absolute inset-0 bg-gradient-to-t from-babun-primary via-transparent to-babun-primary/80 z-[2]" />
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 mt-[100px] text-center">
-          <div className="flex flex-col items-center justify-center space-y-8">
+        <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 mt-[100px] text-right">
+          <div className="flex flex-col items-start justify-start space-y-8">
             
             <motion.h1 
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-display font-black leading-tight text-white mb-4 tracking-tight text-center"
+              className="text-4xl md:text-5xl lg:text-6xl font-display font-black leading-tight text-white mb-4 tracking-tight text-right w-full"
               id="book-main-title"
             >
               הספר שמסביר לך את מה <br className="hidden md:inline" />
@@ -123,7 +123,7 @@ export default function Book() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="pt-2 flex flex-col sm:flex-row items-center gap-4 justify-center"
+              className="pt-2 flex flex-col sm:flex-row items-start gap-4 justify-start w-full"
             >
               <button 
                 onClick={() => scrollToId("checkout-form-section")}
@@ -139,17 +139,17 @@ export default function Book() {
       </section>
 
       {/* 2. OPTIONS CARDS SECTION */}
-      <section id="options-section" className="py-24 bg-white relative scroll-mt-20">
+      <section id="options-section" className="py-24 bg-white relative scroll-mt-20 text-right">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           
-          <div className="text-center mb-16">
+          <div className="text-right mb-16">
             <span className="text-babun-primary/40 text-xs font-bold uppercase tracking-widest block mb-2">
               ספר פיזי עד הבית
             </span>
             <h2 className="text-2xl md:text-4xl font-display font-black text-babun-primary" id="purchase-options-title">
               רכישת המהדורה המודפסת
             </h2>
-            <div className="w-16 h-1 bg-babun-accent mx-auto mt-4 rounded-full" />
+            <div className="w-16 h-1 bg-babun-accent mt-4 rounded-full" />
           </div>
 
           <div className="max-w-2xl mx-auto">
@@ -206,12 +206,12 @@ export default function Book() {
       </section>
 
       {/* 3. METRIC BLOCK SECTION */}
-      <section className="py-24 bg-babun-primary text-white border-y border-white/5 relative overflow-hidden">
+      <section className="py-24 bg-babun-primary text-white border-y border-white/5 relative overflow-hidden text-right">
         <div className="absolute inset-0 mesh-grid opacity-10 z-0" />
-        <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 text-center">
+        <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 text-right">
           
           <div className="space-y-4 mb-4">
-            <div className="inline-flex items-center justify-center gap-2 text-babun-accent bg-babun-accent/10 border border-babun-accent/25 px-4.5 py-1.5 rounded-full text-sm font-bold font-display uppercase tracking-widest">
+            <div className="inline-flex items-center gap-2 text-babun-accent bg-babun-accent/10 border border-babun-accent/25 px-4.5 py-1.5 rounded-full text-sm font-bold font-display uppercase tracking-widest justify-start">
               <span>תוצאות מדידות בשטח</span>
             </div>
             
@@ -222,8 +222,8 @@ export default function Book() {
             </h2>
           </div>
 
-          <div className="max-w-2xl mx-auto mt-12 bg-white/5 rounded-babun-lg p-10 border border-white/10 shadow-2xl relative">
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-5xl bg-babun-primary px-4 font-serif text-babun-accent font-bold">
+          <div className="max-w-2xl mt-12 bg-white/5 rounded-babun-lg p-10 border border-white/10 shadow-2xl relative text-right">
+            <div className="absolute -top-6 right-10 text-5xl bg-babun-primary px-4 font-serif text-babun-accent font-bold">
               "
             </div>
             
@@ -232,7 +232,7 @@ export default function Book() {
             </h3>
             
             <p className="text-lg text-white/90 leading-relaxed font-light mb-8">
-              זו השאלה שאני שומע הכי הרבה. מאנשים שרוצים לקנות דירה ראשונה. מאנשים שרוצים להשקיע ולא יודעים בדיוק איך. מאנשים שכבר קנו - ואחר כך הבינו שהיו שאלות שלא שאלו.
+              זו השאלה שאני שומע הכי הרבה. מאנשים שרוצים לקנות דירה ראשונה. מאנשים שרוצים להשקיע ולא יודעים בדיוק איך. מאנשים שכבר קנו - ואחר כך הבנו שהיו שאלות שלא שאלו.
             </p>
 
             <p className="text-xl md:text-2xl font-bold text-white border-t border-white/10 pt-8">
@@ -244,10 +244,10 @@ export default function Book() {
       </section>
 
       {/* 4. REAL NUMERICAL ESTIMATE / EXAMPLE */}
-      <section className="py-24 bg-white relative">
+      <section className="py-24 bg-white relative text-right">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           
-          <div className="text-center md:text-right max-w-3xl mb-16">
+          <div className="text-right max-w-3xl mb-16">
             <span className="text-babun-primary/40 text-xs font-bold uppercase tracking-widest block mb-2">
               ניתוח כדאיות מספרי
             </span>
@@ -343,14 +343,14 @@ export default function Book() {
       <section className="py-24 bg-babun-light border-y border-babun-primary/5">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           
-          <div className="text-center mb-16">
+          <div className="text-right mb-16">
             <span className="text-babun-accent bg-babun-primary text-xs px-3.5 py-1 rounded font-bold mb-3 inline-block">
               מה תמצא בין הדפים?
             </span>
             <h2 className="text-3xl md:text-5xl font-display font-black text-babun-primary mt-2" id="book-content-title">
               מה בספר?
             </h2>
-            <p className="text-lg text-babun-primary/60 font-light mt-3 max-w-2xl mx-auto">
+            <p className="text-lg text-babun-primary/60 font-light mt-3 max-w-2xl text-right">
               ספר חובה המחולק ל-6 חלקים מרכזיים הבונים בהדרגה את סל הכלים שלך בעולם הנדל"ן.
             </p>
           </div>
@@ -443,14 +443,14 @@ export default function Book() {
       <section className="py-24 bg-white relative">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           
-          <div className="text-center mb-16">
+          <div className="text-right mb-16">
             <span className="text-babun-primary/40 text-xs font-bold uppercase tracking-widest block mb-2">
               משובים ייצוגיים מהשטח
             </span>
             <h2 className="text-3xl md:text-5xl font-display font-black text-babun-primary" id="testimonials-title">
               מה אומרים הקוראים?
             </h2>
-            <p className="text-lg text-babun-primary/60 mt-3 font-light max-w-2xl mx-auto">
+            <p className="text-lg text-babun-primary/60 mt-3 font-light max-w-2xl text-right">
               תוצאות ומפגשים אמיתיים עם קוראי הספר "שליש בקרקע".
             </p>
           </div>
@@ -588,7 +588,7 @@ export default function Book() {
       <section className="py-24 bg-white relative">
         <div className="max-w-4xl mx-auto px-4 md:px-8">
           
-          <div className="text-center mb-16">
+          <div className="text-right mb-16">
             <span className="text-babun-accent bg-babun-primary text-xs px-3.5 py-1 rounded font-bold mb-3 inline-block">
               ריכזנו את השאלות הנפוצות
             </span>
