@@ -500,7 +500,7 @@ export default function Home() {
                <motion.div 
                  key={idx}
                  whileHover={{ y: -10 }}
-                 className={`rounded-[25px] p-10 flex flex-col items-center text-center shadow-sm border border-black/5 relative overflow-hidden ${card.bgImage ? 'text-white' : 'bg-white'}`}
+                 className={`rounded-babun-lg p-10 flex flex-col items-center text-center shadow-sm border border-black/5 relative overflow-hidden ${card.bgImage ? 'text-white' : 'bg-white'}`}
                  style={card.bgImage ? {
                    backgroundImage: `linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url(${card.bgImage})`,
                    backgroundSize: 'cover',
@@ -553,7 +553,7 @@ export default function Home() {
                   className="flex flex-col group cursor-pointer"
                 >
                   <Link to="/articles" className="flex flex-col h-full">
-                    <div className="relative aspect-[16/10] rounded-[30px] overflow-hidden mb-6">
+                    <div className="relative aspect-[16/10] rounded-babun-lg overflow-hidden mb-6">
                       <img 
                         src={getDisplayImage(item.image)} 
                         alt={item.title} 
@@ -585,7 +585,7 @@ export default function Home() {
                 </motion.div>
               ))
             ) : (
-              <div className="col-span-full bg-babun-primary/5 border border-babun-primary/10 rounded-[30px] p-12 text-center text-babun-primary/60 font-display">
+              <div className="col-span-full bg-babun-primary/5 border border-babun-primary/10 rounded-babun-lg p-12 text-center text-babun-primary/60 font-display">
                 <p className="text-lg font-bold mb-2">אין עדיין כתבות או פודקאסטים במערכת</p>
                 <p className="text-sm opacity-70">
                   כל התכנים הקודמים נמחקו לבקשתך על מנת לאפשר התחלה נקייה ומהירה מן היסוד.
@@ -618,12 +618,12 @@ export default function Home() {
                <h2 className="text-5xl md:text-7xl lg:text-[7.5rem] font-display font-black mb-6 text-white leading-[0.9]">קבל את המידע <br /><span className="text-babun-accent">לפני כולם</span></h2>
                <p className="text-white/80 text-xl md:text-2xl font-light leading-relaxed max-w-2xl">הטור השבועי, ניתוחי שוק, פינת חדשות נדל"ן - ישירות אליך.</p>
             </div>
-            <div className="w-full max-w-lg bg-black/60 backdrop-blur-xl p-12 rounded-[25px] border border-white/20 shadow-2xl">
+            <div className="w-full max-w-lg bg-black/60 backdrop-blur-xl p-12 rounded-2xl border border-white/20 shadow-2xl">
                {status === "success" ? (
                  <motion.div 
                    initial={{ opacity: 0, scale: 0.9 }}
                    animate={{ opacity: 1, scale: 1 }}
-                   className="bg-babun-accent/10 p-10 text-center rounded-[32px] border border-babun-accent/30"
+                   className="bg-babun-accent/10 p-10 text-center rounded-2xl border border-babun-accent/30"
                  >
                     <div className="text-babun-accent mb-4 flex justify-center"><CheckCircle size={48} /></div>
                     <div className="text-white text-2xl font-bold">תודה על ההרשמה!</div>

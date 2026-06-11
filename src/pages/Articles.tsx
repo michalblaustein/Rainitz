@@ -442,9 +442,9 @@ export default function Articles() {
         );
 
   return (
-    <div className="bg-babun-light min-h-screen pb-20 selection:bg-babun-accent selection:text-babun-primary">
+    <div className="bg-babun-light min-h-screen pb-0 selection:bg-babun-accent selection:text-babun-primary">
       {/* PAGE HERO */}
-      <section className="bg-babun-primary text-white pt-48 pb-20 relative overflow-hidden">
+      <section className="bg-babun-primary text-white pt-64 md:pt-[280px] pb-20 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-15 z-0"
           style={{
@@ -455,9 +455,6 @@ export default function Articles() {
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 text-right">
           <div className="border-b border-white/10 pb-20">
             <div className="space-y-6">
-              <span className="text-babun-accent font-mono text-xs uppercase tracking-[0.2em] font-semibold">
-                MEDIA & INSIGHTS
-              </span>
               <h1 className="text-4xl md:text-6xl lg:text-[76px] font-display font-black leading-[1.1] text-white">
                 בנדל"ן, <br className="hidden md:block" />
                 הידע הוא הנכס{" "}
@@ -516,8 +513,9 @@ export default function Articles() {
       >
         {/* Dynamic Category Filtering Buttons */}
         <div
-          className="flex flex-row-reverse flex-wrap items-center justify-center gap-3 md:gap-4 mb-20"
+          className="flex flex-row flex-wrap items-center justify-center gap-3 md:gap-4 mb-20"
           id="category-filter-bar"
+          dir="rtl"
         >
           {mediaCategories.map((cat) => {
             const Icon = cat.icon;
@@ -527,19 +525,20 @@ export default function Articles() {
                 key={cat.id}
                 id={`cat-btn-${cat.id}`}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`flex items-center gap-2.5 px-6 py-4 rounded-babun-md font-display font-bold text-sm md:text-base transition-all duration-300 cursor-pointer border ${
+                className={`flex flex-row items-center gap-2.5 px-6 py-4 rounded-babun-md font-display font-bold text-sm md:text-base transition-all duration-300 cursor-pointer border ${
                   isActive
                     ? "bg-babun-primary text-white border-babun-primary shadow-xl shadow-babun-primary/15"
                     : "bg-white text-babun-primary/70 hover:text-babun-primary border-babun-primary/10 hover:border-babun-accent/50 shadow-md shadow-babun-primary/[0.02]"
                 }`}
+                dir="rtl"
               >
-                <span>{cat.name}</span>
                 <Icon
                   size={18}
                   className={
                     isActive ? "text-babun-accent" : "text-babun-primary/55"
                   }
                 />
+                <span>{cat.name}</span>
               </button>
             );
           })}
@@ -556,14 +555,6 @@ export default function Articles() {
         ) : (
           /* ARTICLES GRID CONTAINER */
           <section className="relative">
-            <div className="flex items-center justify-between flex-row-reverse mb-16 border-b border-babun-primary/5 pb-6">
-              <h3 className="text-3xl md:text-4xl font-display font-black text-babun-primary tracking-tight">
-                הכי חדשים.
-              </h3>
-              <div className="hidden md:flex items-center gap-4 text-xs font-bold opacity-30 tracking-[0.2em] font-mono">
-                {filteredArticles.length} ITEMS FOUND
-              </div>
-            </div>
 
             {filteredArticles.length === 0 ? (
               <div className="bg-white rounded-babun-md p-16 text-center border border-babun-primary/5 shadow-sm">
@@ -780,128 +771,140 @@ export default function Articles() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                {filteredArticles.map((article, i) => (
+              <div className="space-y-16">
+                {filteredArticles.length > 0 && (
                   <motion.div
-                    key={article.id || i}
                     layout
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -15 }}
                     transition={{ duration: 0.4 }}
-                    className="group cursor-pointer text-right flex flex-col justify-between"
+                    className="group cursor-pointer text-right flex flex-col lg:flex-row gap-8 lg:gap-12 bg-transparent p-0 transition-all"
+                    onClick={() => setSelectedArticle(filteredArticles[0])}
                   >
-                    <div onClick={() => setSelectedArticle(article)}>
-                      {/* Card Media Wrapper - Original Scanner clipping view */}
-                      <div className="aspect-video bg-babun-primary overflow-hidden rounded-babun-lg mb-6 relative shadow-lg shadow-babun-primary/5">
-                        <ImageWithSkeleton
-                          src={getDisplayImage(article.image)}
-                          className="w-full h-full object-cover grayscale brightness-[0.8] group-hover:scale-105 group-hover:grayscale-0 transition-all duration-700"
-                          referrerPolicy="no-referrer"
-                          alt={article.title}
-                        />
-                        {/* Original clipping visual element overlays */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-babun-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <div className="absolute top-4 right-4 bg-babun-accent text-babun-primary font-display font-black px-4 py-1.5 text-[10px] uppercase tracking-widest shadow-md">
-                          {article.category}
-                        </div>
-                        <div className="absolute bottom-4 left-4 bg-babun-primary/80 backdrop-blur-xs text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Eye size={16} className="text-babun-accent" />
-                        </div>
+                    <div className="w-full lg:w-1/2 aspect-video bg-babun-primary overflow-hidden rounded-babun-xl relative shadow-lg shadow-babun-primary/5 shrink-0">
+                      <ImageWithSkeleton
+                        src={getDisplayImage(filteredArticles[0].image)}
+                        className="w-full h-full object-cover grayscale brightness-[0.8] group-hover:scale-105 group-hover:grayscale-0 transition-all duration-700"
+                        referrerPolicy="no-referrer"
+                        alt={filteredArticles[0].title}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-babun-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute top-4 right-4 bg-babun-accent text-babun-primary font-display font-black px-4 py-1.5 text-[10px] uppercase tracking-widest shadow-md">
+                        {filteredArticles[0].category}
                       </div>
-                      <div className="flex items-center gap-2 justify-end text-xs font-bold opacity-30 mb-3 font-mono">
-                        <span>{article.date}</span>
-                        <Calendar size={13} />
+                      <div className="absolute bottom-4 left-4 bg-babun-primary/80 backdrop-blur-xs text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Eye size={16} className="text-babun-accent" />
                       </div>
-                      <h4 className="text-2xl font-display font-bold text-babun-primary mb-4 group-hover:text-babun-accent transition-colors leading-tight line-clamp-2">
-                        {article.title}
-                      </h4>
                     </div>
+                    <div className="flex-1 flex flex-col justify-between py-2">
+                      <div>
+                        <div className="flex items-center gap-2 justify-end text-xs font-bold opacity-30 mb-4 font-mono">
+                          <span>{filteredArticles[0].date}</span>
+                          <Calendar size={13} />
+                        </div>
+                        <h4 className="text-3xl md:text-4xl lg:text-5xl font-display font-black text-babun-primary mb-6 group-hover:text-babun-accent transition-colors leading-tight">
+                          {filteredArticles[0].title}
+                        </h4>
+                        {filteredArticles[0].content && (
+                          <p className="text-babun-primary/60 text-sm md:text-base font-light line-clamp-3 leading-relaxed">
+                            {filteredArticles[0].content.replace(/[#*`]/g, '')}
+                          </p>
+                        )}
+                        <div className="mt-8 flex items-center justify-end gap-2 text-babun-accent font-display font-bold text-sm group-hover:translate-x-[-4px] transition-transform">
+                          <span>קרא עוד</span>
+                          <ArrowLeft size={16} />
+                        </div>
+                      </div>
 
-                    <div className="flex items-center justify-between mt-2 pt-4 border-t border-babun-primary/5">
-                      {isAdminMode && article.id && (
-                        <button
-                          onClick={() =>
-                            handleDeleteArticle(article.id, article.title)
-                          }
-                          className="text-red-500 hover:text-red-700 p-2 cursor-pointer rounded-babun-sm hover:bg-red-50 transition-colors"
-                          title="מחק כתבה"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                      {isAdminMode && filteredArticles[0].id && (
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-babun-primary/5">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteArticle(filteredArticles[0].id, filteredArticles[0].title);
+                            }}
+                            className="text-red-500 hover:text-red-700 p-2 cursor-pointer rounded-babun-sm hover:bg-red-50 transition-colors"
+                            title="מחק כתבה"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       )}
-                      <button
-                        onClick={() => setSelectedArticle(article)}
-                        className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-babun-primary/45 group-hover:text-babun-accent transition-colors mr-auto"
-                      >
-                        קרא צילום וטקסט חי{" "}
-                        <ChevronRight size={14} className="rotate-180" />
-                      </button>
                     </div>
                   </motion.div>
-                ))}
+                )}
+
+                {filteredArticles.length > 1 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16 mt-16 pt-16 border-t border-babun-primary/5">
+                    {filteredArticles.slice(1).map((article, i) => (
+                      <motion.div
+                        key={article.id || i}
+                        layout
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -15 }}
+                        transition={{ duration: 0.4, delay: i * 0.05 }}
+                        className="group cursor-pointer text-right flex flex-col gap-6 bg-transparent p-0 transition-all"
+                        onClick={() => setSelectedArticle(article)}
+                      >
+                        {/* Thumbnail Cover */}
+                        <div className="w-full aspect-video bg-babun-primary overflow-hidden rounded-babun-lg relative shadow-md shrink-0">
+                          <ImageWithSkeleton
+                            src={getDisplayImage(article.image)}
+                            className="w-full h-full object-cover grayscale brightness-[0.8] group-hover:scale-105 group-hover:grayscale-0 transition-all duration-700"
+                            referrerPolicy="no-referrer"
+                            alt={article.title}
+                          />
+                          <div className="absolute top-3 right-3 bg-babun-accent text-babun-primary font-display font-medium px-2 py-0.5 text-[9px] uppercase tracking-wider shadow-sm">
+                            {article.category}
+                          </div>
+                        </div>
+
+                        {/* Info contents */}
+                        <div className="flex-1 w-full flex flex-col justify-between py-1">
+                          <div>
+                            <div className="flex items-center gap-2 justify-end text-[11px] font-bold opacity-30 mb-2.5 font-mono">
+                              <span>{article.date}</span>
+                              <Calendar size={12} />
+                            </div>
+                            <h5 className="text-xl font-display font-bold text-babun-primary group-hover:text-babun-accent transition-colors leading-snug line-clamp-2">
+                              {article.title}
+                            </h5>
+                            {article.content && (
+                              <p className="text-babun-primary/50 text-xs mt-3 line-clamp-2 font-light leading-relaxed">
+                                {article.content.replace(/[#*`]/g, '')}
+                              </p>
+                            )}
+                            <div className="mt-4 flex items-center justify-end gap-1.5 text-babun-accent font-display font-bold text-xs group-hover:translate-x-[-3px] transition-transform">
+                              <span>קרא עוד</span>
+                              <ArrowLeft size={14} />
+                            </div>
+                          </div>
+
+                          {isAdminMode && article.id && (
+                            <div className="flex items-center justify-between mt-4 pt-2 border-t border-babun-primary/5 border-dashed">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteArticle(article.id, article.title);
+                                }}
+                                className="text-red-500 hover:text-red-700 p-1.5 cursor-pointer rounded-babun-sm hover:bg-red-50 transition-colors"
+                                title="מחק כתבה"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </section>
         )}
 
-        {/* COMPREHENSIVE UPDATE BULLETIN / FEED */}
-        <section className="mt-40 bg-babun-primary text-white p-12 md:p-20 rounded-babun-lg relative overflow-hidden">
-          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16 text-right">
-            <div className="flex-1 w-full">
-              <h3 className="text-3xl font-display font-black text-babun-accent mb-10 leading-none">
-                חדשות נדל"ן - חם מהשטח
-              </h3>
-              <div className="space-y-6">
-                {[
-                  {
-                    text: "עליית ריבית בנק ישראל: מה השפעתה המיידית על גובה המשכנתא?",
-                    desc: "מדריך מעשי בעקבות הכרזת הנגיד האחרונה.",
-                  },
-                  {
-                    text: "מכרזי מחיר מטרה החדשים בפריפריה החרדית - כדאיות מול סיכונים",
-                    desc: 'סקר נדל"ני מקיף על פרויקטים תכנוניים באלעד והדרום.',
-                  },
-                  {
-                    text: "התחדשות עירונית בבני ברק: פניה של עיר התורה והעתיד",
-                    desc: "האישורים החדשים, הסכמי גג וזכויות הדיירים.",
-                  },
-                ].map((news, i) => (
-                  <div
-                    key={i}
-                    className="border-b border-white/5 pb-6 group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-4 justify-end">
-                      <span className="text-lg font-bold text-white group-hover:text-babun-accent transition-colors text-right leading-snug">
-                        {news.text}
-                      </span>
-                      <ExternalLink
-                        size={16}
-                        className="text-babun-accent opacity-20 group-hover:opacity-100 transition-opacity"
-                      />
-                    </div>
-                    <p className="text-white/40 text-xs mt-1 leading-relaxed text-right">
-                      {news.desc}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="flex-1 max-w-sm text-right">
-              <div className="text-5xl font-display font-black text-babun-accent mb-6 leading-none tracking-tight">
-                REAL TIME.
-              </div>
-              <p className="text-white/40 text-sm leading-relaxed">
-                אנחנו דואגים שתהיו מעודכנים במידע הכי חם, מהימן וקריטי בשוק
-                הנדל"ן החרדי והכללי בישראל ישירות משטח המעשה.
-              </p>
-            </div>
-          </div>
-          <Newspaper
-            className="absolute -bottom-10 -right-10 text-white/5 pointer-events-none"
-            size={250}
-          />
-        </section>
       </div>
 
       {/* FLOATING ADMIN LOGIN BUTTON */}
@@ -916,15 +919,14 @@ export default function Articles() {
       )}
 
       {/* FINAL INTERACTIVE CALL-TO-ACTION */}
-      <section className="py-40 text-center bg-white border-t border-babun-primary/5 mt-40">
+      <section className="py-40 text-center bg-black mt-40 mb-0">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-4xl md:text-6xl font-display font-black text-babun-primary mb-8 leading-tight">
-            לא בטוח מאיפה להתחיל?
+          <h2 className="text-4xl md:text-6xl font-display font-black text-white mb-8 leading-tight">
+            שאלה אחת יכולה לחסוך לך <br className="hidden md:block" />
+            <span className="text-babun-accent">עשרות אלפי שקלים.</span>
           </h2>
-          <p className="text-lg md:text-xl text-babun-primary/60 font-light mb-12 max-w-2xl mx-auto leading-relaxed">
-            שאלה אחת נכונה שווה יותר מעשרה ייעוצים לא ממוקדים. פגוש את השטח
-            בצורה מושכלת. 60 דקות בלבד. ותצא עם תוכנית פיננסית סלולה לעסקה הבאה
-            שלך.
+          <p className="text-lg md:text-xl text-white/70 font-light mb-12 max-w-2xl mx-auto leading-relaxed">
+            פגישת ייעוץ אישית עם יעקב רייניץ. שעה אחת. תשובות ישירות. בלי אינטרסים נסתרים.
           </p>
           <Link
             to="/consulting"
@@ -932,6 +934,7 @@ export default function Articles() {
           >
             קביעת פגישה ←
           </Link>
+          <div className="w-24 h-[1px] bg-white/20 mx-auto mt-16" />
         </div>
       </section>
 

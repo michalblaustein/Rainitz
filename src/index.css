@@ -11,11 +11,11 @@
   --color-babun-light: #ffffff;
   --color-babun-gold: #fee000;
   
-  --radius-babun-sm: 10px;
-  --radius-babun-md: 20px;
-  --radius-babun-lg: 30px;
-  --radius-babun-xl: 50px;
-  --radius-babun-full: 100px;
+  --radius-babun-sm: 8px;
+  --radius-babun-md: 14px;
+  --radius-babun-lg: 16px;
+  --radius-babun-xl: 24px;
+  --radius-babun-full: 9999px;
 }
 
 @layer base {
