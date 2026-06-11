@@ -2,7 +2,7 @@ import { motion, useMotionValue, useTransform, animate } from "motion/react";
 import { ArrowLeft, ArrowRight, CheckCircle, Target, Shield, BookOpen, Users, MessageCircle, BarChart3, Presentation, Mail, Send, Star, MoveLeft, Phone, CreditCard, ShieldAlert } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 
 
@@ -50,6 +50,45 @@ export default function Home() {
   const [status, setStatus] = useState<null | "loading" | "success">(null);
   const [courseEmail, setCourseEmail] = useState("");
   const [courseStatus, setCourseStatus] = useState<null | "loading" | "success">(null);
+
+  const [latestMedia, setLatestMedia] = useState<any[]>([]);
+  const [loadingMedia, setLoadingMedia] = useState(true);
+
+  useEffect(() => {
+    const q = query(
+      collection(db, "articles"),
+      orderBy("createdAt", "desc"),
+      limit(4)
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const docs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setLatestMedia(docs);
+      setLoadingMedia(false);
+    }, (error) => {
+      console.error("Failed to load homepage media:", error);
+      setLoadingMedia(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const getDisplayImage = (url: string) => {
+    if (!url) return "";
+    const driveFileRegex = /\/file\/d\/([a-zA-Z0-9_-]+)/;
+    const driveIdRegex = /[?&]id=([a-zA-Z0-9_-]+)/;
+
+    const fileMatch = url.match(driveFileRegex);
+    const idMatch = url.match(driveIdRegex);
+
+    const fileId = fileMatch ? fileMatch[1] : idMatch ? idMatch[1] : null;
+
+    if (fileId) {
+      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w600`;
+    }
+    return url;
+  };
 
   const handleNewsletter = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -502,165 +541,57 @@ export default function Home() {
 
           {/* Articles Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Article 1 */}
-            <motion.a 
-              href="https://www.youtube.com/watch?v=WEhvhlX_UhY"
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10 }}
-              className="flex flex-col group cursor-pointer"
-            >
-              <div className="relative aspect-[16/10] rounded-[30px] overflow-hidden mb-6">
-                <img 
-                  src="https://img.youtube.com/vi/WEhvhlX_UhY/hqdefault.jpg" 
-                  alt="נדל״ן בשלושה - פרק חדש" 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute top-4 right-4 z-20">
-                  <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-babun-primary text-[10px] uppercase font-bold tracking-widest rounded-full shadow-sm">
-                    וידאו
-                  </span>
-                </div>
-                <div className="absolute bottom-4 left-4">
-                  <div className="w-10 h-10 bg-babun-accent text-babun-primary rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:rotate-[-45deg]">
-                    <ArrowLeft size={20} />
-                  </div>
-                </div>
+            {latestMedia.length > 0 ? (
+              latestMedia.map((item, index) => (
+                <motion.div
+                  key={item.id || index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -10 }}
+                  className="flex flex-col group cursor-pointer"
+                >
+                  <Link to="/articles" className="flex flex-col h-full">
+                    <div className="relative aspect-[16/10] rounded-[30px] overflow-hidden mb-6">
+                      <img 
+                        src={getDisplayImage(item.image)} 
+                        alt={item.title} 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute top-4 right-4 z-20">
+                        <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-babun-primary text-[10px] uppercase font-bold tracking-widest rounded-full shadow-sm">
+                          {item.category || "כתבה"}
+                        </span>
+                      </div>
+                      <div className="absolute bottom-4 left-4">
+                        <div className="w-10 h-10 bg-babun-accent text-babun-primary rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:rotate-[-45deg]">
+                          <ArrowLeft size={20} />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-2 text-right">
+                      <div className="flex items-center justify-end gap-2 text-babun-primary/40 font-bold text-xs mb-3">
+                        <span>{item.date}</span>
+                        <div className="w-1 h-1 bg-babun-primary/40 rounded-full" />
+                        <span>יעקב רייניץ</span>
+                      </div>
+                      <h3 className="text-xl font-display font-black text-babun-primary leading-tight group-hover:text-babun-accent transition-colors line-clamp-2">
+                        {item.title}
+                      </h3>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full bg-babun-primary/5 border border-babun-primary/10 rounded-[30px] p-12 text-center text-babun-primary/60 font-display">
+                <p className="text-lg font-bold mb-2">אין עדיין כתבות או פודקאסטים במערכת</p>
+                <p className="text-sm opacity-70">
+                  כל התכנים הקודמים נמחקו לבקשתך על מנת לאפשר התחלה נקייה ומהירה מן היסוד.
+                </p>
               </div>
-              <div className="px-2">
-                <div className="flex items-center gap-2 text-babun-primary/40 font-bold text-xs mb-3">
-                  <span>יעקב רייניץ</span>
-                  <div className="w-1 h-1 bg-babun-primary/40 rounded-full" />
-                  <span>28 באפר׳ 2026</span>
-                </div>
-                <h3 className="text-xl font-display font-black text-babun-primary leading-tight group-hover:text-babun-accent transition-colors line-clamp-2">
-                  נדל״ן בשלושה: פרק חדש עם יעקב רייניץ
-                </h3>
-              </div>
-            </motion.a>
-
-            {/* Article 2 */}
-            <motion.a 
-              href="https://www.doscast.co.il/episode/12896"
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              whileHover={{ y: -10 }}
-              className="flex flex-col group cursor-pointer"
-            >
-              <div className="relative aspect-[16/10] rounded-[30px] overflow-hidden mb-6">
-                <img 
-                  src="https://lh3.googleusercontent.com/d/1uquDwMRs3_fuhwfNSMKkAIWLjz1qKyCg" 
-                  alt="Financial Guidance" 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute top-4 right-4 z-20">
-                  <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-babun-primary text-[10px] uppercase font-bold tracking-widest rounded-full shadow-sm">
-                    פודקאסט
-                  </span>
-                </div>
-                <div className="absolute bottom-4 left-4">
-                  <div className="w-10 h-10 bg-white text-babun-primary rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:rotate-[-45deg]">
-                    <ArrowLeft size={20} />
-                  </div>
-                </div>
-              </div>
-              <div className="px-2">
-                <div className="flex items-center gap-2 text-babun-primary/40 font-bold text-xs mb-3">
-                  <span>יעקב רייניץ</span>
-                  <div className="w-1 h-1 bg-babun-primary/40 rounded-full" />
-                  <span>18 מאי 2024</span>
-                </div>
-                <h3 className="text-xl font-display font-black text-babun-primary leading-tight group-hover:text-babun-accent transition-colors line-clamp-3">
-                  הסודות של הנדל"ן החרדי: עם עו"ד נתן רוזנבלט
-                </h3>
-              </div>
-            </motion.a>
-
-            {/* Article 3 */}
-            <motion.a 
-              href="https://plus-m.co.il/podcast/%D7%99%D7%A2%D7%A7%D7%91-%D7%A8%D7%99%D7%99%D7%A0%D7%99%D7%A5-%D7%A0%D7%93%D7%9C%D7%9F/"
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              whileHover={{ y: -10 }}
-              className="flex flex-col group cursor-pointer"
-            >
-              <div className="relative aspect-[16/10] rounded-[30px] overflow-hidden mb-6">
-                <img 
-                  src="https://lh3.googleusercontent.com/d/1vaDMSOrPbWERhQojXQrcd2rCM6c-qwoY" 
-                  alt="Market Trends" 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute top-4 right-4 z-20">
-                  <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-babun-primary text-[10px] uppercase font-bold tracking-widest rounded-full shadow-sm">
-                    פודקאסט
-                  </span>
-                </div>
-                <div className="absolute bottom-4 left-4">
-                  <div className="w-10 h-10 bg-babun-accent text-babun-primary rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:rotate-[-45deg]">
-                    <ArrowLeft size={20} />
-                  </div>
-                </div>
-              </div>
-              <div className="px-2">
-                <div className="flex items-center gap-2 text-babun-primary/40 font-bold text-xs mb-3">
-                  <span>מערכת פלוס מינוס</span>
-                  <div className="w-1 h-1 bg-babun-primary/40 rounded-full" />
-                  <span>12 מאי 2024</span>
-                </div>
-                <h3 className="text-xl font-display font-black text-babun-primary leading-tight group-hover:text-babun-accent transition-colors line-clamp-2">
-                  פלוס מינוס: יעקב רייניץ על השקעות נדל"ן ומצוקת הדיור
-                </h3>
-              </div>
-            </motion.a>
-
-            {/* Article 4 */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              whileHover={{ y: -10 }}
-              className="flex flex-col group"
-            >
-              <div className="relative aspect-[16/10] rounded-[30px] overflow-hidden mb-6">
-                <img 
-                  src="https://images.unsplash.com/photo-1434626881859-194d67b2b86f?auto=format&fit=crop&q=60&w=600" 
-                  alt="Mortgage Tips" 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute top-4 right-4 z-20">
-                  <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-babun-primary text-[10px] uppercase font-bold tracking-widest rounded-full shadow-sm">
-                    כתבה
-                  </span>
-                </div>
-                <div className="absolute bottom-4 left-4">
-                  <div className="w-10 h-10 bg-white text-babun-primary rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:rotate-[-45deg]">
-                    <ArrowLeft size={20} />
-                  </div>
-                </div>
-              </div>
-              <div className="px-2">
-                <div className="flex items-center gap-2 text-babun-primary/40 font-bold text-sm mb-3 text-xs">
-                  <span>מערכת רייניץ</span>
-                  <div className="w-1 h-1 bg-babun-primary/40 rounded-full" />
-                  <span>05 מאי 2024</span>
-                </div>
-                <h3 className="text-xl font-display font-black text-babun-primary leading-tight group-hover:text-babun-accent transition-colors line-clamp-2">
-                  5 טעויות נפוצות של רוכשי דירה ראשונה ואיך להימנע מהן
-                </h3>
-              </div>
-            </motion.div>
+            )}
           </div>
         </div>
       </section>

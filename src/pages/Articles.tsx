@@ -57,133 +57,7 @@ const mediaCategories = [
 ];
 
 // Richly-detailed base seed articles (with copyable, readable Hebrew text)
-const seedArticles = [
-  {
-    id: "seed-1",
-    title: "השקעה בקרקע חקלאית: הזדמנות אמיתית או הרפתקה פיננסית מסוכנת?",
-    category: "טור שבועי",
-    categoryId: "weekly",
-    date: "01.06.2026",
-    image:
-      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=60&w=600",
-    content: `### שליש בקרקע - ניתוח כלכלי מקיף ומציאותי של השקעות בקרקעות בישראל
- 
-ההבטחה הגדולה של משווקי הקרקעות החקלאיות נשמעת מפתה ביותר: *"רכשו היום מגרש חקלאי במחיר רצפה של כמה עשרות אלפי שקלים, וכאשר הקרקע תופשר לבנייה ותשונה ייעודה למגורים - ערכה יזנק במאות אחוזים והעתיד שלכם מובטח"*. אך האם במבחן המציאות מדובר אכן בהשקעה נבונה או בסיכון שאינו מחושב?
- 
-בטור שבועי זה נעמיק בסוגיה הזו מול ניסיון של 18 שנה בשטח, ונדון בארבעת הכללים הקריטיים שכל משקיע חייב לבדוק לפני שהוא שם את כספו בקרקע:
- 
-#### 1. המשוכה השמאית: 'תקן 21'
-תקן 21 הוא המסמך הרשמי היחיד שעליו אתם יכולים להסתמך. מדובר בהנחיה ממשלתית המחייבת שמאים להעריך באופן אובייקטיבי ושקוף את סיכויי ההפשרה של הקרקע, את הזמן הנדרש להפשרה המשוערת, ואת שווי המגרש המשוער במצבו הנוכחי והעתידי. אם חברת השיווק מסרבת להציג לכם דוח תקן 21 מעודכן למגרש הספציפי - **פיסחו על העסקה מיד.**
- 
-#### 2. קונספט תוחלת הזמן
-קרקע חקלאית אינה דירה. היא אינה מניבה שכר דירה חודשי, והכסף שלכם 'נעול' בתוכה ללא נזילות. תהליכי תכנון ובנייה בישראל נמתחים בממוצע על פני 12 עד 25 שנים. המשמעות היא שאתם צריכים להשקיע אך ורק כסף חופשי שאינכם זקוקים לו בעתיד הנראה לעין.
- 
-#### 3. היטלי השבחה וזכויות הפקעה
-אנשים נוטים לשכוח שההפרש בין מחיר הקנייה לשווי לאחר הפשרה לא נכנס כולו לכיס. עם קבלת תוכנית המתאר החדשה ואישור הבנייה, המשקיע ייאלץ לשלם **היטל השבחה בגובה 50% מההשבחה הריאלית של הקרקע** לבסיס הרשות המקומית, בנוסף לעלויות פיתוח וסלילת כבישים כבדות. מעבר לכך, המדינה רשאית להפקיע עד 40% מהחלקה לטובת כבישים, פארקים, בתי כנסת ומוסדות חינוך, ללא תשלום פיצוי.
- 
-#### 4. ההמלצה להלכה ולמעשה
-קרקע חקלאית יכולה להיות רכיב מעולה והורשה כלכלית לילדים, בתנאי שהבדיקות המשפטיות והתכנוניות נעשו כהלכה ואינכם נשענים על מצגות שיווקיות נוצצות או הבטחות בעל פה. קבלו ייעוץ אישי חסר פניות לפני חתימה.`,
-    link: "#",
-  },
-  {
-    id: "seed-2",
-    title: "תכנון משכנתא נבון בשנת 2026: להשיל עשרות אלפים מחוב הבנק",
-    category: "כתבות ומאמרים",
-    categoryId: "articles",
-    date: "25.05.2026",
-    image:
-      "https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?auto=format&fit=crop&q=60&w=600",
-    content: `### המדריך להלוואה החשובה בחייכם: דיוק בתמהילים פיננסיים
- 
-רכישת דירה היא ללא ספק העסקה הפיננסית הגדולה והמשמעותית ביותר שמרבית המשפחות יעשו במהלך חייהן הבוגרים. למרות זאת, רבים ניגשים לנטילת משכנתא מתוך חוסר הבנה בסיסי, תוך הסתמכות כמעט עיוורת על 'יועץ המשכנתאות' המועסק על ידי הבנק עצמו - שכל מטרתו היא למקסם את רווחיות התעריף של מוסד הבנקאות.
- 
-ריכזנו עבורכם שלושה עוגנים בלעדיים לתכנון משכנתא אחראי וכלכלי:
- 
-#### א. יחס ההחזר מול הדנא של משק הבית
-מרבית האנשים בודקים רק כמה הבנק יאפשר להם להחזיר בחודש (עד 40% מההכנסה המוכרת). דרך עבודה נבונה מציעה שלא לעבור את ה-25% מההכנסה נטו האמיתית, תוך התחשבות באינפלציה ובשינויים עתידיים בצרכי המשפחה (לידות, הוצאות לימוד וכו').
- 
-#### ב. אשליית מסלול הפריים
-שילוב מסלול פריים נראה לעיתים אטרקטיבי בטווח הקצר, אך בעת סביבת אינפלציה וריביות עולות יש להימנע מהלוואות בלון קטלניות בריביות משתנות ולוודא שהחזר המשכנתא החודשי שומר על בריאותו הכלכלית של משק הבית שלכם.
- 
-#### ג. שאלה אחת נכונה בשטח
-הכלים והשאלות שחובה לשאול כל יזם, מתווך ומשווק לפני שיוצאים לדרך כדי להגן על כספכם.
- 
-*הקשיבו לפרק המלא וצפו בטיפים המעשיים שישמרו על ההון העצמי שלכם ויהפכו אותו לכח קנייה מנצח.*`,
-    link: "https://www.youtube.com/watch?v=WEhvhlX_UhY",
-  },
-  {
-    id: "seed-3",
-    title: "הבורסה | שמילי אונגר שלא הכרתם | זמר, יוצר, וביטוח",
-    category: "פודקאסטים",
-    categoryId: "podcast",
-    date: "11/05/2026",
-    duration: "01:31",
-    episodeNum: 12,
-    image: "https://img.youtube.com/vi/FOfx6m9gG2Q/hqdefault.jpg",
-    content: `### הבורסה WITH יוסף מינצברג - פרק 12: שמילי אונגר שלא הכרתם
- 
-בפרק מיוחד זה, מארח יוסף מינצברג את הזמר החסידי הבינלאומי שמילי אונגר לשיחה פתוחה ויוצאת דופן על מוזיקה, יצירה, וניהול פיננסי בעולם האמנות במגזר החרדי והכללי.`,
-    link: "https://www.youtube.com/watch?v=FOfx6m9gG2Q",
-  },
-  {
-    id: "seed-4",
-    title: "הבורסה | עם ניר הירשמן | האם ישראל מפספסת את מהפכת המאות?",
-    category: "פודקאסטים",
-    categoryId: "podcast",
-    date: "13/04/2026",
-    duration: "01:05",
-    episodeNum: 11,
-    image: "https://img.youtube.com/vi/psnj6fJJlRE/hqdefault.jpg",
-    content: `### הבורסה עם יוסף מינצברג - פרק 11: האם ישראל מפספסת את מהפכת הקריפטו?
- 
-שיחה מרתקת עם יועץ הבלוקצ'יין והאסטרטג ניר הירשמן על הרגולציה בישראל, פוטנציאל הצמיחה של הקריפטו והסכנות והסיכויים הנלווים אליו.`,
-    link: "https://www.youtube.com/watch?v=psnj6fJJlRE",
-  },
-  {
-    id: "seed-5",
-    title: 'הבורסה | עם ספי זינגר יו"ר רשות ניירות ערך',
-    category: "פודקאסטים",
-    categoryId: "podcast",
-    date: "09/03/2026",
-    duration: "01:03",
-    episodeNum: 10,
-    image: "https://img.youtube.com/vi/WEhvhlX_UhY/hqdefault.jpg",
-    content: `### הבורסה עם יוסף מינצברג - פרק 10: ספי זינגר יו"ר רשות ניירות ערך
- 
-ספי זינגר, יו"ר רשות ניירות ערך בישראל, בראיון בלעדי ומפוכח על הרגולציה וההנגשה של שוק ההון למגזר החרדי והכללי.`,
-    link: "https://www.youtube.com/watch?v=WEhvhlX_UhY",
-  },
-  {
-    id: "seed-6",
-    title:
-      "קרן ההשתלמות וקופות גמל בניהול אישי - IRA | יוסף מינצברג עם תמר שלו",
-    category: "פודקאסטים",
-    categoryId: "podcast",
-    date: "26/01/2026",
-    duration: "01:20",
-    episodeNum: 9,
-    image: "https://img.youtube.com/vi/7DEf5WmqTWY/hqdefault.jpg",
-    content: `### הבורסה עם יוסף מינצברג - פרק 9: קרן ההשתלמות וקופות גמל בניהול אישי - IRA
- 
-כיצד ניתן למנף את החסכונות הפנסיוניים שלכם בצורה אופטימלית בשיטת IRA? תמר שלו מצצרפת ליוסף מינצברג לסקירה מקצועית ומעמיקה.`,
-    link: "https://www.youtube.com/watch?v=7DEf5WmqTWY",
-  },
-  {
-    id: "seed-7",
-    title:
-      "יוסף מינצברג עם רפאל וואהל | כלכלה חרדית עצמאית - בין ברוקלין לבני ברק",
-    category: "פודקאסטים",
-    categoryId: "podcast",
-    date: "03/12/2025",
-    duration: "01:33",
-    episodeNum: 6,
-    image: "https://img.youtube.com/vi/7yseEP-6D5Q/hqdefault.jpg",
-    content: `### הבורסה עם יוסף מינצברג - פרק 6: כלכלה חרדית עצמאית - כמו באמריקה (בין ברוקלין לבני ברק)
- 
-הפרק המדובר מהפודקאסט "הבורסה" (בהגשת יוסף מינצברג ובאירוח רפאל וואהל) הדן בקשרים הכלכליים והתרבותיים בין הקהילות החרדיות בברוקלין ובבני ברק, והמפתח לעצמאות פיננסית כלכלית.`,
-    link: "https://www.youtube.com/watch?v=7yseEP-6D5Q",
-  },
-];
+const seedArticles: any[] = [];
 
 export default function Articles() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -410,20 +284,24 @@ export default function Articles() {
     setUser(null);
   };
 
-  // Seeding initial articles directly to their database
-  const handleSeedDatabase = async () => {
+  // Delete all articles/podcasts in database to start from scratch
+  const handleDeleteAllArticles = async () => {
+    if (!window.confirm("האם אתה בטוח שברצונך למחוק את כל הכתבות והפודקאסטים מבסיס הנתונים? פעולה זו תשלים ניקוי מלא ואינה הפיכה!")) {
+      return;
+    }
     setLoading(true);
     try {
-      for (const seed of seedArticles) {
-        await addDoc(collection(db, "articles"), {
-          ...seed,
-          createdAt: Timestamp.now(),
-        });
+      let count = 0;
+      for (const item of articlesList) {
+        if (item.id) {
+          await deleteDoc(doc(db, "articles", item.id));
+          count++;
+        }
       }
-      alert("הכתבות המובילות הועלו בהצלחה לבסיס הנתונים!");
+      alert(`כל ${count} התכנים נמחקו בהצלחה מבסיס הנתונים! כעת המערכת ריקה ומוכנה לעבודה מן היסוד.`);
     } catch (err: any) {
-      console.error("Seed error:", err);
-      alert(`שגיאה בהעלאה: ${err.message}`);
+      console.error("Delete all error:", err);
+      alert(`שגיאה במחיקת כל התכנים: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -611,12 +489,13 @@ export default function Articles() {
                 <span>הוספת כתבה / פודקאסט</span>
                 <Plus size={14} className="text-babun-accent" />
               </button>
-              {articlesList.length === 0 && (
+              {articlesList.length > 0 && (
                 <button
-                  onClick={handleSeedDatabase}
-                  className="bg-amber-600 hover:bg-amber-700 text-white font-display text-xs font-bold px-4 py-2 rounded-babun-sm flex items-center gap-1.5 cursor-pointer shadow-md"
+                  onClick={handleDeleteAllArticles}
+                  className="bg-red-650 hover:bg-red-700 text-white font-display text-xs font-bold px-4 py-2 rounded-babun-sm flex items-center gap-1.5 cursor-pointer shadow-md"
                 >
-                  סיד ראשוני של הכתבות
+                  <Trash2 size={13} />
+                  <span>מחיקת כל התכנים</span>
                 </button>
               )}
               <button
@@ -824,8 +703,10 @@ export default function Articles() {
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-white/[0.01] border border-white/5 border-dashed rounded-2xl p-20 text-center text-white/40">
-                        אנא בחר פודקאסט מתוך רשימת הפרקים משמאל.
+                      <div className="bg-white/[0.01] border border-white/5 border-dashed rounded-2xl p-20 text-center text-white/40 font-display text-xs">
+                        {filteredArticles.length === 0
+                          ? "אין פודקאסטים זמינים כעת במערכת. במצב מנהל, לחץ על כפתור ההוספה למעלה והעלה פרק ראשון!"
+                          : "אנא בחר פודקאסט מתוך רשימת הפרקים."}
                       </div>
                     )}
                   </div>
