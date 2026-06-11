@@ -818,10 +818,10 @@ export default function Articles() {
                     className="group cursor-pointer text-right flex flex-col lg:flex-row gap-8 lg:gap-12 bg-transparent p-0 transition-all"
                     onClick={() => setSelectedArticle(filteredArticles[0])}
                   >
-                    <div className="w-full lg:w-1/2 aspect-video bg-babun-primary overflow-hidden rounded-babun-xl relative shadow-lg shadow-babun-primary/5 shrink-0">
+                    <div className="w-full lg:w-1/2 aspect-video bg-[#efede8] overflow-hidden rounded-babun-xl relative shadow-lg shadow-babun-primary/5 shrink-0">
                       <ImageWithSkeleton
                         src={getDisplayImage(filteredArticles[0].image)}
-                        className="w-full h-full object-cover grayscale brightness-[0.8] group-hover:scale-105 group-hover:grayscale-0 transition-all duration-700"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
                         referrerPolicy="no-referrer"
                         alt={filteredArticles[0].title}
                       />
@@ -894,10 +894,10 @@ export default function Articles() {
                         onClick={() => setSelectedArticle(article)}
                       >
                         {/* Thumbnail Cover */}
-                        <div className="w-full aspect-video bg-babun-primary overflow-hidden rounded-babun-lg relative shadow-md shrink-0">
+                        <div className="w-full aspect-video bg-[#efede8] overflow-hidden rounded-babun-lg relative shadow-md shrink-0">
                           <ImageWithSkeleton
                             src={getDisplayImage(article.image)}
-                            className="w-full h-full object-cover grayscale brightness-[0.8] group-hover:scale-105 group-hover:grayscale-0 transition-all duration-700"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
                             referrerPolicy="no-referrer"
                             alt={article.title}
                           />
@@ -1055,18 +1055,8 @@ export default function Articles() {
                   </h3>
                 </div>
 
-                {/* Main scrollable text content with small main image thumbnail */}
+                {/* Main scrollable text content */}
                 <div className="flex-grow overflow-y-auto mb-6 pl-4 text-babun-primary text-right leading-relaxed dir-rtl scrollbar-thin">
-                  {selectedArticle.image && (
-                    <div className="w-48 aspect-video mb-6 bg-babun-primary overflow-hidden rounded-babun-md shadow-sm border border-babun-primary/5">
-                      <ImageWithSkeleton
-                        src={getDisplayImage(selectedArticle.image)}
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                        alt={selectedArticle.title}
-                      />
-                    </div>
-                  )}
 
                   {selectedArticle.content ? (
                     <div className="markdown-body prose prose-slate max-w-none text-right text-babun-primary/95 text-base space-y-5">

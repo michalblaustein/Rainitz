@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Image } from "lucide-react";
 
 interface ImageWithSkeletonProps {
@@ -20,6 +20,7 @@ export default function ImageWithSkeleton({
 }: ImageWithSkeletonProps) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
   // Reset states whenever src changes
   useEffect(() => {
@@ -38,8 +39,7 @@ export default function ImageWithSkeleton({
     <div className={`relative w-full h-full overflow-hidden ${containerClassName}`}>
       {/* Premium Shimmer Skeleton Loader */}
       {!loaded && !error && (
-        <div className="absolute inset-0 bg-gradient-to-r from-babun-primary/5 via-babun-primary/10 to-babun-primary/5 animate-pulse flex items-center justify-center">
-          {/* Subtle loading indicator and decorative grid */}
+        <div className="absolute inset-0 bg-neutral-100 flex items-center justify-center animate-pulse">
           <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:14px_24px]" />
           <Image size={24} className="text-babun-primary/20 animate-bounce duration-1000" />
         </div>
@@ -47,7 +47,7 @@ export default function ImageWithSkeleton({
 
       {/* Error Fallback layout */}
       {error && (
-        <div className="absolute inset-0 bg-babun-primary/10 flex flex-col items-center justify-center text-babun-primary/40 gap-2 p-4 text-center">
+        <div className="absolute inset-0 bg-neutral-100 flex flex-col items-center justify-center text-neutral-400 gap-2 p-4 text-center">
           <Image size={24} className="opacity-60" />
           <span className="text-[10px] font-mono leading-none">הטעינה נכשלה • תצוגה מקדימה</span>
         </div>
@@ -56,6 +56,12 @@ export default function ImageWithSkeleton({
       {/* Actual optimizing Image */}
       {!error && (
         <img
+          ref={(el) => {
+            imgRef.current = el;
+            if (el && el.complete) {
+              setLoaded(true);
+            }
+          }}
           src={src}
           alt={alt}
           onLoad={() => setLoaded(true)}
