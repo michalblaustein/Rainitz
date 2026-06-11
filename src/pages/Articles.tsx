@@ -87,6 +87,7 @@ export default function Articles() {
   const [formCategory, setFormCategory] = useState<string>("weekly");
   const [formDate, setFormDate] = useState<string>("");
   const [formImage, setFormImage] = useState<string>("");
+  const [formInnerImage, setFormInnerImage] = useState<string>("");
   const [formContent, setFormContent] = useState<string>("");
   const [formLink, setFormLink] = useState<string>("");
 
@@ -99,9 +100,11 @@ export default function Articles() {
     setFormCategory("weekly");
     setFormDate("");
     setFormImage("");
+    setFormInnerImage("");
     setFormContent("");
     setFormLink("");
     setCompressionInfo(null);
+    setInnerCompressionInfo(null);
     setShowAddForm(false);
   };
 
@@ -112,6 +115,7 @@ export default function Articles() {
     setFormCategory(article.categoryId || "weekly");
     setFormDate(article.date || "");
     setFormImage(article.image || "");
+    setFormInnerImage(article.innerImage || "");
     setFormContent(article.content || "");
     setFormLink(article.link === "#" ? "" : article.link || "");
     setShowAddForm(true);
@@ -119,8 +123,11 @@ export default function Articles() {
 
   // Direct Image File Upload & Native Browser Compression Optimization
   const [imageSourceType, setImageSourceType] = useState<"file" | "url">("file");
+  const [innerImageSourceType, setInnerImageSourceType] = useState<"file" | "url">("file");
   const [compressionInfo, setCompressionInfo] = useState<{ originalSize: number; compressedSize: number } | null>(null);
+  const [innerCompressionInfo, setInnerCompressionInfo] = useState<{ originalSize: number; compressedSize: number } | null>(null);
   const [uploadingImage, setUploadingImage] = useState<boolean>(false);
+  const [uploadingInnerImage, setUploadingInnerImage] = useState<boolean>(false);
 
   // Helper to compress images client-side dynamically in canvas before storing in Firestore
   const handleImageFileChange = async (file: File) => {
@@ -190,6 +197,76 @@ export default function Articles() {
       alert(`שגיאה בעיבוד התמונה: ${error.message || error}`);
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  const handleInnerImageFileChange = async (file: File) => {
+    if (!file) return;
+    setUploadingInnerImage(true);
+    setInnerCompressionInfo(null);
+    try {
+      const result = await new Promise<{ base64: string; originalSize: number; compressedSize: number }>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new window.Image();
+          img.src = event.target?.result as string;
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const MAX_WIDTH = 800;
+            const MAX_HEIGHT = 800;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+              reject(new Error("לא צלח לקבל קונטקסט דו-מימדי מהקנבס"));
+              return;
+            }
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Compress to JPEG with 0.6 quality for ultra lightweight load (typically 15-40KB)
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.6);
+            
+            // Calc size of base64
+            const stringLength = compressedBase64.length - "data:image/jpeg;base64,".length;
+            const sizeInBytes = 4 * Math.ceil(stringLength / 3) * 0.5624896334383812;
+            
+            resolve({
+              base64: compressedBase64,
+              originalSize: file.size,
+              compressedSize: Math.round(sizeInBytes),
+            });
+          };
+          img.onerror = (err) => reject(new Error("שגיאה בפענוח קובץ התמונה"));
+        };
+        reader.onerror = (err) => reject(new Error("שגיאה בקריאת הקובץ"));
+      });
+
+      setFormInnerImage(result.base64);
+      setInnerCompressionInfo({
+        originalSize: result.originalSize,
+        compressedSize: result.compressedSize,
+      });
+    } catch (error: any) {
+      console.error("Inner Image compression error:", error);
+      alert(`שגיאה בעיבוד התמונה הפנימית: ${error.message || error}`);
+    } finally {
+      setUploadingInnerImage(false);
     }
   };
 
@@ -338,8 +415,9 @@ export default function Articles() {
 
   // AI-powered Hebrew OCR Assistant Call
   const handleAIOCR = async () => {
-    if (!formImage.trim()) {
-      alert("אנא הזן תחילה קישור לתמונה או קובץ מגוגל דרייב בשדה למעלה");
+    const activeOcrImage = formInnerImage || formImage;
+    if (!activeOcrImage.trim()) {
+      alert("אנא הזן תחילה תמונה של הכתבה (פנימית או חיצונית) כדי לבצע פענוח טקסט");
       return;
     }
 
@@ -361,7 +439,7 @@ export default function Articles() {
       const response = await fetch("/api/articles/ocr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl: formImage.trim() }),
+        body: JSON.stringify({ imageUrl: activeOcrImage.trim() }),
       });
 
       const data = await response.json();
@@ -409,6 +487,7 @@ export default function Articles() {
         categoryId: formCategory,
         date: publishDate,
         image: formImage,
+        innerImage: formInnerImage || "",
         content: formContent,
         link: formLink || "#",
       };
@@ -1028,7 +1107,7 @@ export default function Articles() {
                 <div className="w-full h-full flex items-center justify-center p-2 relative">
                   <div className="bg-white p-4 shadow-xl border border-dashed border-babun-primary/10 rounded-babun-sm max-w-full max-h-full overflow-auto flex items-center justify-center relative group">
                     <ImageWithSkeleton
-                      src={getDisplayImage(selectedArticle.image)}
+                      src={getDisplayImage(selectedArticle.innerImage || selectedArticle.image)}
                       className="max-w-full max-h-[60vh] md:max-h-[70vh] object-contain shadow-md rounded-babun-xs"
                       referrerPolicy="no-referrer"
                       alt="Original newspaper clip photograph"
@@ -1331,11 +1410,11 @@ export default function Articles() {
                   </div>
                 </div>
 
-                {/* 3. Image Input: File Upload or External URL */}
+                {/* 3א. Image Input: Outer Thumbnail Preview Image */}
                 <div className="bg-babun-primary/5 p-6 rounded-babun-lg border-r-4 border-babun-accent space-y-4">
                   <div className="flex items-center justify-between flex-row-reverse border-b border-babun-primary/10 pb-3">
                     <label className="block text-xs font-black font-display text-babun-primary uppercase tracking-wider">
-                      תמונת או צילום הכתבה *
+                      תמונה חיצונית (תצוגה מקדימה מושכת עין מחוץ לכתבה) *
                     </label>
                     
                     {/* Source Tab Selector */}
@@ -1397,7 +1476,7 @@ export default function Articles() {
                             )}
                           </div>
                           <span className="text-xs font-bold font-display text-babun-primary">
-                            {uploadingImage ? "מעבד ומכווץ את תמונת הכתבה..." : "לחץ ובחר קובץ או גרור לכאן תמונה"}
+                            {uploadingImage ? "מעבד ומכווץ את תמונת הקאבר..." : "לחץ ובחר קובץ או גרור לכאן תמונה"}
                           </span>
                           <span className="text-[10px] text-babun-primary/50">
                             מכווץ אותה אוטומטית באיכות שיא כדי שהעמוד יטען במהירות הבזק (0ms)!
@@ -1410,7 +1489,7 @@ export default function Articles() {
                         <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 p-4 rounded-babun-sm flex items-center justify-between flex-row-reverse text-xs gap-3 font-display">
                           <div className="flex items-center gap-2 flex-row-reverse">
                             <CheckCircle size={16} className="text-emerald-600 flex-shrink-0" />
-                            <span className="font-bold text-emerald-950">התמונה עובדה וכווצה בהצלחה וממתינה לפרסום!</span>
+                            <span className="font-bold text-emerald-950">תמונת הקאבר עובדה וכווצה בהצלחה!</span>
                           </div>
                           {compressionInfo && (
                             <div className="text-[11px] opacity-75 text-left font-mono">
@@ -1442,6 +1521,128 @@ export default function Articles() {
                         placeholder="הדבק את קישור התמונה או הדרייב כאן..."
                         value={formImage && !formImage.startsWith("data:") ? formImage : ""}
                         onChange={(e) => setFormImage(e.target.value)}
+                        className="w-full border border-babun-primary/15 rounded-babun-md px-4 py-3.5 text-xs text-right focus:outline-hidden focus:border-babun-accent focus:ring-1 focus:ring-babun-accent bg-white text-left font-mono"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* 3ב. Image Input: Inner Newspaper Scan Image or Content Illustration */}
+                <div className="bg-[#efede8]/60 p-6 rounded-babun-lg border-r-4 border-babun-primary/40 space-y-4">
+                  <div className="flex items-center justify-between flex-row-reverse border-b border-babun-primary/10 pb-3">
+                    <div className="text-right">
+                      <label className="block text-xs font-black font-display text-babun-primary uppercase tracking-wider">
+                        תמונת הכתבה הפנימית (צילום/סריקה מלאה בתוך הכתבה)
+                      </label>
+                      <span className="text-[10px] text-babun-primary/40 block mt-0.5">
+                        אופציונלי • אם יישאר ריק, המערכת תציג בתוך הכתבה את תמונת הקאבר החיצונית.
+                      </span>
+                    </div>
+                    
+                    {/* Source Tab Selector */}
+                    <div className="flex bg-babun-primary/10 p-0.5 rounded-babun-sm text-xs select-none">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setInnerImageSourceType("file");
+                          setFormInnerImage("");
+                          setInnerCompressionInfo(null);
+                        }}
+                        className={`px-3 py-1.5 rounded-babun-xs font-display font-medium transition-all ${
+                          innerImageSourceType === "file"
+                            ? "bg-babun-primary text-white shadow-xs"
+                            : "text-babun-primary/60 hover:text-babun-primary"
+                        }`}
+                      >
+                        ⚡ העלאת קובץ מהירה
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setInnerImageSourceType("url");
+                          setFormInnerImage("");
+                          setInnerCompressionInfo(null);
+                        }}
+                        className={`px-3 py-1.5 rounded-babun-xs font-display font-medium transition-all ${
+                          innerImageSourceType === "url"
+                            ? "bg-babun-primary text-white shadow-xs"
+                            : "text-babun-primary/60 hover:text-babun-primary"
+                        }`}
+                      >
+                        🔗 קישור אינטרנט / דרייב
+                      </button>
+                    </div>
+                  </div>
+
+                  {innerImageSourceType === "file" ? (
+                    <div className="space-y-4">
+                      {/* Drag & Drop File Picker Zone */}
+                      <div className="relative border-2 border-dashed border-babun-primary/20 hover:border-babun-accent/50 rounded-babun-lg p-6 bg-white/50 text-center transition-all">
+                        <input
+                          type="file"
+                          id="inner-image-file-input"
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              handleInnerImageFileChange(e.target.files[0]);
+                            }
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <div className="p-3 bg-babun-primary/10 text-babun-primary rounded-full mb-1">
+                            {uploadingInnerImage ? (
+                              <Loader2 size={24} className="animate-spin" />
+                            ) : (
+                              <UploadCloud size={24} />
+                            )}
+                          </div>
+                          <span className="text-xs font-bold font-display text-babun-primary">
+                            {uploadingInnerImage ? "מעבד ומכווץ את צילום הכתבה..." : "לחץ ובחר קובץ או גרור לכאן תמונה"}
+                          </span>
+                          <span className="text-[10px] text-babun-primary/50">
+                            מכווץ אותה אוטומטית באיכות שיא כדי שהעמוד יטען במהירות הבזק (0ms)!
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Compression Feedback details */}
+                      {formInnerImage && innerImageSourceType === "file" && formInnerImage.startsWith("data:") && (
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 p-4 rounded-babun-sm flex items-center justify-between flex-row-reverse text-xs gap-3 font-display">
+                          <div className="flex items-center gap-2 flex-row-reverse">
+                            <CheckCircle size={16} className="text-emerald-600 flex-shrink-0" />
+                            <span className="font-bold text-emerald-950">צילום הכתבה עובד וכווץ בהצלחה!</span>
+                          </div>
+                          {innerCompressionInfo && (
+                            <div className="text-[11px] opacity-75 text-left font-mono">
+                              {(innerCompressionInfo.originalSize / 1024 / 1024).toFixed(1)}MB → {Math.round(innerCompressionInfo.compressedSize / 1024)}KB 
+                              <span className="text-emerald-700 font-bold mr-1">
+                                (-{Math.round((1 - innerCompressionInfo.compressedSize / innerCompressionInfo.originalSize) * 100)}%)
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3 flex-row-reverse">
+                        <Info size={16} className="text-babun-accent mt-0.5" />
+                        <div>
+                          <h4 className="font-display font-bold text-xs text-babun-primary">
+                            מדריך להזנת קישור גוגל דרייב:
+                          </h4>
+                          <p className="text-[11px] text-babun-primary/60 mt-0.5">
+                            ודא שהקובץ מוגדר כמותר לצפייה ציבורית ("כל אחד עם הקישור"), והעתק את כתובתו למטה.
+                          </p>
+                        </div>
+                      </div>
+
+                      <input
+                        type="text"
+                        placeholder="הדבק את קישור צילום הכתבה כאן..."
+                        value={formInnerImage && !formInnerImage.startsWith("data:") ? formInnerImage : ""}
+                        onChange={(e) => setFormInnerImage(e.target.value)}
                         className="w-full border border-babun-primary/15 rounded-babun-md px-4 py-3.5 text-xs text-right focus:outline-hidden focus:border-babun-accent focus:ring-1 focus:ring-babun-accent bg-white text-left font-mono"
                       />
                     </div>
