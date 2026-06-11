@@ -685,206 +685,6 @@ export default function Articles() {
                   המנהל יעלה תכנים חמים בקרוב מאוד.
                 </p>
               </div>
-            ) : activeCategory === "podcast" ? (
-              /* BESPOKE INTERACTIVE PODCAST PLAYER AND EPISODES LIST */
-              <div className="bg-[#0f172a] rounded-3xl p-6 md:p-10 border border-white/5 shadow-2xl overflow-hidden text-right">
-                <div
-                  className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start text-right"
-                  dir="rtl"
-                >
-                  {/* RIGHT SIDE/COLUMN: FEATURED ACTIVE PODCAST (desktop lg:col-span-7) */}
-                  <div className="w-full lg:col-span-7 flex flex-col">
-                    {selectedPodcast ? (
-                      <div className="bg-white/[0.02] border border-white/5 p-5 md:p-6 rounded-2xl space-y-6">
-                        {/* Playback Container / Thumbnail Cover */}
-                        <div className="aspect-video relative rounded-xl overflow-hidden bg-black shadow-inner border border-white/10 group">
-                          {getYoutubeId(selectedPodcast.link) ? (
-                            <iframe
-                              src={`https://www.youtube.com/embed/${getYoutubeId(selectedPodcast.link)}?rel=0`}
-                              title={selectedPodcast.title}
-                              className="w-full h-full border-0 absolute inset-0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                              allowFullScreen
-                            ></iframe>
-                          ) : (
-                            <>
-                              <ImageWithSkeleton
-                                src={getDisplayImage(selectedPodcast.image)}
-                                alt={selectedPodcast.title}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                referrerPolicy="no-referrer"
-                                priority={true}
-                              />
-                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-all duration-300 group-hover:bg-black/50">
-                                <button
-                                  onClick={() => setIsPlayingPodcast(true)}
-                                  className="w-16 h-16 rounded-full bg-babun-accent text-babun-primary flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 shadow-2xl cursor-pointer"
-                                  title="הפעל וידאו"
-                                >
-                                  <PlayCircle
-                                    size={36}
-                                    fill="currentColor"
-                                    className="ml-1 text-babun-primary"
-                                  />
-                                </button>
-                              </div>
-                              {selectedPodcast.duration && (
-                                <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-md px-3 py-1 rounded-md text-xs font-mono text-white/95 border border-white/10">
-                                  {selectedPodcast.duration}
-                                </div>
-                              )}
-                              <div className="absolute top-3 right-3 bg-babun-accent text-babun-primary font-display font-medium px-3 py-1 text-[10px] uppercase tracking-widest shadow-md">
-                                {selectedPodcast.episodeNum
-                                  ? `פרק ${selectedPodcast.episodeNum}`
-                                  : "פודקאסט"}
-                              </div>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Episode Meta & Info */}
-                        <div className="space-y-3 text-right">
-                          <span className="text-babun-accent text-sm font-mono font-bold font-sans">
-                            {selectedPodcast.episodeNum
-                              ? `פרק ${selectedPodcast.episodeNum}`
-                              : "פרק מיוחד"}
-                          </span>
-                          <h3 className="text-xl md:text-2xl font-display font-black text-white leading-tight font-sans">
-                            {selectedPodcast.title}
-                          </h3>
-                          <div className="flex items-center gap-2 justify-end text-xs font-bold text-white/40 font-mono text-mono">
-                            <span>{selectedPodcast.date}</span>
-                            <Calendar size={13} />
-                          </div>
-                          <div className="text-white/70 text-sm leading-relaxed antialiased mt-4 pt-4 border-t border-white/5 text-right">
-                            <Markdown>
-                              {selectedPodcast.content ||
-                                "אזינו לפרק המרתק מהפודקאסט הבורסה בהגשת יוסף מינצברג."}
-                            </Markdown>
-                          </div>
-                        </div>
-
-                        {/* Actions for active podcast */}
-                        <div className="flex justify-start gap-3 pt-4 border-t border-white/5 flex-row-reverse">
-                          {isAdminMode && selectedPodcast.id && (
-                            <button
-                              onClick={() =>
-                                handleDeleteArticle(
-                                  selectedPodcast.id,
-                                  selectedPodcast.title,
-                                )
-                              }
-                              className="text-red-500 hover:text-red-700 p-2.5 cursor-pointer rounded-babun-sm hover:bg-white/5 border border-transparent hover:border-white/5 transition-colors"
-                              title="מחק פרק"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          )}
-                          <a
-                            href={selectedPodcast.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-babun-accent hover:bg-babun-accent/90 text-babun-primary font-display font-black text-xs px-5 py-3 rounded-babun-sm flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-babun-accent/10"
-                          >
-                            <span>צפה ביוטיוב</span>
-                            <ExternalLink size={14} />
-                          </a>
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(
-                                selectedPodcast.link || window.location.href,
-                              );
-                              const notice = document.createElement("div");
-                              notice.innerText = "קישור הפודקאסט הועתק ללוח!";
-                              notice.className =
-                                "fixed bottom-10 left-1/2 -translate-x-1/2 bg-babun-accent text-babun-primary px-6 py-3 font-display font-black rounded-babun-md shadow-2xl z-55";
-                              document.body.appendChild(notice);
-                              setTimeout(() => notice.remove(), 2500);
-                            }}
-                            className="bg-white/5 hover:bg-white/10 text-white border border-white/10 hover:border-white/20 px-5 py-3 rounded-babun-sm text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ml-auto"
-                          >
-                            <span>העתק קישור</span>
-                            <Copy size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="bg-white/[0.01] border border-white/5 border-dashed rounded-2xl p-20 text-center text-white/40 font-display text-xs">
-                        {filteredArticles.length === 0
-                          ? "אין פודקאסטים זמינים כעת במערכת. במצב מנהל, לחץ על כפתור ההוספה למעלה והעלה פרק ראשון!"
-                          : "אנא בחר פודקאסט מתוך רשימת הפרקים."}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* LEFT SIDE/COLUMN: PLAYLIST EPISODES INDEX (desktop lg:col-span-5) */}
-                  <div className="w-full lg:col-span-5 flex flex-col">
-                    <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6 flex-row-reverse">
-                      <h4 className="text-lg font-display font-black text-white font-sans">
-                        כל הפרקים בסדרה
-                      </h4>
-                      <span className="text-xs bg-white/10 text-babun-accent px-3 py-1 rounded-full font-mono font-bold">
-                        {filteredArticles.length} פרקים
-                      </span>
-                    </div>
-                    <div
-                      className="space-y-3 overflow-y-auto max-h-[500px] pl-1 pr-1 scrollbar-thin scrollbar-thumb-white/10 lg:max-h-[550px]"
-                      dir="rtl"
-                    >
-                      {filteredArticles.map((podcast, index) => {
-                        const isSelected = selectedPodcast?.id === podcast.id;
-                        return (
-                          <div
-                            key={podcast.id || index}
-                            onClick={() => {
-                              setSelectedPodcast(podcast);
-                              setIsPlayingPodcast(false);
-                            }}
-                            className={`flex gap-4 p-3.5 rounded-2xl cursor-pointer transition-all duration-200 border text-right items-center select-none ${
-                              isSelected
-                                ? "bg-white/10 border-white/15 shadow-xl shadow-black/25"
-                                : "bg-white/[0.01] hover:bg-white/[0.05] border-transparent"
-                            }`}
-                          >
-                            {/* Text Content Info (Left aligned in Hebrew mockup style) */}
-                            <div className="flex-1 min-w-0 flex flex-col justify-center space-y-1 text-right">
-                              <span className="text-babun-accent text-xs font-mono font-bold font-sans">
-                                {podcast.episodeNum
-                                  ? `פרק ${podcast.episodeNum}`
-                                  : `פרק ${filteredArticles.length - index}`}
-                              </span>
-                              <h5 className="text-white font-bold text-sm leading-snug line-clamp-2 font-sans">
-                                {podcast.title}
-                              </h5>
-                              <div className="flex items-center gap-1.5 justify-end text-[10px] font-mono text-white/40">
-                                <span>{podcast.duration || "01:00"}</span>
-                                <span>•</span>
-                                <span>{podcast.date}</span>
-                              </div>
-                            </div>
-
-                            {/* Episode Image Thumbnail (Far Right aligned) */}
-                            <div className="w-24 md:w-28 shrink-0 aspect-video rounded-xl overflow-hidden bg-black/40 border border-white/10 relative shadow-md">
-                              <ImageWithSkeleton
-                                src={getDisplayImage(podcast.image)}
-                                alt={podcast.title}
-                                className="w-full h-full object-cover"
-                                referrerPolicy="no-referrer"
-                              />
-                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center hover:bg-black/50 transition-all">
-                                <PlayCircle
-                                  size={20}
-                                  className="text-white hover:text-babun-accent transition-colors"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
             ) : (
               <div className="space-y-16">
                 {filteredArticles.length > 0 && (
@@ -1090,7 +890,11 @@ export default function Articles() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", damping: 25 }}
-              className="bg-babun-light w-full max-w-6xl h-[85vh] rounded-babun-xl overflow-hidden relative shadow-2xl flex flex-col md:flex-row text-right z-10"
+              className={`bg-babun-light w-full rounded-babun-xl relative shadow-2xl text-right z-10 overflow-hidden ${
+                selectedArticle.categoryId === "podcast"
+                  ? "max-w-3xl h-[85vh] overflow-y-auto p-6 md:p-10 flex flex-col gap-6 justify-start scrollbar-thin"
+                  : "max-w-6xl h-[85vh] flex flex-col md:flex-row"
+              }`}
             >
               {/* Close Button overlay */}
               <button
@@ -1100,94 +904,168 @@ export default function Articles() {
                 <X size={18} />
               </button>
 
-              {/* LEFT HALF: THE ORIGINAL PHOTOGRAPH/SCAN ("צילום הכתבה") OR YOUTUBE EMBED FOR PODCASTS */}
-              <div className="w-full md:w-1/2 bg-[#efede8] p-6 flex flex-col justify-center items-center relative border-b md:border-b-0 md:border-l border-babun-primary/5 h-2/5 md:h-full overflow-hidden">
-                {selectedArticle.categoryId === "podcast" && getYoutubeId(selectedArticle.link) ? (
-                  <div className="w-full max-w-lg aspect-video rounded-babun-lg overflow-hidden bg-black shadow-2xl relative border border-babun-primary/10">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${getYoutubeId(selectedArticle.link)}?rel=0`}
-                      title={selectedArticle.title}
-                      className="w-full h-full border-0 absolute inset-0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    ></iframe>
-                  </div>
-                ) : (
-                  /* Simulated newspaper framing */
-                  <div className="w-full h-full flex items-center justify-center p-2 relative">
-                    <div className="bg-white p-4 shadow-xl border border-dashed border-babun-primary/10 rounded-babun-sm max-w-full max-h-full overflow-auto flex items-center justify-center relative group">
-                      <ImageWithSkeleton
-                        src={getDisplayImage(selectedArticle.innerImage || selectedArticle.image)}
-                        className="max-w-full max-h-[60vh] md:max-h-[70vh] object-contain shadow-md rounded-babun-xs"
-                        referrerPolicy="no-referrer"
-                        alt="Original newspaper clip photograph"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* RIGHT HALF: THE LIVE SYSTEM TEXT ("טקסט חי") */}
-              <div className="w-full md:w-1/2 p-8 md:p-14 flex flex-col justify-between h-3/5 md:h-full bg-white text-right">
-                {/* Meta info header */}
-                <div className="mb-4">
-                  <div className="flex items-center justify-between flex-row-reverse mb-3 border-b border-babun-primary/5 pb-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-babun-primary/40">
-                      <span>{selectedArticle.date}</span>
-                      <Calendar size={13} />
-                    </div>
-                    <span className="bg-babun-primary/5 text-babun-primary px-3 py-1 text-[10px] font-bold rounded-babun-sm">
-                      {selectedArticle.category}
-                    </span>
-                  </div>
-                  <h3 className="text-2xl md:text-3xl font-display font-black text-babun-primary leading-tight tracking-tight mb-2">
-                    {selectedArticle.title}
-                  </h3>
-                </div>
-
-                {/* Main scrollable text content */}
-                <div className="flex-grow overflow-y-auto mb-6 pl-4 text-babun-primary text-right leading-relaxed dir-rtl scrollbar-thin">
-
-                  {selectedArticle.content ? (
-                    <div className="markdown-body prose prose-slate max-w-none text-right text-babun-primary/95 text-base space-y-5">
-                      <Markdown>{selectedArticle.content}</Markdown>
+              {selectedArticle.categoryId === "podcast" ? (
+                // ==================== 1A. PODCAST DETAILED FULL-WIDTH VIDEO LAYOUT ====================
+                <div className="flex flex-col gap-6 pt-10 text-right w-full dir-rtl">
+                  {/* YouTube Player or Fallback Cover on Full Width */}
+                  {getYoutubeId(selectedArticle.link) ? (
+                    <div className="w-full aspect-video rounded-babun-lg overflow-hidden bg-black shadow-2xl relative border border-babun-primary/10">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${getYoutubeId(selectedArticle.link)}?autoplay=1&rel=0`}
+                        title={selectedArticle.title}
+                        className="w-full h-full border-0 absolute inset-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      ></iframe>
                     </div>
                   ) : (
-                    <p className="text-babun-primary/75 italic">
-                      אין טקסט מוקלד לכתבה זו.
-                    </p>
-                  )}
-                </div>
-
-                {/* Footer and interactions */}
-                <div className="border-t border-babun-primary/5 pt-6 flex items-center justify-between flex-row-reverse gap-4">
-                  {selectedArticle.link && selectedArticle.link !== "#" && (
-                    <a
-                      href={selectedArticle.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-babun-primary text-white hover:bg-babun-primary/90 text-xs font-bold px-5 py-3 rounded-babun-sm flex items-center gap-1.5 shadow-md shadow-babun-primary/5"
-                    >
-                      <ExternalLink size={14} />
-                      <span>פתח קישור חיצוני</span>
-                    </a>
+                    <div className="w-full aspect-video rounded-babun-lg overflow-hidden bg-[#efede8] shadow-md border border-babun-primary/5">
+                      <ImageWithSkeleton
+                        src={getDisplayImage(selectedArticle.image)}
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                        alt={selectedArticle.title}
+                      />
+                    </div>
                   )}
 
+                  {/* Header details & Description containing box - right aligned */}
+                  <div className="flex flex-col text-right dir-rtl w-full bg-white p-6 rounded-babun-lg border-r-4 border-babun-accent shadow-xs space-y-4">
+                    <div className="flex items-center justify-between flex-row-reverse mb-1">
+                      <span className="bg-babun-accent/15 text-babun-primary px-3 py-1 text-[10px] font-bold rounded-babun-sm">
+                        {selectedArticle.category || "פודקאסט"}
+                      </span>
+                      <div className="flex items-center gap-2 text-xs font-bold text-babun-primary/40">
+                        <span>{selectedArticle.date}</span>
+                        <Calendar size={13} />
+                      </div>
+                    </div>
+                    
+                    <h3 className="text-xl md:text-2xl font-display font-black text-babun-primary leading-tight tracking-tight">
+                      {selectedArticle.title}
+                    </h3>
+
+                    {selectedArticle.content ? (
+                      <div className="text-babun-primary/90 text-sm md:text-base leading-relaxed mt-2 border-t border-babun-primary/5 pt-4 space-y-3">
+                        <Markdown>{selectedArticle.content}</Markdown>
+                      </div>
+                    ) : (
+                      <p className="text-babun-primary/40 text-xs italic mt-2 border-t border-babun-primary/5 pt-4">
+                        אין תיאור מוקלד לפרק זה.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Optional Admin controls, NO external link button */}
                   {isAdminMode && selectedArticle.id && (
-                    <button
-                      onClick={() => {
-                        const art = selectedArticle;
-                        setSelectedArticle(null);
-                        handleEditArticleClick(art);
-                      }}
-                      className="bg-babun-accent/20 hover:bg-babun-accent/35 text-babun-primary text-xs font-bold px-5 py-3 rounded-babun-sm flex items-center gap-1.5 cursor-pointer transition-all border border-babun-accent/10"
-                    >
-                      <Edit size={14} />
-                      <span>ערוך כתבה זו</span>
-                    </button>
+                    <div className="flex justify-end border-t border-babun-primary/5 pt-4">
+                      <button
+                        onClick={() => {
+                          const art = selectedArticle;
+                          setSelectedArticle(null);
+                          handleEditArticleClick(art);
+                        }}
+                        className="bg-babun-accent/20 hover:bg-babun-accent/35 text-babun-primary text-xs font-bold px-5 py-3 rounded-babun-sm flex items-center gap-1.5 cursor-pointer transition-all border border-babun-accent/10"
+                      >
+                        <Edit size={14} />
+                        <span>ערוך פודקאסט זה</span>
+                      </button>
+                    </div>
                   )}
                 </div>
-              </div>
+              ) : (
+                // ==================== 1B. STANDARD ARTICLE SPLIT-PANE LAYOUT ====================
+                <>
+                  {/* LEFT HALF: THE ORIGINAL PHOTOGRAPH/SCAN ("צילום הכתבה") OR YOUTUBE EMBED FOR PODCASTS */}
+                  <div className="w-full md:w-1/2 bg-[#efede8] p-6 flex flex-col justify-center items-center relative border-b md:border-b-0 md:border-l border-babun-primary/5 h-2/5 md:h-full overflow-hidden">
+                    {selectedArticle.categoryId === "podcast" && getYoutubeId(selectedArticle.link) ? (
+                      <div className="w-full max-w-lg aspect-video rounded-babun-lg overflow-hidden bg-black shadow-2xl relative border border-babun-primary/10">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${getYoutubeId(selectedArticle.link)}?rel=0`}
+                          title={selectedArticle.title}
+                          className="w-full h-full border-0 absolute inset-0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+                    ) : (
+                      /* Simulated newspaper framing */
+                      <div className="w-full h-full flex items-center justify-center p-2 relative">
+                        <div className="bg-white p-4 shadow-xl border border-dashed border-babun-primary/10 rounded-babun-sm max-w-full max-h-full overflow-auto flex items-center justify-center relative group">
+                          <ImageWithSkeleton
+                            src={getDisplayImage(selectedArticle.innerImage || selectedArticle.image)}
+                            className="max-w-full max-h-[60vh] md:max-h-[70vh] object-contain shadow-md rounded-babun-xs"
+                            referrerPolicy="no-referrer"
+                            alt="Original newspaper clip photograph"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* RIGHT HALF: THE LIVE SYSTEM TEXT ("טקסט חי") */}
+                  <div className="w-full md:w-1/2 p-8 md:p-14 flex flex-col justify-between h-3/5 md:h-full bg-white text-right">
+                    {/* Meta info header */}
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between flex-row-reverse mb-3 border-b border-babun-primary/5 pb-4">
+                        <div className="flex items-center gap-2 text-xs font-bold text-babun-primary/40">
+                          <span>{selectedArticle.date}</span>
+                          <Calendar size={13} />
+                        </div>
+                        <span className="bg-babun-primary/5 text-babun-primary px-3 py-1 text-[10px] font-bold rounded-babun-sm">
+                          {selectedArticle.category}
+                        </span>
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-display font-black text-babun-primary leading-tight tracking-tight mb-2">
+                        {selectedArticle.title}
+                      </h3>
+                    </div>
+
+                    {/* Main scrollable text content */}
+                    <div className="flex-grow overflow-y-auto mb-6 pl-4 text-babun-primary text-right leading-relaxed dir-rtl scrollbar-thin">
+
+                      {selectedArticle.content ? (
+                        <div className="markdown-body prose prose-slate max-w-none text-right text-babun-primary/95 text-base space-y-5">
+                          <Markdown>{selectedArticle.content}</Markdown>
+                        </div>
+                      ) : (
+                        <p className="text-babun-primary/75 italic">
+                          אין טקסט מוקלד לכתבה זו.
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Footer and interactions */}
+                    <div className="border-t border-babun-primary/5 pt-6 flex items-center justify-between flex-row-reverse gap-4">
+                      {selectedArticle.link && selectedArticle.link !== "#" && (
+                        <a
+                          href={selectedArticle.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-babun-primary text-white hover:bg-babun-primary/90 text-xs font-bold px-5 py-3 rounded-babun-sm flex items-center gap-1.5 shadow-md shadow-babun-primary/5"
+                        >
+                          <ExternalLink size={14} />
+                          <span>פתח קישור חיצוני</span>
+                        </a>
+                      )}
+
+                      {isAdminMode && selectedArticle.id && (
+                        <button
+                          onClick={() => {
+                            const art = selectedArticle;
+                            setSelectedArticle(null);
+                            handleEditArticleClick(art);
+                          }}
+                          className="bg-babun-accent/20 hover:bg-babun-accent/35 text-babun-primary text-xs font-bold px-5 py-3 rounded-babun-sm flex items-center gap-1.5 cursor-pointer transition-all border border-babun-accent/10"
+                        >
+                          <Edit size={14} />
+                          <span>ערוך כתבה זו</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </motion.div>
           </div>
         )}
