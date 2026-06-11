@@ -13,6 +13,7 @@ import {
   LayoutGrid,
   Plus,
   Trash2,
+  Edit,
   X,
   Loader2,
   Sparkles,
@@ -36,6 +37,7 @@ import {
   doc,
   Timestamp,
   onSnapshot,
+  updateDoc,
 } from "firebase/firestore";
 import {
   signInWithPopup,
@@ -87,6 +89,33 @@ export default function Articles() {
   const [formImage, setFormImage] = useState<string>("");
   const [formContent, setFormContent] = useState<string>("");
   const [formLink, setFormLink] = useState<string>("");
+
+  // Edit State & Reset Helpers
+  const [editingArticleId, setEditingArticleId] = useState<string | null>(null);
+
+  const handleCloseAddForm = () => {
+    setEditingArticleId(null);
+    setFormTitle("");
+    setFormCategory("weekly");
+    setFormDate("");
+    setFormImage("");
+    setFormContent("");
+    setFormLink("");
+    setCompressionInfo(null);
+    setShowAddForm(false);
+  };
+
+  const handleEditArticleClick = (article: any, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setEditingArticleId(article.id);
+    setFormTitle(article.title || "");
+    setFormCategory(article.categoryId || "weekly");
+    setFormDate(article.date || "");
+    setFormImage(article.image || "");
+    setFormContent(article.content || "");
+    setFormLink(article.link === "#" ? "" : article.link || "");
+    setShowAddForm(true);
+  };
 
   // Direct Image File Upload & Native Browser Compression Optimization
   const [imageSourceType, setImageSourceType] = useState<"file" | "url">("file");
@@ -353,7 +382,7 @@ export default function Articles() {
     }
   };
 
-  // Save new article to Firestore
+  // Save new article or edit existing one in Firestore
   const handleSaveArticle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim() || !formImage.trim() || !formContent.trim()) {
@@ -374,7 +403,7 @@ export default function Articles() {
       });
 
     try {
-      await addDoc(collection(db, "articles"), {
+      const articleData = {
         title: formTitle,
         category: categoryName,
         categoryId: formCategory,
@@ -382,18 +411,23 @@ export default function Articles() {
         image: formImage,
         content: formContent,
         link: formLink || "#",
-        createdAt: Timestamp.now(),
-      });
+      };
+
+      if (editingArticleId) {
+        await updateDoc(doc(db, "articles", editingArticleId), articleData);
+        alert("הכתבה עודכנה בהצלחה!");
+      } else {
+        await addDoc(collection(db, "articles"), {
+          ...articleData,
+          createdAt: Timestamp.now(),
+        });
+        alert("הכתבה פורסמה בהצלחה!");
+      }
 
       // Clear Form state
-      setFormTitle("");
-      setFormDate("");
-      setFormImage("");
-      setFormContent("");
-      setFormLink("");
-      setShowAddForm(false);
+      handleCloseAddForm();
     } catch (err: any) {
-      console.error("Failed to add article to Firestore:", err);
+      console.error("Failed to save article to Firestore:", err);
       alert(`שגיאה בשמירת הכתבה: ${err.message}`);
     }
   };
@@ -480,7 +514,10 @@ export default function Articles() {
             </div>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setShowAddForm(true)}
+                onClick={() => {
+                  handleCloseAddForm();
+                  setShowAddForm(true);
+                }}
                 className="bg-babun-primary hover:bg-babun-primary/90 text-white font-display text-xs font-bold px-4 py-2 rounded-babun-sm flex items-center gap-1.5 cursor-pointer shadow-md"
               >
                 <span>הוספת כתבה / פודקאסט</span>
@@ -828,6 +865,15 @@ export default function Articles() {
                           >
                             <Trash2 size={16} />
                           </button>
+
+                          <button
+                            onClick={(e) => handleEditArticleClick(filteredArticles[0], e)}
+                            className="text-babun-primary hover:text-babun-accent p-2 cursor-pointer rounded-babun-sm hover:bg-babun-primary/5 transition-colors flex items-center gap-1.5 text-xs font-bold font-display"
+                            title="ערוך כתבה"
+                          >
+                            <Edit size={16} />
+                            <span>ערוך כתבה</span>
+                          </button>
                         </div>
                       )}
                     </div>
@@ -892,6 +938,15 @@ export default function Articles() {
                                 title="מחק כתבה"
                               >
                                 <Trash2 size={14} />
+                              </button>
+
+                              <button
+                                onClick={(e) => handleEditArticleClick(article, e)}
+                                className="text-babun-primary hover:text-babun-accent p-1.5 cursor-pointer rounded-babun-sm hover:bg-babun-primary/5 transition-colors flex items-center gap-1 text-[11px] font-bold font-display mr-auto"
+                                title="ערוך כתבה"
+                              >
+                                <Edit size={14} />
+                                <span>ערוך כתבה</span>
                               </button>
                             </div>
                           )}
@@ -968,32 +1023,17 @@ export default function Articles() {
               </button>
 
               {/* LEFT HALF: THE ORIGINAL PHOTOGRAPH/SCAN ("צילום הכתבה") */}
-              <div className="w-full md:w-1/2 bg-[#efede8] p-8 flex flex-col justify-between items-center relative border-b md:border-b-0 md:border-l border-babun-primary/5 h-2/5 md:h-full overflow-hidden">
-                <span className="text-babun-primary/30 uppercase tracking-[0.2em] font-mono text-[9px] select-none absolute top-4 left-6">
-                  ORIGINAL CLIPPING ARCHIVE
-                </span>
-
+              <div className="w-full md:w-1/2 bg-[#efede8] p-8 flex flex-col justify-center items-center relative border-b md:border-b-0 md:border-l border-babun-primary/5 h-2/5 md:h-full overflow-hidden">
                 {/* Simulated newspaper framing */}
                 <div className="w-full h-full flex items-center justify-center p-2 relative">
                   <div className="bg-white p-4 shadow-xl border border-dashed border-babun-primary/10 rounded-babun-sm max-w-full max-h-full overflow-auto flex items-center justify-center relative group">
                     <ImageWithSkeleton
                       src={getDisplayImage(selectedArticle.image)}
-                      className="max-w-full max-h-[60vh] object-contain shadow-md rounded-babun-xs"
+                      className="max-w-full max-h-[60vh] md:max-h-[70vh] object-contain shadow-md rounded-babun-xs"
                       referrerPolicy="no-referrer"
                       alt="Original newspaper clip photograph"
                     />
                   </div>
-                </div>
-
-                <div className="text-center w-full z-10">
-                  <a
-                    href={selectedArticle.image}
-                    target="_blank"
-                    rel="no-referrer"
-                    className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-babun-primary/60 hover:text-babun-accent bg-white px-4 py-2 rounded-babun-xs shadow-sm border border-babun-primary/5 transition-colors"
-                  >
-                    צפה בצילום בגודל מלא <ExternalLink size={12} />
-                  </a>
                 </div>
               </div>
 
@@ -1015,8 +1055,19 @@ export default function Articles() {
                   </h3>
                 </div>
 
-                {/* Main scrollable text content */}
+                {/* Main scrollable text content with small main image thumbnail */}
                 <div className="flex-grow overflow-y-auto mb-6 pl-4 text-babun-primary text-right leading-relaxed dir-rtl scrollbar-thin">
+                  {selectedArticle.image && (
+                    <div className="w-48 aspect-video mb-6 bg-babun-primary overflow-hidden rounded-babun-md shadow-sm border border-babun-primary/5">
+                      <ImageWithSkeleton
+                        src={getDisplayImage(selectedArticle.image)}
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                        alt={selectedArticle.title}
+                      />
+                    </div>
+                  )}
+
                   {selectedArticle.content ? (
                     <div className="markdown-body prose prose-slate max-w-none text-right text-babun-primary/95 text-base space-y-5">
                       <Markdown>{selectedArticle.content}</Markdown>
@@ -1042,19 +1093,19 @@ export default function Articles() {
                     </a>
                   )}
 
-                  {/* Absolute Copy live text utilities */}
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(
-                        selectedArticle.content || selectedArticle.title,
-                      );
-                      alert("הטקסט של המאמר הועתק ללוח בבטחה!");
-                    }}
-                    className="border border-babun-primary/10 hover:border-babun-accent/50 text-babun-primary/75 hover:text-babun-primary text-xs font-bold px-5 py-3 rounded-babun-sm flex items-center gap-1.5 cursor-pointer bg-babun-light/50 transition-all shadow-xs"
-                  >
-                    <Copy size={14} />
-                    <span>העתק טקסט חי</span>
-                  </button>
+                  {isAdminMode && selectedArticle.id && (
+                    <button
+                      onClick={() => {
+                        const art = selectedArticle;
+                        setSelectedArticle(null);
+                        handleEditArticleClick(art);
+                      }}
+                      className="bg-babun-accent/20 hover:bg-babun-accent/35 text-babun-primary text-xs font-bold px-5 py-3 rounded-babun-sm flex items-center gap-1.5 cursor-pointer transition-all border border-babun-accent/10"
+                    >
+                      <Edit size={14} />
+                      <span>ערוך כתבה זו</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </motion.div>
