@@ -698,10 +698,9 @@ export default function Articles() {
                       <div className="bg-white/[0.02] border border-white/5 p-5 md:p-6 rounded-2xl space-y-6">
                         {/* Playback Container / Thumbnail Cover */}
                         <div className="aspect-video relative rounded-xl overflow-hidden bg-black shadow-inner border border-white/10 group">
-                          {isPlayingPodcast &&
-                          getYoutubeId(selectedPodcast.link) ? (
+                          {getYoutubeId(selectedPodcast.link) ? (
                             <iframe
-                              src={`https://www.youtube.com/embed/${getYoutubeId(selectedPodcast.link)}?autoplay=1&rel=0`}
+                              src={`https://www.youtube.com/embed/${getYoutubeId(selectedPodcast.link)}?rel=0`}
                               title={selectedPodcast.title}
                               className="w-full h-full border-0 absolute inset-0"
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -1101,19 +1100,31 @@ export default function Articles() {
                 <X size={18} />
               </button>
 
-              {/* LEFT HALF: THE ORIGINAL PHOTOGRAPH/SCAN ("צילום הכתבה") */}
-              <div className="w-full md:w-1/2 bg-[#efede8] p-8 flex flex-col justify-center items-center relative border-b md:border-b-0 md:border-l border-babun-primary/5 h-2/5 md:h-full overflow-hidden">
-                {/* Simulated newspaper framing */}
-                <div className="w-full h-full flex items-center justify-center p-2 relative">
-                  <div className="bg-white p-4 shadow-xl border border-dashed border-babun-primary/10 rounded-babun-sm max-w-full max-h-full overflow-auto flex items-center justify-center relative group">
-                    <ImageWithSkeleton
-                      src={getDisplayImage(selectedArticle.innerImage || selectedArticle.image)}
-                      className="max-w-full max-h-[60vh] md:max-h-[70vh] object-contain shadow-md rounded-babun-xs"
-                      referrerPolicy="no-referrer"
-                      alt="Original newspaper clip photograph"
-                    />
+              {/* LEFT HALF: THE ORIGINAL PHOTOGRAPH/SCAN ("צילום הכתבה") OR YOUTUBE EMBED FOR PODCASTS */}
+              <div className="w-full md:w-1/2 bg-[#efede8] p-6 flex flex-col justify-center items-center relative border-b md:border-b-0 md:border-l border-babun-primary/5 h-2/5 md:h-full overflow-hidden">
+                {selectedArticle.categoryId === "podcast" && getYoutubeId(selectedArticle.link) ? (
+                  <div className="w-full max-w-lg aspect-video rounded-babun-lg overflow-hidden bg-black shadow-2xl relative border border-babun-primary/10">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${getYoutubeId(selectedArticle.link)}?rel=0`}
+                      title={selectedArticle.title}
+                      className="w-full h-full border-0 absolute inset-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    ></iframe>
                   </div>
-                </div>
+                ) : (
+                  /* Simulated newspaper framing */
+                  <div className="w-full h-full flex items-center justify-center p-2 relative">
+                    <div className="bg-white p-4 shadow-xl border border-dashed border-babun-primary/10 rounded-babun-sm max-w-full max-h-full overflow-auto flex items-center justify-center relative group">
+                      <ImageWithSkeleton
+                        src={getDisplayImage(selectedArticle.innerImage || selectedArticle.image)}
+                        className="max-w-full max-h-[60vh] md:max-h-[70vh] object-contain shadow-md rounded-babun-xs"
+                        referrerPolicy="no-referrer"
+                        alt="Original newspaper clip photograph"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* RIGHT HALF: THE LIVE SYSTEM TEXT ("טקסט חי") */}
