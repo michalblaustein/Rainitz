@@ -23,6 +23,8 @@ import {
   ChevronRight,
   Eye,
   Info,
+  UploadCloud,
+  CheckCircle,
 } from "lucide-react";
 import {
   collection,
@@ -211,6 +213,82 @@ export default function Articles() {
   const [formImage, setFormImage] = useState<string>("");
   const [formContent, setFormContent] = useState<string>("");
   const [formLink, setFormLink] = useState<string>("");
+
+  // Direct Image File Upload & Native Browser Compression Optimization
+  const [imageSourceType, setImageSourceType] = useState<"file" | "url">("file");
+  const [compressionInfo, setCompressionInfo] = useState<{ originalSize: number; compressedSize: number } | null>(null);
+  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
+
+  // Helper to compress images client-side dynamically in canvas before storing in Firestore
+  const handleImageFileChange = async (file: File) => {
+    if (!file) return;
+    setUploadingImage(true);
+    setCompressionInfo(null);
+    try {
+      const result = await new Promise<{ base64: string; originalSize: number; compressedSize: number }>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new window.Image();
+          img.src = event.target?.result as string;
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const MAX_WIDTH = 800;
+            const MAX_HEIGHT = 800;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+              reject(new Error("לא צלח לקבל קונטקסט דו-מימדי מהקנבס"));
+              return;
+            }
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Compress to JPEG with 0.6 quality for ultra lightweight load (typically 15-40KB)
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.6);
+            
+            // Calc size of base64
+            const stringLength = compressedBase64.length - "data:image/jpeg;base64,".length;
+            const sizeInBytes = 4 * Math.ceil(stringLength / 3) * 0.5624896334383812;
+            
+            resolve({
+              base64: compressedBase64,
+              originalSize: file.size,
+              compressedSize: Math.round(sizeInBytes),
+            });
+          };
+          img.onerror = (err) => reject(new Error("שגיאה בפענוח קובץ התמונה"));
+        };
+        reader.onerror = (err) => reject(new Error("שגיאה בקריאת הקובץ"));
+      });
+
+      setFormImage(result.base64);
+      setCompressionInfo({
+        originalSize: result.originalSize,
+        compressedSize: result.compressedSize,
+      });
+    } catch (error: any) {
+      console.error("Image compression error:", error);
+      alert(`שגיאה בעיבוד התמונה: ${error.message || error}`);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   // OCR Magic Assistant States
   const [ocrLoading, setOcrLoading] = useState<boolean>(false);
@@ -1328,35 +1406,121 @@ export default function Articles() {
                   </div>
                 </div>
 
-                {/* 3. Image URL source with Drive instructions */}
-                <div className="bg-babun-primary/5 p-5 rounded-babun-lg border-r-4 border-babun-accent">
-                  <div className="flex items-start gap-3 flex-row-reverse mb-3">
-                    <Info size={16} className="text-babun-accent mt-0.5" />
-                    <div>
-                      <h4 className="font-display font-bold text-xs text-babun-primary">
-                        על מנת להפיק את ה-צילום + טקסט חי:
-                      </h4>
-                      <p className="text-[11px] text-babun-primary/60 mt-0.5">
-                        העלה את צילום הכתבה (מתוך העיתון) לחשבון הגוגל דרייב
-                        שלך, קבע את הקישור ל"כל אחד עם הקישור יכול לצפות", והדבק
-                        את כתובת הדרייב בשדה למטה. המערכת תזהה את התמונה
-                        אוטומטית ותשלוף לכם תצוגה נקייה!
-                      </p>
+                {/* 3. Image Input: File Upload or External URL */}
+                <div className="bg-babun-primary/5 p-6 rounded-babun-lg border-r-4 border-babun-accent space-y-4">
+                  <div className="flex items-center justify-between flex-row-reverse border-b border-babun-primary/10 pb-3">
+                    <label className="block text-xs font-black font-display text-babun-primary uppercase tracking-wider">
+                      תמונת או צילום הכתבה *
+                    </label>
+                    
+                    {/* Source Tab Selector */}
+                    <div className="flex bg-babun-primary/10 p-0.5 rounded-babun-sm text-xs select-none">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImageSourceType("file");
+                          setFormImage("");
+                          setCompressionInfo(null);
+                        }}
+                        className={`px-3 py-1.5 rounded-babun-xs font-display font-medium transition-all ${
+                          imageSourceType === "file"
+                            ? "bg-babun-primary text-white shadow-xs"
+                            : "text-babun-primary/60 hover:text-babun-primary"
+                        }`}
+                      >
+                        ⚡ העלאת קובץ מהירה
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImageSourceType("url");
+                          setFormImage("");
+                          setCompressionInfo(null);
+                        }}
+                        className={`px-3 py-1.5 rounded-babun-xs font-display font-medium transition-all ${
+                          imageSourceType === "url"
+                            ? "bg-babun-primary text-white shadow-xs"
+                            : "text-babun-primary/60 hover:text-babun-primary"
+                        }`}
+                      >
+                        🔗 קישור אינטרנט / דרייב
+                      </button>
                     </div>
                   </div>
 
-                  <label className="block text-xs font-black font-display text-babun-primary uppercase tracking-wider mb-2">
-                    קישור קובץ צילום הכתבה (גוגל דרייב / כתובת אינטרנט של תמונה)
-                    *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="הדבק את כתובת הדרייב (למשל: https://drive.google.com/file/d/...)"
-                    value={formImage}
-                    onChange={(e) => setFormImage(e.target.value)}
-                    className="w-full border border-babun-primary/15 rounded-babun-md px-4 py-3.5 text-xs text-right focus:outline-hidden focus:border-babun-accent focus:ring-1 focus:ring-babun-accent bg-white text-left font-mono"
-                  />
+                  {imageSourceType === "file" ? (
+                    <div className="space-y-4">
+                      {/* Drag & Drop File Picker Zone */}
+                      <div className="relative border-2 border-dashed border-babun-primary/20 hover:border-babun-accent/50 rounded-babun-lg p-6 bg-white/50 text-center transition-all">
+                        <input
+                          type="file"
+                          id="image-file-input"
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              handleImageFileChange(e.target.files[0]);
+                            }
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <div className="p-3 bg-babun-accent/10 text-babun-accent rounded-full mb-1">
+                            {uploadingImage ? (
+                              <Loader2 size={24} className="animate-spin" />
+                            ) : (
+                              <UploadCloud size={24} />
+                            )}
+                          </div>
+                          <span className="text-xs font-bold font-display text-babun-primary">
+                            {uploadingImage ? "מעבד ומכווץ את תמונת הכתבה..." : "לחץ ובחר קובץ או גרור לכאן תמונה"}
+                          </span>
+                          <span className="text-[10px] text-babun-primary/50">
+                            מכווץ אותה אוטומטית באיכות שיא כדי שהעמוד יטען במהירות הבזק (0ms)!
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Compression Feedback details */}
+                      {formImage && imageSourceType === "file" && formImage.startsWith("data:") && (
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 p-4 rounded-babun-sm flex items-center justify-between flex-row-reverse text-xs gap-3 font-display">
+                          <div className="flex items-center gap-2 flex-row-reverse">
+                            <CheckCircle size={16} className="text-emerald-600 flex-shrink-0" />
+                            <span className="font-bold text-emerald-950">התמונה עובדה וכווצה בהצלחה וממתינה לפרסום!</span>
+                          </div>
+                          {compressionInfo && (
+                            <div className="text-[11px] opacity-75 text-left font-mono">
+                              {(compressionInfo.originalSize / 1024 / 1024).toFixed(1)}MB → {Math.round(compressionInfo.compressedSize / 1024)}KB 
+                              <span className="text-emerald-700 font-bold mr-1">
+                                (-{Math.round((1 - compressionInfo.compressedSize / compressionInfo.originalSize) * 100)}%)
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3 flex-row-reverse">
+                        <Info size={16} className="text-babun-accent mt-0.5" />
+                        <div>
+                          <h4 className="font-display font-bold text-xs text-babun-primary">
+                            מדריך להזנת קישור גוגל דרייב:
+                          </h4>
+                          <p className="text-[11px] text-babun-primary/60 mt-0.5">
+                            ודא שהקובץ מוגדר כמותר לצפייה ציבורית ("כל אחד עם הקישור"), והעתק את כתובתו למטה.
+                          </p>
+                        </div>
+                      </div>
+
+                      <input
+                        type="text"
+                        placeholder="הדבק את קישור התמונה או הדרייב כאן..."
+                        value={formImage && !formImage.startsWith("data:") ? formImage : ""}
+                        onChange={(e) => setFormImage(e.target.value)}
+                        className="w-full border border-babun-primary/15 rounded-babun-md px-4 py-3.5 text-xs text-right focus:outline-hidden focus:border-babun-accent focus:ring-1 focus:ring-babun-accent bg-white text-left font-mono"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* 4. Live Text content block with AI OCR Integration magic */}
