@@ -59,7 +59,7 @@ export default function Footer() {
             <div className="space-y-4 w-full">
               <Link to="/articles" className="group flex items-center gap-4 hover:text-babun-accent transition-colors w-full">
                 <img 
-                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=120&h=120&q=80" 
+                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=80&h=80&q=50" 
                   alt="שוק הנדלן" 
                   className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
                   referrerPolicy="no-referrer"
@@ -74,7 +74,7 @@ export default function Footer() {
               
               <Link to="/articles" className="group flex items-center gap-4 hover:text-babun-accent transition-colors w-full border-t border-white/5 pt-4">
                 <img 
-                  src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=120&h=120&q=80" 
+                  src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=80&h=80&q=50" 
                   alt="מדריך למשקיע" 
                   className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
                   referrerPolicy="no-referrer"
@@ -89,7 +89,7 @@ export default function Footer() {
 
               <Link to="/articles" className="group flex items-center gap-4 hover:text-babun-accent transition-colors w-full border-t border-white/5 pt-4">
                 <img 
-                  src="https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=120&h=120&q=80" 
+                  src="https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=80&h=80&q=50" 
                   alt="פודקאסט התחדשות עירונית" 
                   className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
                   referrerPolicy="no-referrer"

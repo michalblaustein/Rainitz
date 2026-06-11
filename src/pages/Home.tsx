@@ -515,7 +515,7 @@ export default function Home() {
             >
               <div className="relative aspect-[16/10] rounded-[30px] overflow-hidden mb-6">
                 <img 
-                  src="https://img.youtube.com/vi/WEhvhlX_UhY/maxresdefault.jpg" 
+                  src="https://img.youtube.com/vi/WEhvhlX_UhY/hqdefault.jpg" 
                   alt="נדל״ן בשלושה - פרק חדש" 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
@@ -635,7 +635,7 @@ export default function Home() {
             >
               <div className="relative aspect-[16/10] rounded-[30px] overflow-hidden mb-6">
                 <img 
-                  src="https://images.unsplash.com/photo-1434626881859-194d67b2b86f?auto=format&fit=crop&q=80&w=800" 
+                  src="https://images.unsplash.com/photo-1434626881859-194d67b2b86f?auto=format&fit=crop&q=60&w=600" 
                   alt="Mortgage Tips" 
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />

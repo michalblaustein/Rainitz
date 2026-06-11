@@ -91,7 +91,7 @@ export default function About() {
               <div className="absolute -inset-4 border border-babun-accent/20 translate-x-4 translate-y-4 -z-10 transition-transform duration-700 hover:translate-x-0 hover:translate-y-0" />
               <div className="aspect-[4/5] bg-babun-primary overflow-hidden rounded-babun-lg grayscale">
                 <img 
-                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1200" 
+                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=60&w=600" 
                   alt="Jacob Rainitz" 
                   className="w-full h-full object-cover opacity-80"
                 />
