@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDocFromServer } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDocFromServer, getFirestore } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 // Support dynamic Environment Variables (ideal for Vercel/Production) with fallback to JSON
@@ -17,12 +17,25 @@ const config = {
 
 const app = initializeApp(config);
 
-// Initialize Firestore with robust multi-tab persistent offline client-side caching
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager(),
-  }),
-}, config.firestoreDatabaseId);
+// Initialize Firestore safely. If custom multi-tab persistent cache is blocked (Safari private, Incognito, etc.),
+// fall back to default Firestore initialization to prevent application cash/blank page.
+let dbInstance: any;
+try {
+  dbInstance = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager(),
+    }),
+  }, config.firestoreDatabaseId);
+} catch (error) {
+  console.warn("Firestore persistent local cache not supported on this device/browser context. Falling back...", error);
+  try {
+    dbInstance = getFirestore(app, config.firestoreDatabaseId);
+  } catch (err2) {
+    dbInstance = getFirestore(app);
+  }
+}
+
+export const db = dbInstance;
 
 export const auth = getAuth();
 
