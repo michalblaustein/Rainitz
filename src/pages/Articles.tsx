@@ -38,6 +38,7 @@ import {
   Timestamp,
   onSnapshot,
   updateDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import {
   signInWithPopup,
@@ -46,7 +47,7 @@ import {
   signOut,
   User,
 } from "firebase/auth";
-import { db, auth } from "../lib/firebase";
+import { db, auth, handleFirestoreError, OperationType } from "../lib/firebase";
 import ImageWithSkeleton from "../components/common/ImageWithSkeleton";
 
 // Category definitions matching the design guidelines
@@ -331,6 +332,11 @@ export default function Articles() {
           "Failed to load articles from Firestore (using seeds):",
           error,
         );
+        try {
+          handleFirestoreError(error, OperationType.LIST, "articles");
+        } catch (logErr) {
+          // Keep running
+        }
         // Fallback in case of closed rules or setup issues
         setArticlesList(seedArticles);
         setLoading(false);
@@ -493,14 +499,22 @@ export default function Articles() {
       };
 
       if (editingArticleId) {
-        await updateDoc(doc(db, "articles", editingArticleId), articleData);
-        alert("הכתבה עודכנה בהצלחה!");
+        try {
+          await updateDoc(doc(db, "articles", editingArticleId), articleData);
+          alert("הכתבה עודכנה בהצלחה!");
+        } catch (err: any) {
+          handleFirestoreError(err, OperationType.UPDATE, `articles/${editingArticleId}`);
+        }
       } else {
-        await addDoc(collection(db, "articles"), {
-          ...articleData,
-          createdAt: Timestamp.now(),
-        });
-        alert("הכתבה פורסמה בהצלחה!");
+        try {
+          await addDoc(collection(db, "articles"), {
+            ...articleData,
+            createdAt: serverTimestamp(),
+          });
+          alert("הכתבה פורסמה בהצלחה!");
+        } catch (err: any) {
+          handleFirestoreError(err, OperationType.CREATE, "articles");
+        }
       }
 
       // Clear Form state
@@ -523,6 +537,11 @@ export default function Articles() {
       }
     } catch (err: any) {
       console.error("Delete error:", err);
+      try {
+        handleFirestoreError(err, OperationType.DELETE, `articles/${id}`);
+      } catch (logErr) {
+        // Just report the original alert error to the UI
+      }
       alert(`שגיאה במחיקת הכתבה: ${err.message}`);
     }
   };
