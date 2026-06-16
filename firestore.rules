@@ -58,10 +58,11 @@ service cloud.firestore {
              data.category in ['טור שבועי', 'כתבות ומאמרים', 'פודקאסטים', 'קווי מידע'] &&
              data.categoryId in ['weekly', 'articles', 'podcast', 'kavei'] &&
              data.date is string && data.date.size() > 0 && data.date.size() <= 30 &&
-             data.image is string && data.image.size() > 0 && data.image.size() <= 200000 &&
+             data.image is string && data.image.size() > 0 && data.image.size() <= 1000000 &&
              data.content is string && data.content.size() > 0 && data.content.size() <= 100000 &&
              (data.keys().hasAny(['link']) ? (data.link is string && data.link.size() <= 1000) : true) &&
-             data.createdAt == request.time;
+             (data.keys().hasAny(['innerImage']) ? (data.innerImage is string && data.innerImage.size() <= 1000000) : true) &&
+             (resource == null ? data.createdAt == request.time : data.createdAt == resource.data.createdAt);
      }
 
     // 1. Master Gate Collection Rules
