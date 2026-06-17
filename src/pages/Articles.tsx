@@ -303,9 +303,24 @@ export default function Articles() {
   // Load and listen to articles from Firestore
   useEffect(() => {
     // Show spinner ONLY when we have absolutely no cache or list loaded
-    const cached = localStorage.getItem("babun_articles_cache");
-    if (!cached || JSON.parse(cached).length === 0) {
+    let cached: string | null = null;
+    try {
+      cached = localStorage.getItem("babun_articles_cache");
+    } catch (e) {
+      console.warn("Local storage access blocked or not supported:", e);
+    }
+
+    if (!cached) {
       setLoading(true);
+    } else {
+      try {
+        const parsed = JSON.parse(cached);
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+          setLoading(true);
+        }
+      } catch (e) {
+        setLoading(true);
+      }
     }
 
     const articlesRef = collection(db, "articles");
