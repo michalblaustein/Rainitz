@@ -310,7 +310,28 @@ export default function Articles() {
         throw new Error("HTTP error");
       })
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        let cachedData: any[] = [];
+        try {
+          const cached = localStorage.getItem("babun_articles_cache");
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed)) {
+              cachedData = parsed;
+            }
+          }
+        } catch (e) {}
+
+        if ((!Array.isArray(data) || data.length === 0) && cachedData.length > 0) {
+          console.log("Restoring server backup from client local storage cache (size: " + cachedData.length + ")");
+          setArticlesList(cachedData);
+          fetch("/api/articles/sync", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(cachedData),
+          }).catch((err) => console.warn("Failed to auto-restore articles backup to server:", err));
+        } else if (Array.isArray(data) && data.length > 0) {
           setArticlesList(data);
           try {
             localStorage.setItem("babun_articles_cache", JSON.stringify(data));
