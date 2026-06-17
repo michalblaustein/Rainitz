@@ -329,7 +329,7 @@ export default function Articles() {
       },
       (error) => {
         console.error(
-          "Failed to load articles from Firestore (using seeds):",
+          "Failed to load articles from Firestore:",
           error,
         );
         try {
@@ -337,8 +337,24 @@ export default function Articles() {
         } catch (logErr) {
           // Keep running
         }
-        // Fallback in case of closed rules or setup issues
-        setArticlesList(seedArticles);
+        
+        // Attempt to load from cache if state is empty, to ensure something is rendered
+        try {
+          const cached = localStorage.getItem("babun_articles_cache");
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setArticlesList(parsed);
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (e) {
+          console.error("Local cache load fallback error:", e);
+        }
+
+        // Only fallback to seedArticles (which is empty) if absolutely nothing in state or cache
+        setArticlesList((prev) => (prev && prev.length > 0 ? prev : seedArticles));
         setLoading(false);
       },
     );

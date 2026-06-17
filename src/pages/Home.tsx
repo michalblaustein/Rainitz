@@ -51,10 +51,37 @@ export default function Home() {
   const [courseEmail, setCourseEmail] = useState("");
   const [courseStatus, setCourseStatus] = useState<null | "loading" | "success">(null);
 
-  const [latestMedia, setLatestMedia] = useState<any[]>([]);
+  const [latestMedia, setLatestMedia] = useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem("babun_articles_cache");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.slice(0, 4);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load local articles cache for home page:", e);
+    }
+    return [];
+  });
   const [loadingMedia, setLoadingMedia] = useState(true);
 
   useEffect(() => {
+    // Attempt to load from cache first to avoid showing skeleton if cache exists
+    try {
+      const cached = localStorage.getItem("babun_articles_cache");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setLatestMedia(parsed.slice(0, 4));
+          setLoadingMedia(false);
+        }
+      }
+    } catch (e) {
+      console.error("Local home page cache reload error:", e);
+    }
+
     const q = query(
       collection(db, "articles"),
       orderBy("createdAt", "desc"),
@@ -68,7 +95,19 @@ export default function Home() {
       setLatestMedia(docs);
       setLoadingMedia(false);
     }, (error) => {
-      console.error("Failed to load homepage media:", error);
+      console.error("Failed to load homepage media from Firestore:", error);
+      // Attempt to load from cache again on error
+      try {
+        const cached = localStorage.getItem("babun_articles_cache");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setLatestMedia(parsed.slice(0, 4));
+          }
+        }
+      } catch (e) {
+        console.error("Failed to recover home page cache on Firestore error:", e);
+      }
       setLoadingMedia(false);
     });
     return () => unsubscribe();
