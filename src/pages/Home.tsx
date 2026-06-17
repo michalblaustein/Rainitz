@@ -68,20 +68,37 @@ export default function Home() {
   const [loadingMedia, setLoadingMedia] = useState(true);
 
   useEffect(() => {
-    // Attempt to load from cache first to avoid showing skeleton if cache exists
-    try {
-      const cached = localStorage.getItem("babun_articles_cache");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setLatestMedia(parsed.slice(0, 4));
-          setLoadingMedia(false);
+    // 1. Initial quick load from server backup (instant load, completely bypasses firestore offline/quota lock)
+    setLoadingMedia(true);
+    fetch("/api/articles")
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error("HTTP error");
+      })
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setLatestMedia(data.slice(0, 4));
         }
-      }
-    } catch (e) {
-      console.error("Local home page cache reload error:", e);
-    }
+      })
+      .catch((err) => {
+        console.warn("Home initial fetch from server fallback failed, trying local storage cache...", err);
+        try {
+          const cached = localStorage.getItem("babun_articles_cache");
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setLatestMedia(parsed.slice(0, 4));
+            }
+          }
+        } catch (e) {
+          console.error("Local home cache load fallback error:", e);
+        }
+      })
+      .finally(() => {
+        setLoadingMedia(false);
+      });
 
+    // 2. Setup subscription to automatically update if firestore is healthy/online
     const q = query(
       collection(db, "articles"),
       orderBy("createdAt", "desc"),
@@ -95,20 +112,7 @@ export default function Home() {
       setLatestMedia(docs);
       setLoadingMedia(false);
     }, (error) => {
-      console.error("Failed to load homepage media from Firestore:", error);
-      // Attempt to load from cache again on error
-      try {
-        const cached = localStorage.getItem("babun_articles_cache");
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setLatestMedia(parsed.slice(0, 4));
-          }
-        }
-      } catch (e) {
-        console.error("Failed to recover home page cache on Firestore error:", e);
-      }
-      setLoadingMedia(false);
+      console.warn("Home Firestore snapshot failed (Quota limit), staying with server backup list:", error);
     });
     return () => unsubscribe();
   }, []);

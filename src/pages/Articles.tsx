@@ -302,31 +302,43 @@ export default function Articles() {
 
   // Load and listen to articles from Firestore
   useEffect(() => {
-    // Show spinner ONLY when we have absolutely no cache or list loaded
-    let cached: string | null = null;
-    try {
-      cached = localStorage.getItem("babun_articles_cache");
-    } catch (e) {
-      console.warn("Local storage access blocked or not supported:", e);
-    }
-
-    if (!cached) {
-      setLoading(true);
-    } else {
-      try {
-        const parsed = JSON.parse(cached);
-        if (!Array.isArray(parsed) || parsed.length === 0) {
-          setLoading(true);
+    // 1. Instantaneous quick-load from server backup JSON (independent of Firestore quota/connection status)
+    setLoading(true);
+    fetch("/api/articles")
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error("HTTP error");
+      })
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setArticlesList(data);
+          try {
+            localStorage.setItem("babun_articles_cache", JSON.stringify(data));
+          } catch (lsErr) {}
         }
-      } catch (e) {
-        setLoading(true);
-      }
-    }
+      })
+      .catch((err) => {
+        console.warn("Initial server-side backup fetch failed, trying local storage cache...", err);
+        try {
+          const cached = localStorage.getItem("babun_articles_cache");
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setArticlesList(parsed);
+            }
+          }
+        } catch (e) {
+          console.error("Local storage fallback failed:", e);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
 
+    // 2. Setup real-time onSnapshot listener for live changes
     const articlesRef = collection(db, "articles");
     const q = query(articlesRef, orderBy("createdAt", "desc"));
 
-    // Real-time snapshot listener
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -337,23 +349,24 @@ export default function Articles() {
         setArticlesList(docs);
         try {
           localStorage.setItem("babun_articles_cache", JSON.stringify(docs));
-        } catch (e) {
-          console.error("Local storage error:", e);
+        } catch (e) {}
+        
+        // Auto-sync with server backup on successful real-time updates
+        if (docs.length > 0) {
+          fetch("/api/articles/sync", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(docs),
+          }).catch((err) => console.warn("Failed to sync live Firestore docs to server JSON backup:", err));
         }
         setLoading(false);
       },
       (error) => {
-        console.error(
-          "Failed to load articles from Firestore:",
-          error,
-        );
-        try {
-          handleFirestoreError(error, OperationType.LIST, "articles");
-        } catch (logErr) {
-          // Keep running
-        }
+        console.warn("Firestore real-time subscription failed (Quota or rules), staying with server backup:", error);
         
-        // Attempt to load from cache if state is empty, to ensure something is rendered
+        // Fallback to cache immediately to verify
         try {
           const cached = localStorage.getItem("babun_articles_cache");
           if (cached) {
@@ -368,7 +381,6 @@ export default function Articles() {
           console.error("Local cache load fallback error:", e);
         }
 
-        // Only fallback to seedArticles (which is empty) if absolutely nothing in state or cache
         setArticlesList((prev) => (prev && prev.length > 0 ? prev : seedArticles));
         setLoading(false);
       },
@@ -534,7 +546,17 @@ export default function Articles() {
           await updateDoc(doc(db, "articles", editingArticleId), articleData);
           alert("הכתבה עודכנה בהצלחה!");
         } catch (err: any) {
-          handleFirestoreError(err, OperationType.UPDATE, `articles/${editingArticleId}`);
+          console.warn("Firestore update failed. Falling back to server-side backup sync:", err);
+          const updatedList = articlesList.map((art) => 
+            art.id === editingArticleId ? { ...art, ...articleData } : art
+          );
+          setArticlesList(updatedList);
+          await fetch("/api/articles/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedList),
+          });
+          alert("הכתבה עודכנה בהצלחה בשרת הגיבוי לחלופין!");
         }
       } else {
         try {
@@ -544,7 +566,20 @@ export default function Articles() {
           });
           alert("הכתבה פורסמה בהצלחה!");
         } catch (err: any) {
-          handleFirestoreError(err, OperationType.CREATE, "articles");
+          console.warn("Firestore add failed. Falling back to server-side backup sync:", err);
+          const newDoc = {
+            id: "local_" + Date.now(),
+            ...articleData,
+            createdAt: new Date().toISOString(),
+          };
+          const updatedList = [newDoc, ...articlesList];
+          setArticlesList(updatedList);
+          await fetch("/api/articles/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedList),
+          });
+          alert("הכתבה פורסמה בהצלחה בשרת הגיבוי לחלופין!");
         }
       }
 
@@ -562,17 +597,27 @@ export default function Articles() {
       return;
 
     try {
-      await deleteDoc(doc(db, "articles", id));
+      try {
+        await deleteDoc(doc(db, "articles", id));
+      } catch (err: any) {
+        console.warn("Firestore delete failed. Falling back to server-side backup sync:", err);
+      }
+
+      const updatedList = articlesList.filter((art) => art.id !== id);
+      setArticlesList(updatedList);
       if (selectedArticle?.id === id) {
         setSelectedArticle(null);
       }
+
+      await fetch("/api/articles/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedList),
+      });
+
+      alert("הכתבה נמחקה בהצלחה!");
     } catch (err: any) {
       console.error("Delete error:", err);
-      try {
-        handleFirestoreError(err, OperationType.DELETE, `articles/${id}`);
-      } catch (logErr) {
-        // Just report the original alert error to the UI
-      }
       alert(`שגיאה במחיקת הכתבה: ${err.message}`);
     }
   };

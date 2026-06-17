@@ -3,6 +3,7 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from "@google/genai";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -64,6 +65,38 @@ async function startServer() {
     const { name, email, phone, source } = req.body;
     console.log(`New lead received: ${name} (${email}) from ${source}`);
     res.json({ success: true, message: "Lead received" });
+  });
+
+  // API route to get cached/backed-up articles when Firestore is down or blocked (Quota limit)
+  app.get("/api/articles", (req, res) => {
+    try {
+      const backupPath = path.join(process.cwd(), "src", "data", "articles.json");
+      if (fs.existsSync(backupPath)) {
+        const data = fs.readFileSync(backupPath, "utf-8");
+        return res.json(JSON.parse(data));
+      }
+      res.json([]);
+    } catch (error) {
+      console.error("Error reading articles backup JSON:", error);
+      res.status(500).json({ error: "Failed to read backup articles" });
+    }
+  });
+
+  // API route to sync/save current articles to server-side backup JSON file from the client
+  app.post("/api/articles/sync", (req, res) => {
+    try {
+      const articles = req.body;
+      if (!Array.isArray(articles)) {
+        return res.status(400).json({ error: "Payload must be a valid array of articles" });
+      }
+      const backupPath = path.join(process.cwd(), "src", "data", "articles.json");
+      fs.writeFileSync(backupPath, JSON.stringify(articles, null, 2), "utf-8");
+      console.log(`Server-side articles backup updated successfully (count: ${articles.length})`);
+      res.json({ success: true, count: articles.length });
+    } catch (error: any) {
+      console.error("Error synchronizing articles to backup JSON:", error);
+      res.status(500).json({ error: error?.message || "Failed to update backup" });
+    }
   });
 
   // AI OCR extraction endpoint for articles
