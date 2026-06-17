@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import {
   MessageCircle,
@@ -63,6 +63,9 @@ const mediaCategories = [
 const seedArticles: any[] = [];
 
 export default function Articles() {
+  const [searchParams] = useSearchParams();
+  const hasEditParam = searchParams.get("edit") === "true" || searchParams.get("admin") === "true";
+
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [articlesList, setArticlesList] = useState<any[]>(() => {
     try {
@@ -421,6 +424,13 @@ export default function Articles() {
     });
     return () => unsubscribe();
   }, []);
+
+  // Auto-trigger admin login modal if ?edit=true or ?admin=true is passed in URL
+  useEffect(() => {
+    if (hasEditParam && !isAdminMode) {
+      setShowAdminLogin(true);
+    }
+  }, [hasEditParam, isAdminMode]);
 
   // Handle Google authenticaton
   const handleGoogleLogin = async () => {
@@ -957,7 +967,7 @@ export default function Articles() {
       </div>
 
       {/* FLOATING ADMIN LOGIN BUTTON */}
-      {!isAdminMode && (
+      {!isAdminMode && hasEditParam && (
         <button
           onClick={() => setShowAdminLogin(true)}
           className="fixed bottom-8 right-8 z-55 bg-babun-primary/90 text-white hover:text-babun-accent hover:bg-babun-primary p-4 rounded-full shadow-2xl transition-all duration-300 backdrop-blur-md cursor-pointer flex items-center justify-center"
