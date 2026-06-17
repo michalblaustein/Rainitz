@@ -1,7 +1,77 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, Linkedin, Facebook, Send } from "lucide-react";
 
+const getDisplayImage = (url: string) => {
+  if (!url) return "";
+  const driveFileRegex = /\/file\/d\/([a-zA-Z0-9_-]+)/;
+  const driveIdRegex = /[?&]id=([a-zA-Z0-9_-]+)/;
+
+  const fileMatch = url.match(driveFileRegex);
+  const idMatch = url.match(driveIdRegex);
+
+  const fileId = fileMatch ? fileMatch[1] : idMatch ? idMatch[1] : null;
+
+  if (fileId) {
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w160`;
+  }
+  return url;
+};
+
+const defaultArticlesFallback = [
+  {
+    id: "default_1",
+    title: 'שוק הנדל"ן 2026: מה באמת קורה מאחורי הקלעים?',
+    date: "15.05.2026",
+    category: "טור שבועי",
+    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=80&h=80&q=50"
+  },
+  {
+    id: "default_2",
+    title: "המדריך המלא למשקיע המתחיל: איך לא ליפול בפח?",
+    date: "10.05.2026",
+    category: "מאמר מקצועי",
+    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=80&h=80&q=50"
+  },
+  {
+    id: "default_3",
+    title: "פודקאסט: למה כולם מדברים על התחדשות עירונית?",
+    date: "05.05.2026",
+    category: "פודקאסט",
+    image: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=80&h=80&q=50"
+  }
+];
+
 export default function Footer() {
+  const [latestArticles, setLatestArticles] = useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem("babun_articles_cache");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.slice(0, 3);
+        }
+      }
+    } catch (e) {}
+    return defaultArticlesFallback;
+  });
+
+  useEffect(() => {
+    fetch("/api/articles")
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error("HTTP error");
+      })
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setLatestArticles(data.slice(0, 3));
+        }
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch latest articles in Footer:", err);
+      });
+  }, []);
+
   return (
     <footer className="bg-babun-primary text-white pt-24 pb-12 overflow-hidden relative" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
@@ -57,50 +127,28 @@ export default function Footer() {
           <div className="flex flex-col items-start w-full">
             <h5 className="text-xl font-display font-bold text-babun-accent mb-8 w-full">כתבות ופודקאסטים</h5>
             <div className="space-y-4 w-full">
-              <Link to="/articles" className="group flex items-center gap-4 hover:text-babun-accent transition-colors w-full">
-                <img 
-                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=80&h=80&q=50" 
-                  alt="שוק הנדלן" 
-                  className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="flex flex-col min-w-0">
-                  <span className="line-clamp-2 leading-snug font-normal text-white/90 group-hover:text-babun-accent transition-colors text-sm">
-                    שוק הנדל"ן 2026: מה באמת קורה מאחורי הקלעים?
-                  </span>
-                  <span className="text-xs text-white/30 mt-1">15.05.2026 • טור שבועי</span>
-                </div>
-              </Link>
-              
-              <Link to="/articles" className="group flex items-center gap-4 hover:text-babun-accent transition-colors w-full border-t border-white/5 pt-4">
-                <img 
-                  src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=80&h=80&q=50" 
-                  alt="מדריך למשקיע" 
-                  className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="flex flex-col min-w-0">
-                  <span className="line-clamp-2 leading-snug font-normal text-white/90 group-hover:text-babun-accent transition-colors text-sm">
-                    המדריך המלא למשקיע המתחיל: איך לא ליפול בפח?
-                  </span>
-                  <span className="text-xs text-white/30 mt-1">10.05.2026 • מאמר מקצועי</span>
-                </div>
-              </Link>
-
-              <Link to="/articles" className="group flex items-center gap-4 hover:text-babun-accent transition-colors w-full border-t border-white/5 pt-4">
-                <img 
-                  src="https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=80&h=80&q=50" 
-                  alt="פודקאסט התחדשות עירונית" 
-                  className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="flex flex-col min-w-0">
-                  <span className="line-clamp-2 leading-snug font-normal text-white/90 group-hover:text-babun-accent transition-colors text-sm">
-                    פודקאסט: למה כולם מדברים על התחדשות עירונית?
-                  </span>
-                  <span className="text-xs text-white/30 mt-1">05.05.2026 • פודקאסט</span>
-                </div>
-              </Link>
+              {latestArticles.map((article, idx) => (
+                <Link 
+                  key={article.id || idx}
+                  to="/articles" 
+                  className={`group flex items-center gap-4 hover:text-babun-accent transition-colors w-full ${idx > 0 ? "border-t border-white/5 pt-4" : ""}`}
+                >
+                  <img 
+                    src={getDisplayImage(article.image)} 
+                    alt={article.title} 
+                    className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="flex flex-col min-w-0">
+                    <span className="line-clamp-2 leading-snug font-normal text-white/90 group-hover:text-babun-accent transition-colors text-sm text-right">
+                      {article.title}
+                    </span>
+                    <span className="text-xs text-white/30 mt-1 text-right">
+                      {article.date || ""} • {article.category || ""}
+                    </span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
