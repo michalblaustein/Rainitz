@@ -5,18 +5,46 @@ import { fileURLToPath } from 'url';
 import { GoogleGenAI } from "@google/genai";
 import fs from "fs";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Initialize Gemini Client
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
+// Helper to resolve paths in a way that works in both ESM (tsx) and CJS (bundled esbuild)
+const getPaths = () => {
+  let filename = "";
+  let dirname = "";
+  try {
+    if (typeof import.meta !== "undefined" && import.meta.url) {
+      filename = fileURLToPath(import.meta.url);
+      dirname = path.dirname(filename);
     }
+  } catch (e) {}
+
+  if (!filename) {
+    filename = typeof __filename !== "undefined" ? __filename : "";
+    dirname = typeof __dirname !== "undefined" ? __dirname : process.cwd();
   }
-});
+
+  return { filename, dirname };
+};
+
+const { filename: __filename, dirname: __dirname } = getPaths();
+
+// Lazy Initialize Gemini Client to avoid module-load time crashes if GEMINI_API_KEY is missing
+let aiClient: GoogleGenAI | null = null;
+function getGeminiClient(): GoogleGenAI {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY environment variable is required");
+    }
+    aiClient = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
+  }
+  return aiClient;
+}
 
 // Helper to fetch Google Drive/External images and convert them to Base64
 async function fetchImageAsBase64(url: string): Promise<{ data: string; mimeType: string }> {
@@ -119,6 +147,7 @@ async function startServer() {
       }
 
       console.log(`Invoking Gemini for Hebrew article OCR extraction...`);
+      const ai = getGeminiClient();
       const response = await ai.models.generateContent({
         model: "gemini-3.5-flash",
         contents: {
