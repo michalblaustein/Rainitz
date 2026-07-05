@@ -75,7 +75,7 @@ function AnimatedCounter({
   return (
     <span ref={elementRef}>
       {prefix}
-      {count}
+      {count.toLocaleString()}
       {suffix}
     </span>
   );
@@ -145,7 +145,7 @@ export default function Courses() {
     },
     {
       q: "האם הקורס מתאים לאנשי מקצוע?",
-      a: "כן בהחלט. בכל מחזור משתתפים מתווכים, ברוקרים ויועצי משכנתאות שרוצים לחדד את ארגז הכלים המעשי שלהם ולשפר את איכות השיחה עם הלקוחות."
+      a: "כן בהחלט. בכל מחזור משתתפים מתווכים ויועצי משכנתאות שרוצים לחדד את ארגז הכלים המעשי שלהם ולשפר את איכות השיחה עם הלקוחות."
     },
     {
       q: "כמה משתתפים בקבוצה?",
@@ -188,20 +188,20 @@ export default function Courses() {
 
   const whatYouGet = [
     {
-      title: "ידע שקוף, בלי אינטרסים",
+      title: "ידע שקוף בלי אינטרסים",
       desc: "אני לא מחויב לאף קבלן, לאף יזם, או לאף גורם פיננסי בשוק. מה שתשמע בקורס - זה בדיוק מה שאני אומר לחברים קרובים שמבקשים עצה."
     },
     {
-      title: "ליווי אנושי אמיתי",
-      desc: "ליווי, בדיקת שיעורי בית ומענה לשאלות אונליין"
+      title: "התאמה אסטרטגית של העסקה",
+      desc: "איך להגדיר תקציב אמיתי, לבחור את האזור הנכון, ולוודא שהנכס משרת את המטרות שלכם ולא להפך."
     },
     {
       title: "6 מפגשים שבונים שלב אחרי שלב",
-      desc: "מסלול לימוד מסודר ובונה. אין קפיצות חדות או הנחה מראש שאתה כבר שולט בחומר. אנחנו מתחילים מהיסודות האיתנים ומגיעים להבנת הרזים העמוקים ביותר."
+      desc: "מסלול לימוד מובנה ומדורג. בלי קפיצות חדות ובלי הנחה מוקדמת שאתם כבר שולטים בחומר. אנחנו מתחילים מהיסודות האיתנים, ובונים את הידע צעד אחר צעד, עד להבנה המעמיקה ביותר של השוק."
     },
     {
       title: "כלים שאפשר להשתמש בהם מחר",
-      desc: "רשימות בדיקה פרקטיות למגרשים ודירות, שאלות זהב לשאול מתווכים, וזיהוי מיידי של דגלים אדומים בנכס. לא תיאוריות באוויר - אלא כלים אמיתיים."
+      desc: "רשימות בדיקה פרקטיות לפני חתימה על חוזה, שאלות מפתח למתווכים, וזיהוי מיידי של דגלים אדומים בנכס. בלי תיאוריות באוויר, רק כלים שעובדים בשטח."
     }
   ];
 
@@ -220,7 +220,7 @@ export default function Courses() {
     },
     {
       title: "אנשי מקצוע",
-      desc: "הזדמנות יקרת ערך למתווכים, ברוקרים ויועצי משכנתאות בתחילת הדרך או ותיקים שרוצים לחדד את הידע השיווקי והמקצועי, ולשפר לאין שיעור את השיח היומיומי מול הלקוחות."
+      desc: "הזדמנות יקרת ערך למתווכים ויועצי משכנתאות בתחילת הדרך או ותיקים שרוצים לחדד את הידע השיווקי והמקצועי, ולשפר לאין שיעור את השיח היומיומי מול הלקוחות."
     }
   ];
 
@@ -269,8 +269,8 @@ export default function Courses() {
               transition={{ delay: 0.3, duration: 0.8 }}
               className="text-white text-lg md:text-2xl font-light mb-10 max-w-2xl leading-relaxed md:leading-[33px] flex flex-col gap-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]"
             >
-              <span>הקורס המקצועי לרוכשי דירות ומשקיעי נדל"ן.</span>
-              <span>קצר, ממוקד, אישי, פרקטי. והכי חשוב: בשפה שלך.</span>
+              <span>הקורס המקצועי לרוכשי דירות ומשקיעי נדל"ן</span>
+              <span>קצר, ממוקד, אישי, פרקטי. והכי חשוב: בשפה שלכם.</span>
             </motion.p>
             
             <motion.div
@@ -307,14 +307,14 @@ export default function Courses() {
             
             <div className="text-center px-4 flex flex-col justify-center items-center">
               <span className="text-babun-accent font-display text-2xl md:text-3xl font-black">
-                <AnimatedCounter value={2006} prefix="משנת " startFrom={1995} />
+                <AnimatedCounter value={1500} prefix="+" suffix=" טורים" startFrom={1000} />
               </span>
-              <span className="text-zinc-400 text-sm md:text-base mt-1">בשוק הנדל״ן</span>
+              <span className="text-zinc-400 text-sm md:text-base mt-1">מקצועיים</span>
             </div>
 
             <div className="text-center px-4 pt-4 lg:pt-0 flex flex-col justify-center items-center">
               <span className="text-babun-accent font-display text-2xl md:text-3xl font-black">
-                <AnimatedCounter value={500} suffix=" בוגרים" />
+                <AnimatedCounter value={700} suffix="+ בוגרים" startFrom={500} />
               </span>
               <span className="text-zinc-400 text-sm md:text-base mt-1">שיצאו לשטח</span>
             </div>
@@ -345,20 +345,24 @@ export default function Courses() {
             {/* Right column: Text content */}
             <div className="lg:col-span-7">
               <h2 className="text-3xl md:text-5xl font-display font-black mb-8 leading-tight">
-                בוא נדבר ישר.
+                בואו נדבר על הטעות הכי גדולה שלכם.
               </h2>
 
               <div className="space-y-6 text-lg md:text-xl font-light text-babun-primary">
                 <p className="leading-relaxed">
-                  רוב האנשים שמגיעים אלי לייעוץ - מגיעים אחרי שחתמו. אחרי שסמכו על מתווך שעבד בשביל הצד השני. אחרי שלקחו משכנתא שלא הבינו עד הסוף. אחרי שגילו שאפשר היה לשלם פחות.
+                  רוב האנשים מגיעים אליי לייעוץ – אחרי שחתמו.<br />
+                  אחרי שסמכו על מתווך שעבד בשביל המוכר.<br />
+                  אחרי שגילו שהעסקה פשוט לא מתאימה להם.<br />
+                  אחרי שגילו שאפשר היה לשלם פחות.<br />
+                  <strong className="font-black text-xl block mt-2">אל תגיעו אחרי.</strong>
                 </p>
                 <p className="leading-relaxed flex flex-col gap-1">
-                  <span>אני שואל אותם כל פעם: <strong className="font-bold bg-babun-accent/30 py-0.5 px-1.5 rounded">"למה לא למדת לפני?"</strong></span>
-                  <span>התשובה תמיד אותה תשובה: <strong className="font-bold">"לא ידעתי שצריך."</strong></span>
+                  <span>אני שואל אותם כל פעם מחדש: <strong className="font-bold bg-babun-accent/30 py-0.5 px-1.5 rounded inline-block">"למה לא למדתם לפני?"</strong></span>
+                  <span>והתשובה תמיד אותה תשובה: <strong className="font-bold">"לא ידענו שצריך"</strong></span>
                 </p>
                 <div className="pt-4">
                   <p className="text-2xl md:text-3xl font-display font-black text-babun-primary leading-snug">
-                    <span>הקורס הזה קיים כדי שאתה תדע!</span>
+                    <span>הקורס הזה קיים כדי שתדע לפני.</span>
                     <span className="block mt-1 text-babun-primary">כי ידע = כסף!</span>
                   </p>
                 </div>
@@ -392,7 +396,7 @@ export default function Courses() {
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-right">
           <div className="text-right mb-16 lg:mb-20">
             <h2 className="text-3xl md:text-5xl font-display font-black text-babun-primary tracking-tight">
-              מה תקבל - בקורס הזה
+              מה תקבלו - בקורס הזה
             </h2>
           </div>
 
@@ -442,7 +446,7 @@ export default function Courses() {
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-right relative z-10">
           <div className="text-right mb-16">
             <h2 className="text-3xl md:text-5xl font-display font-black text-white flex items-center justify-start gap-3">
-              <span>מה מחכה לך בקורס?</span>
+              <span>מה מחכה לכם בקורס?</span>
             </h2>
           </div>
 
@@ -603,24 +607,25 @@ export default function Courses() {
             {/* Right side: Bio copy */}
             <div className="lg:col-span-7 order-1 lg:order-2 space-y-6">
               <h2 className="text-3xl md:text-5xl font-display font-black text-babun-primary">
-                על יעקב רייניץ
+                על יעקב רייניץ:
               </h2>
               <h3 className="text-xl md:text-2xl font-bold text-babun-primary/80">
-                עיתונאי כלכלי שהפך למומחה נדל"ן. מומחה שהפך לשליחות.
+                עיתונאי שהפך למומחה. מומחה שהפך את הידע לשליחות.
               </h3>
               
               <div className="text-base md:text-lg font-light text-zinc-700 space-y-4 leading-relaxed">
                 <p>
-                  התחלתי כעיתונאי כלכלי - כיסיתי את שוק הנדל"ן העשיר והמורכב מבחוץ. הייתה לי גישה בלעדית לנתונים ומהלכים שרוב רובו של הציבור בארץ לא ראה או הבין לעומק. ראיתי יותר מדי פעמים מה קורה כשאנשים חותמים על חוזים דרקוניים ללא כל ידע קודם.
+                  הכניסה שלי לשוק הנדל"ן התחילה מהכיסוי העיתונאי. ראיתי מספרים, מגמות ומהלכים שרוב הציבור לא חשוף אליהם. אבל מה שנחרט בי עמוק יותר מכל הנתונים והגרפים היו הפנים של האנשים.<br />
+                  אלו שהגיעו אליי אחרי שחתמו. אחרי שהבינו שנפלו. אחרי שגילו, בכאב עצום, שאפשר היה למנוע את זה.
                 </p>
                 <p>
-                  כשעברתי באופן רשמי לתחום הייעוץ האישי, הבנתי אמת פשוטה: הבעיה העיקרית היא איננה קיומם של אנשים רעים ומניפולטיביים בשוק. הבעיה המרכזית היא כוח משמעותי של ידע מקצועי פשוט שלא מגיע לאנשים הנכונים ברגע הנכון.
+                  זה היה הרגע שבו הבנתי שהכתיבה בעיתון לבד כבר לא מספיקה.
+                </p>
+                <p>
+                  כשעברתי לשטח והתחלתי לייעץ, הבנתי דבר אחד: הבעיה בשוק היא לא שיש בו רק אנשים רעים, אלא שהידע שיכול להציל משפחות מטעות של מיליוני שקלים פשוט לא מגיע אליהן בזמן.
                 </p>
                 <p className="font-medium text-babun-primary bg-zinc-50 border-r-4 border-babun-accent p-4 rounded-l-babun-md">
-                  הטור השבועי שלי ב"המודיע", הספר שכתבתי "שליש בקרקע" והקורסים שאני מעביר כיום - כולם קיימים עם מטרה אחת ברורה ובלעדית: שגם אתה תוכל לרכוש נדל״ן מתוך הבנת הנתונים וראש שקט ובטוח.
-                </p>
-                <p>
-                  אני לא מחויב לאף קבלן, לאף יזם או לאף גורם פיננסי או מסחרי בשוק. מה שתשמע ממני במהלך הלימודים עובר דרך מסננת אחת בלבד: <strong className="font-bold">האם זה נכון ומדויק עבורך.</strong>
+                  הקמתי את "מרכז רייניץ לנדל"ן" כי הבנתי שמישהו חייב לעמוד בצד שלכם. מהרגע הראשון ועד המפתח.
                 </p>
               </div>
             </div>
@@ -758,7 +763,7 @@ export default function Courses() {
                 </span>
 
                 <p className="text-zinc-600 text-base leading-relaxed mb-6 font-light">
-                  לימוד נוח וזמין ישירות מהטלפון האישי שלך, בקצב שלך ובזמן שלך באמצעות מערכת הטלפוניה המתקדמת. הקורס מועבר במערכת הטלפונית של חסידות אור עולם ופתוח להאזנה בכל עת.
+                  לימוד נוח וזמין ישירות מהטלפון האישי שלך, בקצב שלך ובזמן שלך באמצעות מערכת טלפונית מתקדמת. הקורס מובא במערכת טלפונית של מרכז רייניץ לנדל״ן ופתוח להאזנה בכל עת.
                 </p>
 
                 <div className="space-y-3 pt-4 border-t border-zinc-100 mb-8 text-sm text-zinc-700">
@@ -768,7 +773,7 @@ export default function Courses() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Check size={18} className="text-babun-primary shrink-0" />
-                    <span>מתאים למגזר התורני ולמחזיקי טלפון כשר</span>
+                    <span>חומרי עזר להורדה לאחר כל מפגש</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check size={18} className="text-babun-primary shrink-0" />
@@ -818,7 +823,7 @@ export default function Courses() {
                 </span>
 
                 <p className="text-zinc-600 text-base leading-relaxed mb-6 font-light">
-                  המסלול המושלם ללמידה עצמית דינמית בקצב שלכם ובמכשיר שלכם. הרשמו עכשיו ללא כל התחייבות כספית כדי לשריין את הטבת הרישום המוקדם במועד ההשקה הקרוב.
+                  המסלול המושלם ללמידה עצמית דינמית בקצב שלכם ובמחשב שלכם. הרשמו עכשיו ללא כל התחייבות כספית כדי לשריין את הטבת הרישום המוקדם במועד ההשקה הקרוב.
                 </p>
 
                 <div className="space-y-3 pt-4 border-t border-zinc-100 mb-8 text-sm text-zinc-700">
@@ -884,7 +889,7 @@ export default function Courses() {
                 <div className="space-y-3 pt-4 border-t border-zinc-100 mb-8 text-sm text-zinc-700">
                   <div className="flex items-center gap-2">
                     <Check size={18} className="text-babun-primary shrink-0" />
-                    <span>קבוצה אינטימית למפגש דינמי ומענה אישי מעמיק</span>
+                    <span>קבוצה קטנה למפגש דינמי ומענה אישי מעמיק</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check size={18} className="text-babun-primary shrink-0" />
