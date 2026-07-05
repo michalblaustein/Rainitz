@@ -88,7 +88,7 @@ export default function Footer() {
               />
             </Link>
             <p className="text-lg text-white/80 font-medium leading-relaxed mb-10 max-w-sm">
-              18 שנות ניסיון. טור שבועי ב"המודיע". ספר שמסביר מה אף אחד לא אמר לך. יעקב רייניץ לצידך - מהשאלה הראשונה עד חתימת הטאבו.
+              יעקב רייניץ, יועץ נדל"ן בכיר, 18 שנות ניסיון במגזר החרדי
             </p>
           </div>
 
@@ -110,7 +110,7 @@ export default function Footer() {
             <ul className="space-y-6 text-lg text-white/60 font-light w-full">
               <li className="flex items-center gap-4 group">
                 <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-babun-accent/20 transition-colors"><Mail size={18} /></div>
-                <span className="group-hover:text-white transition-colors">office@rainitznadlan.co.il</span>
+                <span className="group-hover:text-white transition-colors">r0504141516@gmail.com</span>
               </li>
               <li className="flex items-center gap-4 group">
                 <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-babun-accent/20 transition-colors"><Phone size={18} /></div>
@@ -118,7 +118,7 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-4 group">
                 <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-babun-accent/20 transition-colors"><MapPin size={18} /></div>
-                <span className="group-hover:text-white transition-colors max-w-[200px]">מצדה 3, מרכז עסקים, בני ברק</span>
+                <span className="group-hover:text-white transition-colors max-w-[200px]">מגדל בסר 3, מצדה 9 מרכז העסקים בני ברק</span>
               </li>
             </ul>
           </div>

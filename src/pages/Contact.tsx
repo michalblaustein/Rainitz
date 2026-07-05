@@ -70,7 +70,7 @@ export default function Contact() {
                 <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-babun-accent mb-6">LOCATION</div>
                 <h4 className="text-2xl font-display font-bold text-babun-primary mb-4">בני ברק, ישראל</h4>
                 <div className="text-babun-primary/60 text-sm leading-loose">
-                   מרכז העסקים, מצדה 3 <br />
+                   מגדל בסר 3, מצדה 9, מרכז העסקים בני ברק <br />
                    יעקב רייניץ - נדל"ן וכלכלה נבונה
                 </div>
               </div>
@@ -79,18 +79,27 @@ export default function Contact() {
                 <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-babun-accent mb-6">CONTACT</div>
                 <div className="space-y-4">
                   <a href="tel:0504141516" className="block text-2xl font-display font-bold text-babun-primary hover:text-babun-accent transition-colors">050-4141516</a>
-                  <a href="mailto:office@rainitznadlan.co.il" className="block text-lg font-light text-babun-primary/60 hover:text-babun-accent transition-colors">office@rainitznadlan.co.il</a>
+                  <a href="mailto:r0504141516@gmail.com" className="block text-lg font-light text-babun-primary/60 hover:text-babun-accent transition-colors">r0504141516@gmail.com</a>
                 </div>
               </div>
               
               <div className="pt-8 group">
                 <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-babun-accent mb-6">SOCIAL</div>
                 <div className="flex gap-6 justify-end">
-                   {['Linkedin', 'Facebook', 'Whatsapp'].map(social => (
-                     <a key={social} href="#" className="text-[10px] font-black uppercase tracking-widest text-babun-primary/30 border-b-2 border-transparent hover:text-babun-accent hover:border-babun-accent transition-all pb-1">
-                       {social}
-                     </a>
-                   ))}
+                   {['Linkedin', 'Facebook', 'Whatsapp'].map(social => {
+                     const href = social === 'Whatsapp' ? 'https://chat.whatsapp.com/C2tWdG3sQ6r0UcqN9tgetQ?m' : '#';
+                     return (
+                       <a 
+                         key={social} 
+                         href={href} 
+                         target={social === 'Whatsapp' ? '_blank' : undefined}
+                         rel={social === 'Whatsapp' ? 'noopener noreferrer' : undefined}
+                         className="text-[10px] font-black uppercase tracking-widest text-babun-primary/30 border-b-2 border-transparent hover:text-babun-accent hover:border-babun-accent transition-all pb-1"
+                       >
+                         {social}
+                       </a>
+                     );
+                   })}
                 </div>
               </div>
             </div>

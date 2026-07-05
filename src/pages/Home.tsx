@@ -9,7 +9,7 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 const services = [
   {
     title: "פגישת ייעוץ אישית",
-    desc: "פגישת ייעוץ שעושה סדר בראש. בודקים כדאיות ופוטנציאל רווח. מזהים סיכונים ואתגרים. יוצאים עם תכלס - משימות ברורות איך מתקדמים.",
+    desc: "פגישת ייעוץ שעושה סדר בראש. בודקים כדאיות, מזהים סיכונים, יוצאים עם תכלס ומשימות ברורות איך מתקדמים.",
     price: "₪1,200",
     cta: "לקביעת פגישה",
     link: "/consulting",
@@ -24,7 +24,7 @@ const services = [
     icon: Presentation
   },
   {
-    title: "הרצאות והדרכות",
+    title: "הרצאות וסדנאות",
     desc: "לארגונים, קהילות, וחברות. תוכן מרתק ומעשיר שמשנה את הדרך שבה אנשים מסתכלים על נדל\"ן.",
     price: "הזמנה מראש",
     cta: "תיאום הרצאה",
@@ -48,6 +48,8 @@ function AnimatedNumber({ value }: { value: number }) {
 export default function Home() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<null | "loading" | "success">(null);
+  const [courseName, setCourseName] = useState("");
+  const [coursePhone, setCoursePhone] = useState("");
   const [courseEmail, setCourseEmail] = useState("");
   const [courseStatus, setCourseStatus] = useState<null | "loading" | "success">(null);
 
@@ -150,6 +152,8 @@ export default function Home() {
     setCourseStatus("loading");
     try {
       await addDoc(collection(db, "syllabus_requests"), { 
+        name: courseName,
+        phone: coursePhone,
         email: courseEmail, 
         course: "telephonic",
         createdAt: serverTimestamp() 
@@ -173,25 +177,24 @@ export default function Home() {
             {/* Image Side (Left) */}
             <div className="lg:col-span-5 relative order-2 flex justify-center">
               <div className="relative w-full max-w-lg aspect-square">
-                 {/* Yellow Circle Background */}
-                 <motion.div 
-                   initial={{ opacity: 0, scale: 0.8 }}
-                   animate={{ opacity: 1, scale: 1 }}
-                   transition={{ duration: 1 }}
-                   className="absolute inset-0 bg-babun-accent rounded-full z-0"
-                 />
-                 
                  <motion.div
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 1 }}
-                  className="relative z-10 w-full h-full flex items-end justify-center"
+                  className="absolute inset-0 rounded-full overflow-hidden bg-black shadow-inner z-10 pointer-events-none"
                  >
-                   <img 
-                    src="https://lh3.googleusercontent.com/d/1wzfE5sZMtpfnHN39XgYqYtvsHanSB_vn" 
-                    alt="יעקב רייניץ" 
-                    className="w-[120%] max-w-none -mb-4 drop-shadow-2xl"
-                    referrerPolicy="no-referrer"
+                   <iframe 
+                     src="https://www.youtube.com/embed/i6-AD36z860?autoplay=1&mute=1&loop=1&playlist=i6-AD36z860&controls=0&modestbranding=1&playsinline=1&rel=0&showinfo=0&iv_load_policy=3" 
+                     title="יעקב רייניץ - סרטון הסבר"
+                     frameBorder="0"
+                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                     style={{ 
+                       position: 'absolute',
+                       top: '0',
+                       left: '-38.89%',
+                       width: '177.78%',
+                       height: '100%'
+                     }}
                    />
                  </motion.div>
 
@@ -211,7 +214,7 @@ export default function Home() {
                     className="absolute top-1/4 -right-12 z-20 bg-white p-6 rounded-babun-lg shadow-2xl text-black text-center min-w-[180px]"
                  >
                     <div className="text-4xl font-display font-black text-babun-primary">
-                      <AnimatedNumber value={4981} />
+                      <AnimatedNumber value={2000} />+
                     </div>
                     <div className="text-sm font-bold opacity-80 mt-1">פגישות ייעוץ</div>
                  </motion.div>
@@ -289,7 +292,7 @@ export default function Home() {
             className="mb-32"
           >
             <h2 className="text-6xl md:text-8xl font-display font-black tracking-tighter text-babun-primary">
-              רייניץ <span className="text-babun-accent">במספרים</span>
+              מרכז רייניץ <span className="text-babun-accent">במספרים</span>
             </h2>
           </motion.div>
 
@@ -298,22 +301,23 @@ export default function Home() {
               { 
                 val: 18, 
                 label: "שנים", 
-                sub: "של ייעוצים, הרצאות וסדנאות" 
+                sub: "של פגישות ייעוץ" 
               },
               { 
-                val: 4981, 
+                val: 2000, 
                 label: "משפחות", 
+                suffix: "+",
                 sub: "שליווינו לרכישה בטוחה" 
               },
               { 
                 val: 60, 
                 label: "דקות", 
-                sub: "שנותנות לך תמונה מלאה" 
+                sub: "שנותנות לך תמונה בהירה" 
               },
               { 
                 val: 12, 
                 label: "קורסים", 
-                sub: "שלימדו מאות תלמידים את סודות הנדל״ן" 
+                sub: "שלימדו את רזי סודות הנדל״ן" 
               }
             ].map((stat, i) => (
               <motion.div 
@@ -324,8 +328,8 @@ export default function Home() {
                 transition={{ delay: i * 0.1, duration: 0.6 }}
                 className="flex flex-col items-center"
               >
-                <div className="text-6xl md:text-8xl font-display font-black text-babun-primary mb-2">
-                  <AnimatedNumber value={stat.val} />
+                <div className="text-6xl md:text-8xl font-display font-black text-babun-primary mb-2 flex items-center justify-center">
+                  <AnimatedNumber value={stat.val} />{stat.suffix || ""}
                 </div>
                 <div className="text-4xl md:text-5xl font-display font-black text-babun-primary mb-6">
                   {stat.label}
@@ -361,22 +365,12 @@ export default function Home() {
                   <div className="w-full pt-10 border-t border-babun-primary/5 flex items-center justify-start">
                      <Link to={item.link} className="text-babun-primary font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:text-babun-accent transition-colors">
                         {item.cta} <ArrowLeft size={16} />
-                     </Link>
+                      </Link>
                   </div>
                 </motion.div>
               ))}
-           </div>
-
-            <div className="mt-16 flex justify-center">
-               <Link 
-                  to="/courses" 
-                  className="bg-babun-accent text-babun-primary font-black py-5 px-12 rounded-babun-full text-xl transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-babun-primary/10 flex items-center gap-3"
-               >
-                  <span>להרשמה לקורס</span>
-                  <ArrowLeft size={22} className="text-babun-primary" />
-               </Link>
             </div>
-        </div>
+         </div>
       </section>
 
       {/* TELEPHONIC COURSE SECTION */}
@@ -393,19 +387,16 @@ export default function Home() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8"
+          className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24"
         >
           
           {/* Right Column - Titles */}
           <div className="flex-1 flex flex-col items-center lg:items-start text-right">
-            <div className="bg-white text-babun-primary px-5 py-1.5 rounded-full font-bold text-base mb-10 shadow-lg">
-              שליש בקרקע
-            </div>
             <h2 className="text-6xl md:text-[8rem] font-display font-black leading-[0.8] mb-8 text-right">
-              <span className="text-babun-accent block">הקורס</span>
-              <span className="text-white block mt-3">הטלפוני</span>
+              <span className="text-babun-accent block" style={{ paddingRight: '90px' }}>הקורס</span>
+              <span className="text-white block mt-3" style={{ paddingRight: '90px' }}>הבא</span>
+              <span className="text-white block mt-3" style={{ marginTop: '12px', paddingLeft: '5px', paddingRight: '90px' }}>נפתח</span>
             </h2>
-            <p className="text-white text-2xl md:text-4xl font-light opacity-90 text-right w-full">במערכת אור עולם</p>
           </div>
  
           {/* Center Column - Illustration & Stats */}
@@ -430,25 +421,20 @@ export default function Home() {
                </div>
             </div>
           </div>
- 
-          {/* Left Column - Contact Info (Left side, Right-aligned text) */}
-          <div className="flex-1 flex flex-col items-center lg:items-start text-right">
-            <h4 className="text-white text-3xl md:text-4xl font-display font-medium mb-2">כל הפרטים:</h4>
-            <div className="text-babun-accent text-6xl md:text-[39px] font-display font-black tracking-tight mb-2 leading-none">
-              073-3454545
-            </div>
-            <div className="text-white text-3xl md:text-[36px] font-display font-medium opacity-90 mb-6">
-              שלוחה 6-2-2
-            </div>
 
-            {/* LEAD CARD */}
+          {/* Left Column - Contact Form (Circular Lead Card) */}
+          <div 
+            className="flex-1 flex flex-col items-center lg:items-start text-right relative z-30 -mt-16 sm:-mt-24 lg:mt-0 lg:-translate-y-20"
+            style={{ paddingRight: '-190px', marginRight: '-300px' }}
+          >
             <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="mt-12 lg:mt-[60px] lg:-mr-[260px] lg:-translate-x-[100px] lg:translate-y-[15px] bg-white/80 backdrop-blur-md p-8 md:p-10 lg:p-12 rounded-full shadow-[0_30px_70px_rgba(0,0,0,0.4)] relative z-30 w-[310px] sm:w-[350px] md:w-[380px] lg:w-[400px] aspect-square border border-black/5 flex flex-col justify-center items-center text-center mx-auto lg:mx-0"
+              style={{ paddingRight: '48px' }}
+              className="bg-white/95 backdrop-blur-md p-10 md:p-12 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 w-[320px] sm:w-[360px] md:w-[380px] lg:w-[400px] aspect-square flex flex-col justify-center items-center text-center mx-auto lg:mx-0"
             >
-              <div className="bg-[#fe0000] text-white px-4 py-1.5 rounded-[100px] font-black text-xs md:text-sm inline-block mb-4 shadow-sm self-center">
+              <div className="bg-[#fe0000] text-white px-4 py-1 rounded-full font-black text-xs md:text-sm inline-block mb-3 shadow-md">
                 מחזור חדש נפתח!
               </div>
 
@@ -456,23 +442,40 @@ export default function Home() {
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-babun-accent/10 p-6 rounded-2xl border border-babun-accent/30 text-center w-full"
+                  className="text-center w-full max-w-[200px] sm:max-w-[220px]"
                 >
-                  <div className="text-babun-primary font-bold text-lg mb-1">נשלח! תבדוק את המייל שלך</div>
+                  <CheckCircle size={44} className="text-green-500 mx-auto mb-3 animate-bounce" />
+                  <div className="text-babun-primary font-bold text-lg leading-tight mb-2">פרטיך התקבלו בהצלחה!</div>
+                  <p className="text-babun-primary/70 text-sm leading-snug">הסילבוס המלא של הקורס יישלח אליך בהקדם.</p>
                 </motion.div>
               ) : (
-                <div className="w-full">
-                  <p className="text-babun-primary/60 text-sm md:text-base lg:text-lg mb-4 font-medium leading-tight">
-                    לקבלת הסילבוס המלא לקורס,
-                    <br />
-                    הכנס את המייל שלך:
+                <div className="w-full max-w-[200px] sm:max-w-[220px] md:max-w-[240px]">
+                  <p className="text-babun-primary text-sm md:text-base font-bold mb-3 leading-tight px-2">
+                    השאירו פרטים לקבלת הסילבוס:
                   </p>
-                  <form onSubmit={handleCourseSyllabus} className="flex flex-col gap-3 w-full max-w-[220px] sm:max-w-xs mx-auto">
+                  
+                  <form onSubmit={handleCourseSyllabus} className="flex flex-col gap-2 w-full">
+                    <input 
+                      required 
+                      type="text" 
+                      placeholder="שם מלא"
+                      className="w-full h-9 bg-gray-50/80 px-4 rounded-full border border-gray-200 focus:border-babun-accent focus:bg-white outline-none text-xs text-center text-babun-primary placeholder:text-gray-400"
+                      value={courseName}
+                      onChange={e => setCourseName(e.target.value)}
+                    />
+                    <input 
+                      required 
+                      type="tel" 
+                      placeholder="מספר טלפון"
+                      className="w-full h-9 bg-gray-50/80 px-4 rounded-full border border-gray-200 focus:border-babun-accent focus:bg-white outline-none text-xs text-center text-babun-primary placeholder:text-gray-400"
+                      value={coursePhone}
+                      onChange={e => setCoursePhone(e.target.value)}
+                    />
                     <input 
                       required 
                       type="email" 
-                      placeholder="המייל שלך"
-                      className="w-full h-11 sm:h-12 bg-gray-50 px-6 rounded-2xl outline-none border border-gray-200 focus:border-babun-accent text-babun-primary text-center text-sm placeholder:text-gray-400"
+                      placeholder="כתובת אימייל"
+                      className="w-full h-9 bg-gray-50/80 px-4 rounded-full border border-gray-200 focus:border-babun-accent focus:bg-white outline-none text-xs text-center text-babun-primary placeholder:text-gray-400"
                       value={courseEmail}
                       onChange={e => setCourseEmail(e.target.value)}
                     />
@@ -480,25 +483,25 @@ export default function Home() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       disabled={courseStatus === "loading"}
-                      className="bg-babun-primary text-white font-bold w-full h-11 sm:h-12 rounded-2xl shadow-lg transition-colors hover:bg-black disabled:opacity-50 flex items-center justify-center text-sm"
+                      type="submit"
+                      className="bg-babun-primary text-white font-bold w-full h-9 rounded-full shadow-md transition-colors hover:bg-black disabled:opacity-50 flex items-center justify-center text-xs"
                     >
                       {courseStatus === "loading" ? (
                         <motion.div
                           animate={{ rotate: 360 }}
                           transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                          className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                          className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
                         />
                       ) : (
-                        "שלח"
+                        "לקבלת הסילבוס במייל"
                       )}
                     </motion.button>
                   </form>
                 </div>
               )}
             </motion.div>
-
-
           </div>
+ 
         </motion.div>
       </section>
 
@@ -565,13 +568,13 @@ export default function Home() {
       </section>
 
       {/* ARTICLES & PODCASTS SECTION */}
-      <section className="py-24 bg-white" dir="rtl">
+      <section className="py-24 bg-babun-accent text-babun-primary" dir="rtl">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           {/* Section Header */}
           <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8">
             <div className="text-right">
-              <h2 className="text-4xl md:text-6xl font-display font-black text-babun-primary leading-tight mb-4">כתבות ופודקאסטים.</h2>
-              <p className="text-xl text-babun-primary/60 font-light">ידע שווה כח. תקראו ותאזינו ותשארו מעודכנים.</p>
+              <h2 className="text-4xl md:text-6xl font-display font-black text-babun-primary leading-tight mb-4">כתבות ופודקאסטים</h2>
+              <p className="text-xl text-babun-primary/70 font-light">ידע שווה כח. תקראו ותאזינו ותשארו מעודכנים.</p>
             </div>
             
             <Link to="/articles" className="flex items-center gap-4 group cursor-pointer">
@@ -582,60 +585,103 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Articles Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {latestMedia.length > 0 ? (
-              latestMedia.map((item, index) => (
+          {/* Articles/Podcasts Asymmetric Grid */}
+          {latestMedia.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+              {/* Right Column: 1 Large Featured Article/Podcast */}
+              <div className="lg:col-span-7 flex flex-col">
                 <motion.div
-                  key={item.id || index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -10 }}
-                  className="flex flex-col group cursor-pointer"
+                  whileHover={{ y: -8 }}
+                  className="flex flex-col h-full group cursor-pointer"
                 >
-                  <Link to="/articles" className="flex flex-col h-full">
-                    <div className="relative aspect-[16/10] rounded-babun-lg overflow-hidden mb-6">
+                  <Link to="/articles" className="flex flex-col h-full bg-white/50 hover:bg-white/85 backdrop-blur-sm p-6 rounded-babun-lg border border-babun-primary/10 transition-all duration-300 shadow-md hover:shadow-xl">
+                    <div className="relative aspect-[16/9] rounded-babun-md overflow-hidden mb-6">
                       <img 
-                        src={getDisplayImage(item.image)} 
-                        alt={item.title} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        src={getDisplayImage(latestMedia[0].image)} 
+                        alt={latestMedia[0].title} 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         referrerPolicy="no-referrer"
                       />
                       <div className="absolute top-4 right-4 z-20">
-                        <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-babun-primary text-[10px] uppercase font-bold tracking-widest rounded-full shadow-sm">
-                          {item.category || "כתבה"}
+                        <span className="px-3 py-1 bg-babun-primary text-white text-[10px] uppercase font-bold tracking-widest rounded-full shadow-sm">
+                          {latestMedia[0].category || "כתבה"}
                         </span>
                       </div>
                       <div className="absolute bottom-4 left-4">
-                        <div className="w-10 h-10 bg-babun-accent text-babun-primary rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:rotate-[-45deg]">
-                          <ArrowLeft size={20} />
+                        <div className="w-12 h-12 bg-babun-primary text-white rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:rotate-[-45deg]">
+                          <ArrowLeft size={22} />
                         </div>
                       </div>
                     </div>
                     <div className="px-2 text-right">
-                      <div className="flex items-center justify-end gap-2 text-babun-primary/40 font-bold text-xs mb-3">
-                        <span>{item.date}</span>
-                        <div className="w-1 h-1 bg-babun-primary/40 rounded-full" />
+                      <div className="flex items-center justify-end gap-2 text-babun-primary/60 font-bold text-xs mb-3">
+                        <span>{latestMedia[0].date}</span>
+                        <div className="w-1.5 h-1.5 bg-babun-primary/30 rounded-full" />
                         <span>יעקב רייניץ</span>
                       </div>
-                      <h3 className="text-xl font-display font-black text-babun-primary leading-tight group-hover:text-babun-accent transition-colors line-clamp-2">
-                        {item.title}
+                      <h3 className="text-2xl md:text-3xl font-display font-black text-babun-primary leading-snug group-hover:text-black transition-colors line-clamp-2">
+                        {latestMedia[0].title}
                       </h3>
+                      {latestMedia[0].summary && (
+                        <p className="mt-4 text-babun-primary/70 text-sm md:text-base leading-relaxed line-clamp-2 font-medium">
+                          {latestMedia[0].summary}
+                        </p>
+                      )}
                     </div>
                   </Link>
                 </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full bg-babun-primary/5 border border-babun-primary/10 rounded-babun-lg p-12 text-center text-babun-primary/60 font-display">
-                <p className="text-lg font-bold mb-2">אין עדיין כתבות או פודקאסטים במערכת</p>
-                <p className="text-sm opacity-70">
-                  כל התכנים הקודמים נמחקו לבקשתך על מנת לאפשר התחלה נקייה ומהירה מן היסוד.
-                </p>
               </div>
-            )}
-          </div>
+
+              {/* Left Column: 3 Smaller Stacked Articles/Podcasts */}
+              <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
+                {latestMedia.slice(1, 4).map((item, index) => (
+                  <motion.div
+                    key={item.id || index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ x: -6 }}
+                    className="group"
+                  >
+                    <Link to="/articles" className="flex gap-4 p-4 rounded-babun-lg bg-white/30 hover:bg-white/60 transition-all duration-300 border border-babun-primary/5 shadow-sm">
+                      <div className="relative w-28 sm:w-36 aspect-[4/3] rounded-babun-md overflow-hidden flex-shrink-0">
+                        <img 
+                          src={getDisplayImage(item.image)} 
+                          alt={item.title} 
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute top-2 right-2 z-20">
+                          <span className="px-2 py-0.5 bg-babun-primary text-white text-[8px] uppercase font-bold tracking-widest rounded-full">
+                            {item.category || "כתבה"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col justify-center text-right flex-1 min-w-0">
+                        <div className="flex items-center justify-end gap-1.5 text-babun-primary/60 font-bold text-[10px] mb-2">
+                          <span>{item.date}</span>
+                        </div>
+                        <h4 className="text-base sm:text-lg font-display font-black text-babun-primary leading-tight group-hover:text-black transition-colors line-clamp-2">
+                          {item.title}
+                        </h4>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="col-span-full bg-babun-primary/5 border border-babun-primary/10 rounded-babun-lg p-12 text-center text-babun-primary/60 font-display">
+              <p className="text-lg font-bold mb-2">אין עדיין כתבות או פודקאסטים במערכת</p>
+              <p className="text-sm opacity-70">
+                כל התכנים הקודמים נמחקו לבקשתך על מנת לאפשר התחלה נקייה ומהירה מן היסוד.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -645,7 +691,7 @@ export default function Home() {
          <div className="absolute inset-0 z-0 opacity-60 select-none pointer-events-none">
             <iframe 
                className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150"
-               src="https://www.youtube.com/embed/db5sSZJhvkM?autoplay=1&mute=1&loop=1&playlist=db5sSZJhvkM&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
+               src="https://www.youtube.com/embed/i6-AD36z860?autoplay=1&mute=1&loop=1&playlist=i6-AD36z860&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
                allow="autoplay; encrypted-media"
                frameBorder="0"
             />
@@ -661,7 +707,7 @@ export default function Home() {
                <h2 className="text-5xl md:text-7xl lg:text-[7.5rem] font-display font-black mb-6 text-white leading-[0.9]">קבל את המידע <br /><span className="text-babun-accent">לפני כולם</span></h2>
                <p className="text-white/80 text-xl md:text-2xl font-light leading-relaxed max-w-2xl">הטור השבועי, ניתוחי שוק, פינת חדשות נדל"ן - ישירות אליך.</p>
             </div>
-            <div className="w-full max-w-lg bg-black/60 backdrop-blur-xl p-12 rounded-2xl border border-white/20 shadow-2xl">
+            <div className="w-full max-w-lg bg-transparent backdrop-blur-xl p-12 rounded-2xl border border-white/20 shadow-2xl">
                {status === "success" ? (
                  <motion.div 
                    initial={{ opacity: 0, scale: 0.9 }}

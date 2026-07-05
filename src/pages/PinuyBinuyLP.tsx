@@ -73,23 +73,19 @@ export default function PinuyBinuyLP() {
   const metrics = [
     {
       value: "18",
-      label: "שנים",
-      subtext: "של ניסיון, יזמות והוראת נדל\"ן"
+      text: "שנים של פגישות ייעוץ"
     },
     {
-      value: "4,981",
-      label: "משפחות",
-      subtext: "שבחרו לקבל ייעוץ וליווי"
+      value: "2000+",
+      text: "משפחות שליווינו לרכישה בטוחה"
     },
     {
       value: "60",
-      label: "דקות",
-      subtext: "של הדרכות ממוקדות ומעשיות"
+      text: "דקות שנותנות לך תמונה בהירה"
     },
     {
       value: "12",
-      label: "קורסים",
-      subtext: "שהעברנו לקבוצות ומשקיעים בארץ"
+      text: "קורסים שלימדו את רזי סודות הנדל״ן"
     }
   ];
 
@@ -202,25 +198,25 @@ export default function PinuyBinuyLP() {
             {/* Left Side: Portrait Photo with Badge */}
             <div className="lg:col-span-5 flex justify-center items-center relative order-1 lg:order-2">
               <div className="relative w-80 h-80 md:w-96 md:h-96">
-                {/* Yellow glowing solid circle backdrop */}
-                <div className="absolute inset-4 rounded-full bg-babun-accent/90" />
-                
-                {/* Frame ring outline */}
-                <div className="absolute inset-0 rounded-full border-4 border-dashed border-babun-accent/30 animate-[spin_60s_linear_infinite]" />
-
-                {/* Portrait */}
-                <div className="absolute inset-8 rounded-full overflow-hidden bg-babun-primary">
-                  <img 
-                    src="https://lh3.googleusercontent.com/d/1wzfE5sZMtpfnHN39XgYqYtvsHanSB_vn" 
-                    alt="יעקב רייניץ" 
-                    className="w-[125%] h-auto max-w-none object-cover absolute bottom-0 right-[50%] translate-x-[50%] scale-105"
-                    referrerPolicy="no-referrer"
+                <div className="absolute inset-0 rounded-full overflow-hidden bg-black shadow-inner pointer-events-none">
+                  <iframe 
+                    src="https://www.youtube.com/embed/i6-AD36z860?autoplay=1&mute=1&loop=1&playlist=i6-AD36z860&controls=0&modestbranding=1&playsinline=1&rel=0&showinfo=0&iv_load_policy=3" 
+                    title="יעקב רייניץ - סרטון הסבר"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    style={{ 
+                      position: 'absolute',
+                      top: '0',
+                      left: '-38.89%',
+                      width: '177.78%',
+                      height: '100%'
+                    }}
                   />
                 </div>
 
                 {/* Left side circular rating badge */}
                 <div className="absolute bottom-6 right-4 bg-white text-babun-primary py-2.5 px-4 rounded-babun-md shadow-xl border border-gray-100 flex flex-col items-center">
-                  <span className="text-2xl font-black text-babun-primary">4,981</span>
+                  <span className="text-2xl font-black text-babun-primary">2000+</span>
                   <span className="text-[10px] font-bold text-gray-500 tracking-wider">משפחות מיועצות</span>
                 </div>
               </div>
@@ -233,17 +229,21 @@ export default function PinuyBinuyLP() {
       {/* 2. STATS / METRICS SECTION */}
       <section className="py-16 bg-white border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-display font-black text-babun-primary mb-3">
+              מרכז רייניץ <span className="text-babun-accent bg-babun-primary px-3 py-1.5 rounded-babun-sm inline-block">במספרים</span>
+            </h2>
+            <div className="h-1 w-16 bg-babun-accent mx-auto rounded-full" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
             {metrics.map((m, index) => (
-              <div key={index} className="flex flex-col items-center text-center">
-                <span className="text-4xl md:text-6xl font-display font-black text-babun-primary tracking-tight">
+              <div key={index} className="flex flex-col items-center text-center p-6 bg-gray-50/50 rounded-babun-md border border-gray-50/50 hover:bg-gray-50 transition-colors duration-200">
+                <span className="text-5xl md:text-7xl font-display font-black text-babun-primary tracking-tight mb-2">
                   {m.value}
                 </span>
-                <span className="text-lg md:text-xl font-bold text-babun-accent tracking-wide mt-1 bg-babun-primary px-4 py-1.5 rounded-babun-sm inline-block shadow-sm">
-                  {m.label}
-                </span>
-                <span className="text-sm md:text-base text-gray-500 font-medium mt-3 whitespace-pre-line leading-snug w-full max-w-[180px]">
-                  {m.subtext}
+                <span className="text-sm sm:text-base md:text-lg text-gray-600 font-medium leading-relaxed whitespace-nowrap">
+                  {m.text}
                 </span>
               </div>
             ))}

@@ -59,7 +59,7 @@ function AppContent() {
 
       {/* Floating WhatsApp Button */}
       <a 
-        href="https://wa.me/972504141516" 
+        href="https://chat.whatsapp.com/C2tWdG3sQ6r0UcqN9tgetQ?m" 
         target="_blank" 
         rel="noopener noreferrer"
         className="fixed bottom-8 left-8 z-50 w-16 h-16 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform duration-300 group"

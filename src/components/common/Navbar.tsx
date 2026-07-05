@@ -126,7 +126,7 @@ export default function Navbar() {
               <Link to="/consulting" className="btn-babun-primary w-full justify-center">קביעת ייעוץ</Link>
               <div className="flex gap-4 justify-center mt-4">
                  <a href="tel:050-4141516" className="w-10 h-10 rounded-full bg-babun-primary/5 flex items-center justify-center"><Phone size={16} /></a>
-                 <a href="mailto:office@rainitznadlan.co.il" className="w-10 h-10 rounded-full bg-babun-primary/5 flex items-center justify-center"><Mail size={16} /></a>
+                 <a href="mailto:r0504141516@gmail.com" className="w-10 h-10 rounded-full bg-babun-primary/5 flex items-center justify-center"><Mail size={16} /></a>
               </div>
             </div>
           </motion.nav>
