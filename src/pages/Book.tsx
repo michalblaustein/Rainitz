@@ -72,10 +72,19 @@ export default function Book() {
       });
       setCheckoutStatus("success");
       setFormData({ name: "", address: "", phone: "", email: "" });
+
+      // Automatically redirect to the secure payment URL
+      setTimeout(() => {
+        window.location.href = "https://plando.co.il/self_services/embed_store/24804?ak=597df96284d52e5dd3be33b6ff7afc68";
+      }, 1500);
     } catch (err: any) {
       console.error("Firestore error: ", err);
-      setErrorMsg("אירעה שגיאה בחיבור לשרת. נא לנסות שנית.");
-      setCheckoutStatus("error");
+      // Fallback to success + redirect anyway so they can pay even if Firestore is slow or offline
+      setCheckoutStatus("success");
+      setFormData({ name: "", address: "", phone: "", email: "" });
+      setTimeout(() => {
+        window.location.href = "https://plando.co.il/self_services/embed_store/24804?ak=597df96284d52e5dd3be33b6ff7afc68";
+      }, 1500);
     }
   };
 
@@ -674,20 +683,29 @@ export default function Book() {
                     <CheckCircle2 size={28} className="stroke-[2.5]" />
                   </div>
                   <h3 className="text-xl font-display font-bold text-babun-primary mb-2">
-                    הזמנתך התקבלה בהצלחה!
+                    הפרטים נקלטו בהצלחה!
                   </h3>
-                  <p className="text-sm text-babun-primary/80 mb-6 leading-relaxed">
-                    מזל טוב ומודה לך על הזמנתך. העותק הפיזי שלך נכנס לתהליך אריזה ומשלוח מיידי.
+                  <p className="text-sm text-babun-primary/80 mb-4 leading-relaxed">
+                    תודה רבה. פרטי המשלוח נשמרו במערכת. כעת אנו מעבירים אותך לעמוד התשלום המאובטח להשלמת הרכישה.
                   </p>
-                  <div className="py-2 px-4 bg-babun-primary text-white font-bold text-xs rounded inline-block">
-                    משלוח עד הבית - עד 5 ימי עסקים 🚚
+                  <p className="text-babun-primary text-sm font-bold animate-pulse mb-6">
+                    מעביר לתשלום באופן אוטומטי...
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+                    <a 
+                      href="https://plando.co.il/self_services/embed_store/24804?ak=597df96284d52e5dd3be33b6ff7afc68"
+                      className="bg-babun-accent hover:bg-babun-accent/90 text-babun-primary font-black py-4 px-8 rounded-full shadow-lg transition-all duration-300 hover:scale-105 inline-flex items-center gap-2 cursor-pointer text-base"
+                    >
+                      <span>מעבר לתשלום מאובטח (149 ₪)</span>
+                      <ArrowLeft size={18} />
+                    </a>
+                    <button 
+                      onClick={() => setCheckoutStatus(null)}
+                      className="text-xs text-babun-primary/60 hover:text-babun-primary underline font-bold"
+                    >
+                      בצע הזמנה נוספת
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => setCheckoutStatus(null)}
-                    className="block text-xs text-babun-primary/40 hover:text-babun-primary mt-6 underline mx-auto font-bold"
-                  >
-                    בצע הזמנה נוספת
-                  </button>
                 </motion.div>
               ) : (
                 <form onSubmit={handleCheckoutSubmit} className="space-y-4 max-w-xl mx-auto">

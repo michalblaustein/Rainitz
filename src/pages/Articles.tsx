@@ -66,7 +66,20 @@ export default function Articles() {
   const [searchParams] = useSearchParams();
   const hasEditParam = searchParams.get("edit") === "true" || searchParams.get("admin") === "true";
 
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeCategory, setActiveCategory] = useState<string>(() => {
+    const categoryParam = searchParams.get("category");
+    if (categoryParam && mediaCategories.some(cat => cat.id === categoryParam)) {
+      return categoryParam;
+    }
+    return "all";
+  });
+
+  useEffect(() => {
+    const categoryParam = searchParams.get("category");
+    if (categoryParam && mediaCategories.some(cat => cat.id === categoryParam)) {
+      setActiveCategory(categoryParam);
+    }
+  }, [searchParams]);
   const [articlesList, setArticlesList] = useState<any[]>(() => {
     try {
       const cached = localStorage.getItem("babun_articles_cache");

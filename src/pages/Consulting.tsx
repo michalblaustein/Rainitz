@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "motion/react";
+import { db } from "../lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { 
   Users, 
   Clock, 
@@ -60,7 +62,7 @@ export default function Consulting() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.fullName || !formData.phone || !formData.email) {
       setErrorMsg("אנא מלא שם מלא, מספר טלפון וכתובת מייל.");
@@ -69,12 +71,33 @@ export default function Consulting() {
     setErrorMsg("");
     setIsSubmitting(true);
 
-    // Simulate submission
-    setTimeout(() => {
+    try {
+      await addDoc(collection(db, "consulting_leads"), {
+        fullName: formData.fullName,
+        phone: formData.phone,
+        email: formData.email,
+        message: formData.message,
+        createdAt: serverTimestamp(),
+      });
+
       setIsSubmitting(false);
       setIsSubmitted(true);
       setFormData({ fullName: "", phone: "", email: "", message: "" });
-    }, 1200);
+
+      // Automatically redirect to payment URL
+      setTimeout(() => {
+        window.location.href = "https://plando.co.il/self_services/embed_store/24802?ak=597df96284d52e5dd3be33b6ff7afc68";
+      }, 1500);
+    } catch (err: any) {
+      console.error("Error saving lead:", err);
+      // Fallback in case of firestore/network error
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+      setFormData({ fullName: "", phone: "", email: "", message: "" });
+      setTimeout(() => {
+        window.location.href = "https://plando.co.il/self_services/embed_store/24802?ak=597df96284d52e5dd3be33b6ff7afc68";
+      }, 1500);
+    }
   };
 
   // Scroll smoothly to appointment form
@@ -530,17 +553,26 @@ export default function Consulting() {
                       הבקשה התקבלה בהצלחה!
                     </h3>
                     <p className="text-babun-primary text-base leading-relaxed font-light mb-4">
-                      תודה רבה. פרטיך נרשמו במערכת ונבדוק את פנייתך בהקדם המרבי.
+                      תודה רבה. פרטיך נרשמו בהצלחה במערכת. כעת אנו מעבירים אותך לעמוד התשלום המאובטח להשלמת ההזמנה.
                     </p>
-                    <p className="text-babun-primary text-sm font-bold animate-pulse">
-                      אנחנו חוזרים אליך תוך 24 שעות!
+                    <p className="text-babun-primary text-sm font-bold animate-pulse mb-6">
+                      מעביר לתשלום באופן אוטומטי...
                     </p>
-                    <button 
-                      onClick={() => setIsSubmitted(false)}
-                      className="mt-6 text-xs text-babun-primary/60 hover:text-babun-primary underline font-bold"
-                    >
-                      שלח פנייה נוספת
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+                      <a 
+                        href="https://plando.co.il/self_services/embed_store/24802?ak=597df96284d52e5dd3be33b6ff7afc68"
+                        className="bg-babun-accent hover:bg-babun-accent/90 text-babun-primary font-black py-4 px-8 rounded-full shadow-lg transition-all duration-300 hover:scale-105 inline-flex items-center gap-2 cursor-pointer text-base"
+                      >
+                        <span>מעבר לתשלום מאובטח</span>
+                        <ArrowLeft size={18} />
+                      </a>
+                      <button 
+                        onClick={() => setIsSubmitted(false)}
+                        className="text-xs text-babun-primary/60 hover:text-babun-primary underline font-bold"
+                      >
+                        שלח פנייה חדשה
+                      </button>
+                    </div>
                   </motion.div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">

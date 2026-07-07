@@ -8,7 +8,7 @@ const navLinks = [
   { name: "פגישת ייעוץ", path: "/consulting" },
   { name: "מחשבונים", path: "/calculators" },
   { name: "הספר", path: "/book" },
-  { name: "מאמרים ופודקאסטים", path: "/articles" },
+  { name: "מאמרים ופודקאסטים", path: "/articles?category=podcast" },
 ];
 
 export default function Navbar() {
@@ -56,7 +56,7 @@ export default function Navbar() {
                 <Link 
                   to={link.path}
                   className={`text-lg transition-all duration-300 relative group px-6 py-2 flex flex-col items-center ${
-                    location.pathname === link.path 
+                    location.pathname === link.path.split("?")[0]
                       ? (isScrolled || !hasDarkHero ? "text-black" : "text-white") 
                       : (isScrolled || !hasDarkHero ? "text-black/70 hover:text-black" : "text-white/70 hover:text-white")
                   }`}
@@ -70,7 +70,7 @@ export default function Navbar() {
                     </span>
                   </div>
                   <span className={`absolute -bottom-1 right-0 w-full h-1 bg-babun-accent transition-transform duration-500 origin-right ${
-                    location.pathname === link.path ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                    location.pathname === link.path.split("?")[0] ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                   }`} />
                 </Link>
                 {index < navLinks.length - 1 && (
@@ -116,7 +116,7 @@ export default function Navbar() {
               <Link 
                 key={link.path} 
                 to={link.path} 
-                className={`text-xl font-display font-bold uppercase tracking-widest ${location.pathname === link.path ? "text-babun-accent" : "text-babun-primary"}`}
+                className={`text-xl font-display font-bold uppercase tracking-widest ${location.pathname === link.path.split("?")[0] ? "text-babun-accent" : "text-babun-primary"}`}
                 onClick={() => setIsOpen(false)}
               >
                 {link.name}

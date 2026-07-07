@@ -381,7 +381,7 @@ export default function Courses() {
             {/* Left column: Image */}
             <div className="lg:col-span-5 flex justify-center">
               <img 
-                src="https://lh3.googleusercontent.com/d/1h-0JRjvxlcFpQE7nTFKcsAXMlfCchmec" 
+                src="https://lh3.googleusercontent.com/d/1izQHE2VO90HSDHv09Ie_uGatKjYcG5qM" 
                 alt="בוא נדבר ישר"
                 className="w-full max-w-md lg:max-w-none h-auto rounded-lg object-cover"
                 referrerPolicy="no-referrer"
@@ -783,26 +783,22 @@ export default function Courses() {
               </div>
 
               <div>
-                <button
-                  onClick={() => handleCourseSelect("phone")}
-                  className={`w-full py-4 px-6 rounded-2xl text-lg font-black transition-all duration-300 flex items-center justify-center gap-2 shadow-lg group cursor-pointer ${
-                    activeRegisterCourse === "phone"
-                      ? "bg-babun-primary text-white hover:bg-babun-primary/95"
-                      : "bg-babun-accent text-babun-primary hover:bg-babun-accent/90"
-                  }`}
+                <a
+                  href="https://plando.co.il/self_services/embed_store/24805?ak=597df96284d52e5dd3be33b6ff7afc68"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-4 px-6 rounded-2xl text-lg font-black transition-all duration-300 flex items-center justify-center gap-2 shadow-lg group cursor-pointer bg-babun-accent text-babun-primary hover:bg-babun-accent/90"
                 >
-                  <span>להרשמה למסלול</span>
+                  <span>להרשמה ותשלום</span>
                   <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                </button>
+                </a>
               </div>
             </motion.div>
 
             {/* Card 2: Digital Course */}
             <motion.div 
               whileHover={{ y: -6 }}
-              className={`bg-white border rounded-[32px] p-8 md:p-10 shadow-[0_15px_30px_rgba(0,0,0,0.05)] flex flex-col justify-between transition-all duration-300 relative ${
-                activeRegisterCourse === "digital" ? "ring-4 ring-babun-primary border-transparent" : "border-zinc-200/80"
-              }`}
+              className="bg-white border rounded-[32px] p-8 md:p-10 shadow-[0_15px_30px_rgba(0,0,0,0.05)] flex flex-col justify-between transition-all duration-300 relative border-zinc-200/80"
             >
               <div>
                 <div className="flex justify-between items-start mb-6">
@@ -843,26 +839,22 @@ export default function Courses() {
               </div>
 
               <div>
-                <button
-                  onClick={() => handleCourseSelect("digital")}
-                  className={`w-full py-4 px-6 rounded-2xl text-lg font-black transition-all duration-300 flex items-center justify-center gap-2 shadow-lg group cursor-pointer ${
-                    activeRegisterCourse === "digital"
-                      ? "bg-babun-primary text-white hover:bg-babun-primary/95"
-                      : "bg-babun-accent text-babun-primary hover:bg-babun-accent/90"
-                  }`}
+                <a
+                  href="https://plando.co.il/self_services/embed_store/24806?ak=597df96284d52e5dd3be33b6ff7afc68"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-4 px-6 rounded-2xl text-lg font-black transition-all duration-300 flex items-center justify-center gap-2 shadow-lg group cursor-pointer bg-babun-primary text-white hover:bg-babun-primary/95"
                 >
-                  <span>להרשמה למסלול</span>
+                  <span>להרשמה ותשלום</span>
                   <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                </button>
+                </a>
               </div>
             </motion.div>
 
             {/* Card 3: Frontal Course */}
             <motion.div 
               whileHover={{ y: -6 }}
-              className={`bg-white border rounded-[32px] p-8 md:p-10 shadow-[0_15px_30px_rgba(0,0,0,0.05)] flex flex-col justify-between transition-all duration-300 relative ${
-                activeRegisterCourse === "frontal" ? "ring-4 ring-babun-primary border-transparent" : "border-zinc-200/80"
-              }`}
+              className="bg-white border rounded-[32px] p-8 md:p-10 shadow-[0_15px_30px_rgba(0,0,0,0.05)] flex flex-col justify-between transition-all duration-300 relative border-zinc-200/80"
             >
               <div>
                 <div className="flex justify-between items-start mb-6">
@@ -903,17 +895,15 @@ export default function Courses() {
               </div>
 
               <div>
-                <button
-                  onClick={() => handleCourseSelect("frontal")}
-                  className={`w-full py-4 px-6 rounded-2xl text-lg font-black transition-all duration-300 flex items-center justify-center gap-2 shadow-lg group cursor-pointer ${
-                    activeRegisterCourse === "frontal"
-                      ? "bg-babun-primary text-white hover:bg-babun-primary/95"
-                      : "bg-babun-accent text-babun-primary hover:bg-babun-accent/90"
-                  }`}
+                <a
+                  href="https://plando.co.il/self_services/embed_store/24807?ak=597df96284d52e5dd3be33b6ff7afc68"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-4 px-6 rounded-2xl text-lg font-black transition-all duration-300 flex items-center justify-center gap-2 shadow-lg group cursor-pointer bg-babun-accent text-babun-primary hover:bg-babun-accent/90"
                 >
-                  <span>להרשמה למסלול</span>
+                  <span>להרשמה ותשלום</span>
                   <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                </button>
+                </a>
               </div>
             </motion.div>
 

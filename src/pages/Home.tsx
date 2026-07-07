@@ -59,7 +59,7 @@ export default function Home() {
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.slice(0, 4);
+          return parsed.filter((item: any) => item.categoryId === "podcast").slice(0, 4);
         }
       }
     } catch (e) {
@@ -79,7 +79,8 @@ export default function Home() {
       })
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          setLatestMedia(data.slice(0, 4));
+          const podcastsOnly = data.filter((item: any) => item.categoryId === "podcast");
+          setLatestMedia(podcastsOnly.slice(0, 4));
         }
       })
       .catch((err) => {
@@ -89,7 +90,8 @@ export default function Home() {
           if (cached) {
             const parsed = JSON.parse(cached);
             if (Array.isArray(parsed) && parsed.length > 0) {
-              setLatestMedia(parsed.slice(0, 4));
+              const podcastsOnly = parsed.filter((item: any) => item.categoryId === "podcast");
+              setLatestMedia(podcastsOnly.slice(0, 4));
             }
           }
         } catch (e) {
@@ -103,15 +105,15 @@ export default function Home() {
     // 2. Setup subscription to automatically update if firestore is healthy/online
     const q = query(
       collection(db, "articles"),
-      orderBy("createdAt", "desc"),
-      limit(4)
+      orderBy("createdAt", "desc")
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const docs = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setLatestMedia(docs);
+      const podcastsOnly = docs.filter((item: any) => item.categoryId === "podcast");
+      setLatestMedia(podcastsOnly.slice(0, 4));
       setLoadingMedia(false);
     }, (error) => {
       console.warn("Home Firestore snapshot failed (Quota limit), staying with server backup list:", error);
@@ -566,19 +568,17 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* ARTICLES & PODCASTS SECTION */}
       <section className="py-24 bg-babun-accent text-babun-primary" dir="rtl">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           {/* Section Header */}
           <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8">
             <div className="text-right">
-              <h2 className="text-4xl md:text-6xl font-display font-black text-babun-primary leading-tight mb-4">כתבות ופודקאסטים</h2>
-              <p className="text-xl text-babun-primary/70 font-light">ידע שווה כח. תקראו ותאזינו ותשארו מעודכנים.</p>
+              <h2 className="text-4xl md:text-6xl font-display font-black text-babun-primary leading-tight mb-4">פודקאסטים</h2>
+              <p className="text-xl text-babun-primary/70 font-light">ידע שווה כח. תאזינו ותשארו מעודכנים.</p>
             </div>
             
-            <Link to="/articles" className="flex items-center gap-4 group cursor-pointer">
-               <span className="font-bold text-babun-primary/80 group-hover:text-babun-primary transition-colors">לכל הכתבות</span>
+            <Link to="/articles?category=podcast" className="flex items-center gap-4 group cursor-pointer">
+               <span className="font-bold text-babun-primary/80 group-hover:text-babun-primary transition-colors">לכל הפודקאסטים</span>
                <div className="w-12 h-12 bg-babun-primary text-white rounded-full flex items-center justify-center transition-transform group-hover:scale-110">
                   <ArrowLeft size={20} />
                </div>
@@ -597,7 +597,7 @@ export default function Home() {
                   whileHover={{ y: -8 }}
                   className="flex flex-col h-full group cursor-pointer"
                 >
-                  <Link to="/articles" className="flex flex-col h-full bg-white/50 hover:bg-white/85 backdrop-blur-sm p-6 rounded-babun-lg border border-babun-primary/10 transition-all duration-300 shadow-md hover:shadow-xl">
+                  <Link to="/articles?category=podcast" className="flex flex-col h-full bg-white hover:bg-zinc-50 p-6 rounded-babun-lg border border-babun-primary/10 transition-all duration-300 shadow-md hover:shadow-xl">
                     <div className="relative aspect-[16/9] rounded-babun-md overflow-hidden mb-6">
                       <img 
                         src={getDisplayImage(latestMedia[0].image)} 
@@ -607,7 +607,7 @@ export default function Home() {
                       />
                       <div className="absolute top-4 right-4 z-20">
                         <span className="px-3 py-1 bg-babun-primary text-white text-[10px] uppercase font-bold tracking-widest rounded-full shadow-sm">
-                          {latestMedia[0].category || "כתבה"}
+                          {latestMedia[0].category || "פודקאסט"}
                         </span>
                       </div>
                       <div className="absolute bottom-4 left-4">
@@ -647,7 +647,7 @@ export default function Home() {
                     whileHover={{ x: -6 }}
                     className="group"
                   >
-                    <Link to="/articles" className="flex gap-4 p-4 rounded-babun-lg bg-white/30 hover:bg-white/60 transition-all duration-300 border border-babun-primary/5 shadow-sm">
+                    <Link to="/articles?category=podcast" className="flex gap-4 p-4 rounded-babun-lg bg-white hover:bg-zinc-50 transition-all duration-300 border border-babun-primary/5 shadow-sm">
                       <div className="relative w-28 sm:w-36 aspect-[4/3] rounded-babun-md overflow-hidden flex-shrink-0">
                         <img 
                           src={getDisplayImage(item.image)} 
@@ -657,7 +657,7 @@ export default function Home() {
                         />
                         <div className="absolute top-2 right-2 z-20">
                           <span className="px-2 py-0.5 bg-babun-primary text-white text-[8px] uppercase font-bold tracking-widest rounded-full">
-                            {item.category || "כתבה"}
+                            {item.category || "פודקאסט"}
                           </span>
                         </div>
                       </div>
@@ -675,8 +675,8 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <div className="col-span-full bg-babun-primary/5 border border-babun-primary/10 rounded-babun-lg p-12 text-center text-babun-primary/60 font-display">
-              <p className="text-lg font-bold mb-2">אין עדיין כתבות או פודקאסטים במערכת</p>
+            <div className="col-span-full bg-white/70 border border-babun-primary/10 rounded-babun-lg p-12 text-center text-babun-primary/60 font-display">
+              <p className="text-lg font-bold mb-2">אין עדיין פודקאסטים במערכת</p>
               <p className="text-sm opacity-70">
                 כל התכנים הקודמים נמחקו לבקשתך על מנת לאפשר התחלה נקייה ומהירה מן היסוד.
               </p>
