@@ -81,6 +81,36 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    match /course_registrations/{id} {
+      allow create: if isValidId(id);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /consulting_leads/{id} {
+      allow create: if isValidId(id);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /deal_leads/{id} {
+      allow create: if isValidId(id);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /book_orders/{id} {
+      allow create: if isValidId(id);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /applications/{id} {
+      allow create: if isValidId(id);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /jobs/{id} {
+      allow create: if isValidId(id);
+      allow read, update, delete: if isAdmin();
+    }
+
     match /articles/{articleId} {
       allow read: if true;
       allow create: if isValidId(articleId) && isAdmin() && isValidArticle(incoming());

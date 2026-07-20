@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
+import { syncLeadToBackend } from "../lib/leadSync";
 
 
 const services = [
@@ -47,6 +48,7 @@ function AnimatedNumber({ value }: { value: number }) {
 
 export default function Home() {
   const [email, setEmail] = useState("");
+  const [newsletterName, setNewsletterName] = useState("");
   const [status, setStatus] = useState<null | "loading" | "success">(null);
   const [courseName, setCourseName] = useState("");
   const [coursePhone, setCoursePhone] = useState("");
@@ -141,10 +143,31 @@ export default function Home() {
     e.preventDefault();
     setStatus("loading");
     try {
-      await addDoc(collection(db, "newsletter"), { email, createdAt: serverTimestamp() });
+      // 1. Save to local Firestore (subscribers collection as defined in blueprint)
+      try {
+        await addDoc(collection(db, "subscribers"), { 
+          email, 
+          createdAt: serverTimestamp() 
+        });
+      } catch (dbErr) {
+        console.warn("Firestore newsletter subscription failed, proceeding with backend sync:", dbErr);
+      }
+
+      // 2. Forward to Plando CRM and notify team via Email
+      await syncLeadToBackend({
+        name: newsletterName || "לקוח ניוזלטר",
+        phone: "לא צוין",
+        email,
+        message: "הרשמה לניוזלטר השבועי באתר",
+        source: "הרשמה לניוזלטר",
+        tag: "הרשמה לניוזלטר"
+      });
+
       setStatus("success");
+      setNewsletterName("");
+      setEmail("");
     } catch (e) {
-      console.error(e);
+      console.error("Newsletter registration failed:", e);
       setStatus(null);
     }
   };
@@ -153,16 +176,35 @@ export default function Home() {
     e.preventDefault();
     setCourseStatus("loading");
     try {
-      await addDoc(collection(db, "syllabus_requests"), { 
+      // 1. Save to local Firestore (course_signups collection as defined in blueprint)
+      try {
+        await addDoc(collection(db, "course_signups"), { 
+          name: courseName,
+          phone: coursePhone,
+          email: courseEmail, 
+          courseType: "digital",
+          createdAt: serverTimestamp() 
+        });
+      } catch (dbErr) {
+        console.warn("Firestore course signup failed, proceeding with backend sync:", dbErr);
+      }
+
+      // 2. Forward lead details directly to CRM
+      await syncLeadToBackend({
         name: courseName,
         phone: coursePhone,
-        email: courseEmail, 
-        course: "telephonic",
-        createdAt: serverTimestamp() 
+        email: courseEmail,
+        message: "בקשת סילבוס / השארת פרטים לקורס מדף הבית",
+        source: "הורדת סילבוס - דף הבית",
+        tag: "הורדת סילבוס"
       });
+
       setCourseStatus("success");
+      setCourseName("");
+      setCoursePhone("");
+      setCourseEmail("");
     } catch (e) {
-      console.error(e);
+      console.error("Course syllabus request failed:", e);
       setCourseStatus(null);
     }
   };
@@ -579,7 +621,7 @@ export default function Home() {
             
             <Link to="/articles?category=podcast" className="flex items-center gap-4 group cursor-pointer">
                <span className="font-bold text-babun-primary/80 group-hover:text-babun-primary transition-colors">לכל הפודקאסטים</span>
-               <div className="w-12 h-12 bg-babun-primary text-white rounded-full flex items-center justify-center transition-transform group-hover:scale-110">
+               <div className="w-12 h-12 bg-babun-primary text-white rounded-none flex items-center justify-center transition-all group-hover:bg-babun-accent group-hover:text-babun-primary border border-babun-primary">
                   <ArrowLeft size={20} />
                </div>
             </Link>
@@ -594,24 +636,23 @@ export default function Home() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  whileHover={{ y: -8 }}
                   className="flex flex-col h-full group cursor-pointer"
                 >
-                  <Link to="/articles?category=podcast" className="flex flex-col h-full bg-white hover:bg-zinc-50 p-6 rounded-babun-lg border border-babun-primary/10 transition-all duration-300 shadow-md hover:shadow-xl">
-                    <div className="relative aspect-[16/9] rounded-babun-md overflow-hidden mb-6">
+                  <Link to="/articles?category=podcast" className="flex flex-col h-full bg-white hover:bg-zinc-50/50 p-6 rounded-none border-2 border-babun-primary transition-all duration-300">
+                    <div className="relative aspect-[16/9] rounded-none overflow-hidden mb-6 border border-babun-primary/25">
                       <img 
                         src={getDisplayImage(latestMedia[0].image)} 
                         alt={latestMedia[0].title} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
                         referrerPolicy="no-referrer"
                       />
                       <div className="absolute top-4 right-4 z-20">
-                        <span className="px-3 py-1 bg-babun-primary text-white text-[10px] uppercase font-bold tracking-widest rounded-full shadow-sm">
+                        <span className="px-3 py-1 bg-babun-accent text-babun-primary text-[10px] uppercase font-black tracking-widest rounded-none border border-babun-primary">
                           {latestMedia[0].category || "פודקאסט"}
                         </span>
                       </div>
                       <div className="absolute bottom-4 left-4">
-                        <div className="w-12 h-12 bg-babun-primary text-white rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:rotate-[-45deg]">
+                        <div className="w-12 h-12 bg-babun-primary text-white rounded-none flex items-center justify-center border border-babun-primary transition-all group-hover:bg-babun-accent group-hover:text-babun-primary group-hover:rotate-[-45deg]">
                           <ArrowLeft size={22} />
                         </div>
                       </div>
@@ -619,10 +660,10 @@ export default function Home() {
                     <div className="px-2 text-right">
                       <div className="flex items-center justify-end gap-2 text-babun-primary/60 font-bold text-xs mb-3">
                         <span>{latestMedia[0].date}</span>
-                        <div className="w-1.5 h-1.5 bg-babun-primary/30 rounded-full" />
+                        <div className="w-1.5 h-1.5 bg-babun-primary/30 rounded-none" />
                         <span>יעקב רייניץ</span>
                       </div>
-                      <h3 className="text-2xl md:text-3xl font-display font-black text-babun-primary leading-snug group-hover:text-black transition-colors line-clamp-2">
+                      <h3 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-babun-primary leading-snug group-hover:text-babun-accent transition-colors line-clamp-2">
                         {latestMedia[0].title}
                       </h3>
                       {latestMedia[0].summary && (
@@ -644,19 +685,18 @@ export default function Home() {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
-                    whileHover={{ x: -6 }}
                     className="group"
                   >
-                    <Link to="/articles?category=podcast" className="flex gap-4 p-4 rounded-babun-lg bg-white hover:bg-zinc-50 transition-all duration-300 border border-babun-primary/5 shadow-sm">
-                      <div className="relative w-28 sm:w-36 aspect-[4/3] rounded-babun-md overflow-hidden flex-shrink-0">
+                    <Link to="/articles?category=podcast" className="flex gap-4 p-4 rounded-none bg-white hover:bg-zinc-50/50 transition-all duration-300 border-2 border-babun-primary">
+                      <div className="relative w-28 sm:w-36 aspect-[4/3] rounded-none overflow-hidden flex-shrink-0 border border-babun-primary/10">
                         <img 
                           src={getDisplayImage(item.image)} 
                           alt={item.title} 
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
                           referrerPolicy="no-referrer"
                         />
                         <div className="absolute top-2 right-2 z-20">
-                          <span className="px-2 py-0.5 bg-babun-primary text-white text-[8px] uppercase font-bold tracking-widest rounded-full">
+                          <span className="px-2 py-0.5 bg-babun-accent text-babun-primary text-[8px] uppercase font-black tracking-widest rounded-none border border-babun-primary">
                             {item.category || "פודקאסט"}
                           </span>
                         </div>
@@ -665,7 +705,7 @@ export default function Home() {
                         <div className="flex items-center justify-end gap-1.5 text-babun-primary/60 font-bold text-[10px] mb-2">
                           <span>{item.date}</span>
                         </div>
-                        <h4 className="text-base sm:text-lg font-display font-black text-babun-primary leading-tight group-hover:text-black transition-colors line-clamp-2">
+                        <h4 className="text-base sm:text-lg font-display font-black text-babun-primary leading-tight group-hover:text-babun-accent transition-colors line-clamp-2">
                           {item.title}
                         </h4>
                       </div>
@@ -675,7 +715,7 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <div className="col-span-full bg-white/70 border border-babun-primary/10 rounded-babun-lg p-12 text-center text-babun-primary/60 font-display">
+            <div className="col-span-full bg-white/70 border border-babun-primary/10 rounded-none p-12 text-center text-babun-primary/60 font-display">
               <p className="text-lg font-bold mb-2">אין עדיין פודקאסטים במערכת</p>
               <p className="text-sm opacity-70">
                 כל התכנים הקודמים נמחקו לבקשתך על מנת לאפשר התחלה נקייה ומהירה מן היסוד.
@@ -723,7 +763,7 @@ export default function Home() {
                     <input 
                      required 
                      type="text" 
-                     placeholder="שם פרטי" 
+                     placeholder="שם פרטי" value={newsletterName} onChange={e => setNewsletterName(e.target.value)} 
                      className="h-16 bg-white/10 px-8 rounded-2xl outline-none border border-white/20 focus:border-babun-accent/50 focus:bg-white/20 transition-all text-right text-white" 
                    />
                     <input 

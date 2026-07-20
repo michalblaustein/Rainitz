@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Link } from "react-router-dom";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { syncLeadToBackend } from "../lib/leadSync";
 import { 
   BookOpen, 
   CheckCircle2, 
@@ -64,12 +65,24 @@ export default function Book() {
     setCheckoutStatus("loading");
 
     try {
+      // 1. Save to Firestore backup
       await addDoc(collection(db, "book_orders"), {
         ...formData,
         bookTitle: "שליש בקרקע",
         price: 149,
         createdAt: serverTimestamp()
       });
+
+      // 2. Synchronize with backend (Plando CRM & Email Alerts)
+      await syncLeadToBackend({
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        message: `רכישת ספר 'שליש בקרקע' - כתובת למשלוח: ${formData.address}`,
+        source: "רכישת ספר - שליש בקרקע",
+        tag: "רכישת ספר - שליש בקרקע"
+      });
+
       setCheckoutStatus("success");
       setFormData({ name: "", address: "", phone: "", email: "" });
 
@@ -79,7 +92,19 @@ export default function Book() {
       }, 1500);
     } catch (err: any) {
       console.error("Firestore error: ", err);
-      // Fallback to success + redirect anyway so they can pay even if Firestore is slow or offline
+      
+      // Attempt backend synchronization even if Firestore failed
+      try {
+        await syncLeadToBackend({
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          message: `רכישת ספר 'שליש בקרקע' (שגיאת גיבוי פיירבייס) - כתובת למשלוח: ${formData.address}`,
+          source: "רכישת ספר - שליש בקרקע",
+          tag: "רכישת ספר - שליש בקרקע"
+        });
+      } catch (e) {}
+
       setCheckoutStatus("success");
       setFormData({ name: "", address: "", phone: "", email: "" });
       setTimeout(() => {

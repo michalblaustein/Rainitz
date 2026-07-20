@@ -18,6 +18,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { syncLeadToBackend } from "../lib/leadSync";
 
 interface AnimatedCounterProps {
   value: number;
@@ -114,15 +115,31 @@ export default function Courses() {
       if (activeRegisterCourse === "digital") typeName = "קורס דיגיטלי - רישום מוקדם";
       if (activeRegisterCourse === "frontal") typeName = "קורס פרונטלי - רישום לעדכונים";
 
-      await addDoc(collection(db, "course_registrations"), {
-        ...formData,
-        type: typeName,
-        createdAt: serverTimestamp(),
+      // 1. Save to local Firestore
+      try {
+        await addDoc(collection(db, "course_registrations"), {
+          ...formData,
+          type: typeName,
+          createdAt: serverTimestamp(),
+        });
+      } catch (dbErr) {
+        console.warn("Firestore course registration failed, proceeding with backend sync:", dbErr);
+      }
+
+      // 2. Synchronize with backend (Plando CRM & Email Alerts)
+      await syncLeadToBackend({
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        message: `הרשמה לקורס: ${typeName}`,
+        source: `עמוד קורסים - ${typeName}`,
+        tag: typeName || "הרשמה לקורס"
       });
+
       setRegistrationStatus("success");
       setFormData({ name: "", phone: "", email: "" });
     } catch (err) {
-      console.error(err);
+      console.error("Course registration sync failed:", err);
       setRegistrationStatus(null);
     }
   };

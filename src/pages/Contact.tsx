@@ -3,6 +3,7 @@ import { Send } from "lucide-react";
 import { useState } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
+import { syncLeadToBackend } from "../lib/leadSync";
 
 export default function Contact() {
   const [formStatus, setFormStatus] = useState<null | "success" | "loading">(null);
@@ -19,10 +20,22 @@ export default function Contact() {
     setFormStatus("loading");
     
     try {
+      // 1. Save to local Firebase database
       await addDoc(collection(db, "leads"), {
         ...formData,
         createdAt: serverTimestamp()
       });
+
+      // 2. Sync lead to backend (Plando CRM & Email Alerts)
+      await syncLeadToBackend({
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        message: formData.message,
+        source: `צור קשר - ${formData.subject}`,
+        tag: `צור קשר - ${formData.subject}`
+      });
+
       setFormStatus("success");
     } catch (error) {
       console.error("Error submitting lead:", error);

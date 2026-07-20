@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
+import { syncLeadToBackend } from "../lib/leadSync";
 
 export default function PinuyBinuyLP() {
   const [formStatus, setFormStatus] = useState<null | "success" | "loading" | "error">(null);
@@ -50,6 +51,7 @@ export default function PinuyBinuyLP() {
     }
     setFormStatus("loading");
     try {
+      // 1. Save to Firestore backup
       await addDoc(collection(db, "leads"), {
         name: formData.name,
         phone: formData.phone,
@@ -59,6 +61,17 @@ export default function PinuyBinuyLP() {
         source: "lp-pinuy-binuy",
         createdAt: serverTimestamp()
       });
+
+      // 2. Synchronize with backend (Plando & Email notification)
+      await syncLeadToBackend({
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        message: formData.message || "נרשם דרך עמוד נחיתה - פינוי בינוי",
+        source: "דף נחיתה - קורס פינוי בינוי",
+        tag: "דף נחיתה פינוי בינוי"
+      });
+
       setFormStatus("success");
       setFormData({ name: "", phone: "", email: "", message: "" });
     } catch (err) {

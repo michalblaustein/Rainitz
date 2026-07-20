@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "motion/react";
 import { db } from "../lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { syncLeadToBackend } from "../lib/leadSync";
 import { 
   Users, 
   Clock, 
@@ -72,12 +73,23 @@ export default function Consulting() {
     setIsSubmitting(true);
 
     try {
+      // 1. Save to local Firestore database
       await addDoc(collection(db, "consulting_leads"), {
         fullName: formData.fullName,
         phone: formData.phone,
         email: formData.email,
         message: formData.message,
         createdAt: serverTimestamp(),
+      });
+
+      // 2. Sync lead to backend (Plando CRM & Email Alerts)
+      await syncLeadToBackend({
+        name: formData.fullName,
+        phone: formData.phone,
+        email: formData.email,
+        message: formData.message || "תיאום פגישת ייעוץ",
+        source: "פגישת ייעוץ אישית",
+        tag: "תיאום פגישת ייעוץ"
       });
 
       setIsSubmitting(false);
@@ -90,6 +102,19 @@ export default function Consulting() {
       }, 1500);
     } catch (err: any) {
       console.error("Error saving lead:", err);
+      
+      // Attempt backend synchronization even if Firestore failed
+      try {
+        await syncLeadToBackend({
+          name: formData.fullName,
+          phone: formData.phone,
+          email: formData.email,
+          message: formData.message || "תיאום פגישת ייעוץ (שגיאת גיבוי פיירבייס)",
+          source: "פגישת ייעוץ אישית",
+          tag: "תיאום פגישת ייעוץ"
+        });
+      } catch (e) {}
+
       // Fallback in case of firestore/network error
       setIsSubmitting(false);
       setIsSubmitted(true);

@@ -4,6 +4,9 @@ import { createServer as createViteServer } from "vite";
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from "@google/genai";
 import fs from "fs";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // Helper to resolve paths in a way that works in both ESM (tsx) and CJS (bundled esbuild)
 const getPaths = () => {
@@ -89,10 +92,265 @@ async function startServer() {
   app.use(express.json({ limit: "15mb" }));
 
   // API Routes
-  app.post("/api/leads", (req, res) => {
-    const { name, email, phone, source } = req.body;
-    console.log(`New lead received: ${name} (${email}) from ${source}`);
-    res.json({ success: true, message: "Lead received" });
+  app.post("/api/leads", async (req, res) => {
+    try {
+      const { name, email, phone, message, source, details, tag } = req.body;
+      console.log(`New lead received: ${name} (${email}) from ${source} [Tag: ${tag || "None"}]`);
+
+      // 1. Send Email Notification to r0504141516@gmail.com via Resend
+      const adminEmail = "r0504141516@gmail.com";
+      const resendApiKey = process.env.RESEND_API_KEY;
+      let emailSent = false;
+
+      if (resendApiKey) {
+        try {
+          const emailBody = `
+            <div style="direction: rtl; text-align: right; font-family: sans-serif; padding: 20px; background-color: #f4f4f7; border-radius: 12px; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #1a1a24; border-bottom: 3px solid #fee000; padding-bottom: 12px; margin-top: 0; font-size: 22px;">ליד חדש התקבל במערכת מרכז רייניץ!</h2>
+              
+              <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px;">
+                <p style="margin: 8px 0; font-size: 16px; color: #333;"><strong style="color: #1a1a24;">שם מלא:</strong> ${name || "לא צוין"}</p>
+                <p style="margin: 8px 0; font-size: 16px; color: #333;"><strong style="color: #1a1a24;">מספר טלפון:</strong> <a href="tel:${phone}" style="color: #0076ff; text-decoration: none; font-weight: bold;">${phone || "לא צוין"}</a></p>
+                <p style="margin: 8px 0; font-size: 16px; color: #333;"><strong style="color: #1a1a24;">כתובת דוא"ל:</strong> ${email || "לא צוין"}</p>
+                <p style="margin: 8px 0; font-size: 16px; color: #333;"><strong style="color: #1a1a24;">מקור הליד:</strong> <span style="background-color: #fee00020; padding: 3px 8px; border-radius: 4px; font-weight: bold; color: #333;">${source || "לא צוין"}</span></p>
+                ${tag ? `
+                <p style="margin: 8px 0; font-size: 16px; color: #333;"><strong style="color: #1a1a24;">תגית / פעולה:</strong> <span style="background-color: #ff572215; padding: 3px 8px; border-radius: 4px; font-weight: bold; color: #d32f2f;">${tag}</span></p>
+                ` : ""}
+              </div>
+
+              ${message ? `
+                <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px;">
+                  <h4 style="margin: 0 0 10px 0; color: #1a1a24; font-size: 15px;">הודעה / הערות:</h4>
+                  <p style="margin: 0; line-height: 1.6; color: #555; white-space: pre-wrap;">${message}</p>
+                </div>
+              ` : ""}
+
+              ${details && Object.keys(details).length > 0 ? `
+                <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px; direction: ltr; text-align: left;">
+                  <h4 style="margin: 0 0 10px 0; color: #1a1a24; font-size: 15px; direction: rtl; text-align: right;">פרטי עסקת מחשבון נוספים:</h4>
+                  <pre style="margin: 0; font-family: monospace; font-size: 13px; color: #444; background: #fafafa; padding: 10px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(details, null, 2)}</pre>
+                </div>
+              ` : ""}
+              
+              <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;" />
+              <p style="font-size: 12px; color: #718096; text-align: center; margin: 0;">הודעה זו נשלחה אוטומטית ממערכת מרכז רייניץ נדל"ן וכלכלה נבונה.</p>
+            </div>
+          `;
+
+          const emailResponse = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${resendApiKey}`
+            },
+            body: JSON.stringify({
+              from: "מרכז רייניץ <onboarding@resend.dev>",
+              to: adminEmail,
+              subject: `ליד חדש: ${name || "לקוח"} (${source || "אתר"})`,
+              html: emailBody
+            })
+          });
+
+          if (emailResponse.ok) {
+            emailSent = true;
+            console.log(`Notification email sent successfully to ${adminEmail}`);
+          } else {
+            const errText = await emailResponse.text();
+            console.error("Resend API returned an error:", errText);
+          }
+        } catch (e) {
+          console.error("Failed to send email via Resend API:", e);
+        }
+      } else {
+        console.log("RESEND_API_KEY environment variable is not defined. Skipping email dispatch.");
+      }
+
+      // 2. Forward lead details directly to Plando (via webhook/Zapier/Make URL)
+      const plandoWebhookUrl = process.env.PLANDO_WEBHOOK_URL;
+      let plandoSynced = false;
+
+      if (plandoWebhookUrl) {
+        try {
+          const plandoPayload = {
+            name,
+            firstName: name ? name.split(" ")[0] : "",
+            lastName: name ? name.split(" ").slice(1).join(" ") : "",
+            email,
+            phone,
+            message: message || "",
+            source: source || "Website Form",
+            tag: tag || "",
+            details: details || {},
+            createdAt: new Date().toISOString()
+          };
+
+          const plandoResponse = await fetch(plandoWebhookUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(plandoPayload)
+          });
+
+          if (plandoResponse.ok) {
+            plandoSynced = true;
+            console.log("Successfully synchronized lead to Plando webhook.");
+          } else {
+            const errText = await plandoResponse.text();
+            console.error("Plando webhook returned an error status:", plandoResponse.status, errText);
+          }
+        } catch (e) {
+          console.error("Failed to forward lead to Plando webhook:", e);
+        }
+      } else {
+        // Direct integration with Plando Lead Capture Form API using access key
+        const plandoAccessKey = process.env.PLANDO_ACCESS_KEY || "597df96284d52e5dd3be33b6ff7afc68";
+        console.log(`PLANDO_WEBHOOK_URL not defined. Attempting direct Plando contact registration using access key ending in ...${plandoAccessKey.slice(-6)}`);
+        
+        try {
+          const params = new URLSearchParams();
+          params.append("access_key", plandoAccessKey);
+          params.append("no_redirect", "1");
+          params.append("contact[customer_cat_id]", "0");
+          
+          const firstName = name ? name.split(" ")[0] : "";
+          const lastName = name ? name.split(" ").slice(1).join(" ") : name || "לקוח";
+          
+          params.append("contact[first_name]", firstName);
+          params.append("contact[last_name]", lastName);
+          params.append("contact[primary_email]", email || "");
+          params.append("contact[mobile1]", phone || "");
+          
+          if (tag) {
+            params.append("contact[tags]", tag);
+            params.append("contact[tag]", tag);
+          }
+          
+          // Construct a detailed remark with source, tag, message, and transaction details
+          let remarkText = "";
+          if (tag) {
+            remarkText += `תגית / פעולה: ${tag}\n`;
+          }
+          remarkText += `מקור: ${source || "לא צוין"}`;
+          if (message) {
+            remarkText += `\nהודעה: ${message}`;
+          }
+          if (details && Object.keys(details).length > 0) {
+            remarkText += `\nפרטים נוספים: ${JSON.stringify(details, null, 2)}`;
+          }
+          params.append("contact[remark]", remarkText);
+          
+          const directPlandoUrl = "https://plando.co.il/contacts/lead_form1";
+          
+          const directResponse = await fetch(directPlandoUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: params.toString()
+          });
+
+          if (directResponse.ok) {
+            const resText = await directResponse.text();
+            try {
+              const resultJson = JSON.parse(resText);
+              if (resultJson && (resultJson.err === "0" || resultJson.err === 0)) {
+                plandoSynced = true;
+                console.log(`Successfully synchronized lead directly to Plando CRM. Contact ID: ${resultJson.contact_id}`);
+              } else {
+                console.error("Direct Plando CRM returned an application-level error:", resultJson);
+              }
+            } catch (jsonErr) {
+              if (resText.includes("errdesc") || resText.includes("contact_id") || resText.includes('"err":0') || resText.includes('"err":"0"')) {
+                plandoSynced = true;
+                console.log("Direct Plando CRM succeeded (parsed via text substring search).");
+              } else {
+                console.error("Failed to parse Plando CRM response as JSON:", resText, jsonErr);
+              }
+            }
+          } else {
+            const errText = await directResponse.text();
+            console.error("Direct Plando CRM returned error status:", directResponse.status, errText);
+          }
+        } catch (directErr) {
+          console.error("Failed to sync lead directly to Plando CRM:", directErr);
+        }
+      }
+
+      res.json({
+        success: true,
+        emailSent,
+        plandoSynced,
+        message: "Lead successfully recorded"
+      });
+    } catch (err: any) {
+      console.error("General error processing lead in server:", err);
+      res.status(500).json({ success: false, error: err?.message || "Internal server error" });
+    }
+  });
+
+  // API Route to receive notifications when someone books/schedules an appointment on Plando
+  app.post("/api/plando-webhook", async (req, res) => {
+    try {
+      console.log("Received Plando Webhook payload:", JSON.stringify(req.body, null, 2));
+      const { name, email, phone, date, time, service, event } = req.body;
+
+      // Send Email Notification to r0504141516@gmail.com via Resend
+      const adminEmail = "r0504141516@gmail.com";
+      const resendApiKey = process.env.RESEND_API_KEY;
+      let emailSent = false;
+
+      if (resendApiKey) {
+        try {
+          const emailBody = `
+            <div style="direction: rtl; text-align: right; font-family: sans-serif; padding: 20px; background-color: #f0fdf4; border-radius: 12px; max-width: 600px; margin: 0 auto; border: 1px solid #bbf7d0;">
+              <h2 style="color: #14532d; border-bottom: 3px solid #4ade80; padding-bottom: 12px; margin-top: 0; font-size: 22px;">פגישה חדשה נקבעה בפלאנדו (Plando)! 🎉</h2>
+              
+              <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px;">
+                <p style="margin: 8px 0; font-size: 16px; color: #333;"><strong style="color: #14532d;">שם הלקוח:</strong> ${name || "לא צוין"}</p>
+                <p style="margin: 8px 0; font-size: 16px; color: #333;"><strong style="color: #14532d;">טלפון:</strong> <a href="tel:${phone}" style="color: #16a34a; text-decoration: none; font-weight: bold;">${phone || "לא צוין"}</a></p>
+                <p style="margin: 8px 0; font-size: 16px; color: #333;"><strong style="color: #14532d;">אימייל:</strong> ${email || "לא צוין"}</p>
+                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 15px 0;" />
+                <p style="margin: 8px 0; font-size: 16px; color: #333;"><strong style="color: #14532d;">תאריך פגישה:</strong> <span style="background-color: #f0fdf4; padding: 4px 10px; border-radius: 6px; font-weight: bold; color: #16a34a;">${date || "לא צוין"}</span></p>
+                <p style="margin: 8px 0; font-size: 16px; color: #333;"><strong style="color: #14532d;">שעה:</strong> <span style="background-color: #f0fdf4; padding: 4px 10px; border-radius: 6px; font-weight: bold; color: #16a34a;">${time || "לא צוין"}</span></p>
+                <p style="margin: 8px 0; font-size: 16px; color: #333;"><strong style="color: #14532d;">סוג השירות/שירות:</strong> ${service || "פגישת ייעוץ"}</p>
+              </div>
+
+              <p style="font-size: 12px; color: #718096; text-align: center; margin: 0;">הודעה זו נשלחה אוטומטית ממערכת מרכז רייניץ בעקבות קביעת תור ביומן של פלאנדו.</p>
+            </div>
+          `;
+
+          const emailResponse = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${resendApiKey}`
+            },
+            body: JSON.stringify({
+              from: "מרכז רייניץ <onboarding@resend.dev>",
+              to: adminEmail,
+              subject: `פגישה חדשה נקבעה: ${name || "לקוח"} - ${date || ""} ${time || ""}`,
+              html: emailBody
+            })
+          });
+
+          if (emailResponse.ok) {
+            emailSent = true;
+            console.log(`Appointment email notification sent successfully to ${adminEmail}`);
+          } else {
+            const errText = await emailResponse.text();
+            console.error("Resend API error for webhook:", errText);
+          }
+        } catch (e) {
+          console.error("Failed to send webhook notification email:", e);
+        }
+      }
+
+      res.json({ success: true, message: "Webhook successfully received and processed", emailSent });
+    } catch (err: any) {
+      console.error("Error processing Plando webhook:", err);
+      res.status(500).json({ success: false, error: err?.message || "Internal server error" });
+    }
   });
 
   // API route to get cached/backed-up articles when Firestore is down or blocked (Quota limit)

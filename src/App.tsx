@@ -14,6 +14,7 @@ const Consulting = lazy(() => import("./pages/Consulting"));
 const Book = lazy(() => import("./pages/Book"));
 const Articles = lazy(() => import("./pages/Articles"));
 const PinuyBinuyLP = lazy(() => import("./pages/PinuyBinuyLP"));
+const Scheduler = lazy(() => import("./pages/Scheduler"));
 
 // Component to scroll to top on route change
 function ScrollToTop() {
@@ -52,6 +53,7 @@ function AppContent() {
             <Route path="/articles" element={<Articles />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/pinuy-binuy" element={<PinuyBinuyLP />} />
+            <Route path="/scheduler" element={<Scheduler />} />
           </Routes>
         </Suspense>
       </main>
