@@ -16,13 +16,26 @@ const Articles = lazy(() => import("./pages/Articles"));
 const PinuyBinuyLP = lazy(() => import("./pages/PinuyBinuyLP"));
 const Scheduler = lazy(() => import("./pages/Scheduler"));
 
-// Component to scroll to top on route change
-function ScrollToTop() {
-  const { pathname } = useLocation();
+// Component to scroll to top on route change & track Google Analytics pageviews
+function ScrollAndAnalyticsTracker() {
+  const { pathname, search } = useLocation();
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [pathname]);
+
+    // Track pageview on route change in Google Analytics (SPA support)
+    if (typeof (window as any).gtag === "function") {
+      const pagePath = pathname + search;
+      (window as any).gtag("event", "page_view", {
+        page_path: pagePath,
+        page_location: window.location.href,
+        page_title: document.title,
+      });
+      (window as any).gtag("config", "G-94L6RJTJJE", {
+        page_path: pagePath,
+      });
+    }
+  }, [pathname, search]);
 
   return null;
 }
@@ -79,7 +92,7 @@ function AppContent() {
 export default function App() {
   return (
     <Router>
-      <ScrollToTop />
+      <ScrollAndAnalyticsTracker />
       <AppContent />
     </Router>
   );

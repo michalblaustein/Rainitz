@@ -13,103 +13,93 @@ import {
   Phone, 
   Mail, 
   ChevronDown, 
-  ShoppingBag, 
   ArrowLeft, 
   Sparkles, 
   Bookmark, 
   AlertTriangle, 
-  DollarSign, 
   MessageSquare,
   ClipboardList,
-  Flame,
-  CornerDownLeft,
-  X,
-  Share2,
+  Clock,
+  Send,
   Truck,
-  Book as BookIcon
+  Book as BookIcon,
+  Calendar
 } from "lucide-react";
 
 export default function Book() {
-  // Checkout Form State
+  // Waiting List Form State
   const [formData, setFormData] = useState({
     name: "",
-    address: "",
     phone: "",
-    email: ""
+    email: "",
+    city: "",
+    notes: ""
   });
-  const [checkoutStatus, setCheckoutStatus] = useState<null | "loading" | "success" | "error">(null);
+  const [submitStatus, setSubmitStatus] = useState<null | "loading" | "success" | "error">(null);
   const [errorMsg, setErrorMsg] = useState("");
 
   // FAQ state
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  
-  // Editorial Notes State (Visible to help review the publishing metrics)
-  const [showNotes, setShowNotes] = useState(false);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleCheckoutSubmit = async (e: React.FormEvent) => {
+  const handleWaitingListSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone || !formData.address) {
-      setErrorMsg("אנא מלא את כל שדות החובה: שם מלא, מספר טלפון וכתובת למשלוח.");
+    if (!formData.name || !formData.phone) {
+      setErrorMsg("אנא מלאו לפחות שם מלא ומספר טלפון.");
       return;
     }
     setErrorMsg("");
-    setCheckoutStatus("loading");
+    setSubmitStatus("loading");
 
     try {
-      // 1. Save to Firestore backup
-      await addDoc(collection(db, "book_orders"), {
-        ...formData,
-        bookTitle: "שליש בקרקע",
-        price: 149,
-        createdAt: serverTimestamp()
-      });
+      // 1. Save to Firestore waiting list
+      try {
+        await addDoc(collection(db, "book_waiting_list"), {
+          ...formData,
+          bookTitle: "שליש בקרקע",
+          isOutOfStock: true,
+          createdAt: serverTimestamp()
+        });
+      } catch (dbErr) {
+        console.warn("Firestore backup save error:", dbErr);
+      }
 
       // 2. Synchronize with backend (Plando CRM & Email Alerts)
       await syncLeadToBackend({
         name: formData.name,
         phone: formData.phone,
-        email: formData.email,
-        message: `רכישת ספר 'שליש בקרקע' - כתובת למשלוח: ${formData.address}`,
-        source: "רכישת ספר - שליש בקרקע",
-        tag: "רכישת ספר - שליש בקרקע"
+        email: formData.email || "לא צוין",
+        message: `הצטרפות לרשימת המתנה לספר 'שליש בקרקע' (אזל זמנית מהמלאי)${formData.city ? ` | יישוב: ${formData.city}` : ''}${formData.notes ? ` | הערות: ${formData.notes}` : ''}`,
+        source: "רשימת המתנה - ספר שליש בקרקע",
+        tag: "רשימת המתנה לספר"
       });
 
-      setCheckoutStatus("success");
-      setFormData({ name: "", address: "", phone: "", email: "" });
-
-      // Automatically redirect to the secure payment URL
-      setTimeout(() => {
-        window.location.href = "https://plando.co.il/self_services/embed_store/24804?ak=597df96284d52e5dd3be33b6ff7afc68";
-      }, 1500);
+      setSubmitStatus("success");
+      setFormData({ name: "", phone: "", email: "", city: "", notes: "" });
     } catch (err: any) {
-      console.error("Firestore error: ", err);
-      
+      console.error("Waiting list error: ", err);
       // Attempt backend synchronization even if Firestore failed
       try {
         await syncLeadToBackend({
           name: formData.name,
           phone: formData.phone,
-          email: formData.email,
-          message: `רכישת ספר 'שליש בקרקע' (שגיאת גיבוי פיירבייס) - כתובת למשלוח: ${formData.address}`,
-          source: "רכישת ספר - שליש בקרקע",
-          tag: "רכישת ספר - שליש בקרקע"
+          email: formData.email || "לא צוין",
+          message: `הצטרפות לרשימת המתנה לספר 'שליש בקרקע' (אזל זמנית מהמלאי)${formData.city ? ` | יישוב: ${formData.city}` : ''}`,
+          source: "רשימת המתנה - ספר שליש בקרקע",
+          tag: "רשימת המתנה לספר"
         });
       } catch (e) {}
 
-      setCheckoutStatus("success");
-      setFormData({ name: "", address: "", phone: "", email: "" });
-      setTimeout(() => {
-        window.location.href = "https://plando.co.il/self_services/embed_store/24804?ak=597df96284d52e5dd3be33b6ff7afc68";
-      }, 1500);
+      setSubmitStatus("success");
+      setFormData({ name: "", phone: "", email: "", city: "", notes: "" });
     }
   };
 
@@ -141,19 +131,40 @@ export default function Book() {
           <div className="absolute inset-0 bg-gradient-to-t from-babun-primary via-transparent to-babun-primary/80 z-[2]" />
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 mt-[100px] text-right">
-          <div className="flex flex-col items-start justify-start space-y-8 pr-0 pl-[5px] -mr-[92px]">
+        <div className="max-w-4xl mx-auto px-4 md:px-8 relative z-10 mt-[80px] text-right">
+          <div className="flex flex-col items-start justify-start space-y-6 pr-0 pl-[5px] -mr-[92px]">
             
+            {/* Out of Stock Notice Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="inline-flex items-center gap-2 bg-red-600/20 border border-red-500/50 text-white px-4 py-2 rounded-full text-xs md:text-sm font-bold shadow-lg backdrop-blur-md"
+            >
+              <AlertTriangle size={16} className="text-red-400 shrink-0" />
+              <span className="text-red-400 font-black">הספר אזל מהמלאי</span>
+              <span className="text-white/80">• ההרשמה לרשימת ההמתנה למהדורה הבאה פתוחה</span>
+            </motion.div>
+
             <motion.h1 
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-display font-black leading-tight text-white mb-4 tracking-tight text-right w-full"
+              className="text-4xl md:text-5xl lg:text-6xl font-display font-black leading-tight text-white mb-2 tracking-tight text-right w-full"
               id="book-main-title"
             >
               הספר שמסביר לך את מה <br className="hidden md:inline" />
               <span className="text-babun-accent font-black">שאיש לא הסביר לפני שחתמת.</span>
             </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-white/80 text-base md:text-lg max-w-2xl leading-relaxed font-light"
+            >
+              בשל הביקוש הגבוה, המהדורה הנוכחית של הספר "שליש בקרקע" אזלה מהמלאי. ניתן להירשם עכשיו לרשימת ההמתנה ללא התחייבות, ולשריין עותק בעדיפות ראשונה ברגע שההדפסה הבאה תצא לאור.
+            </motion.p>
 
             <motion.div
               initial={{ opacity: 0, y: 15 }}
@@ -165,8 +176,8 @@ export default function Book() {
                 onClick={() => scrollToId("checkout-form-section")}
                 className="w-full sm:w-auto bg-babun-accent hover:bg-white text-babun-primary font-bold px-8 py-4.5 rounded-babun-md text-base shadow-xl hover:shadow-babun-accent/15 transition-all duration-350 cursor-pointer flex items-center justify-center gap-2.5 transform hover:-translate-y-0.5"
               >
-                <ArrowLeft size={18} className="stroke-[2.5]" />
-                <span>רכוש את הספר</span>
+                <Clock size={18} className="stroke-[2.5]" />
+                <span>הצטרפות לרשימת המתנה</span>
               </button>
             </motion.div>
 
@@ -174,7 +185,7 @@ export default function Book() {
         </div>
       </section>
 
-      {/* 2. METRIC BLOCK SECTION - Styled with clean white background, split layout: texts on the right, large book mockup on the left */}
+      {/* 2. METRIC BLOCK SECTION */}
       <section className="py-24 bg-white text-babun-primary relative overflow-hidden text-right">
         <div className="absolute inset-0 mesh-grid opacity-5 z-0" />
         <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-10 text-right">
@@ -182,18 +193,15 @@ export default function Book() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center" dir="rtl">
             {/* Right Column: Texts (5/12) */}
             <div className="lg:col-span-5 space-y-6 text-right">
-              {/* SMALLER SUBTITLE: ספר אחד. תשובה לשאלה שכולם שואלים. */}
               <p className="text-lg md:text-xl font-bold text-black py-0.5">
                 ספר אחד. תשובה לשאלה שכולם שואלים.
               </p>
 
-              {/* BIG HEADING: מאיפה מתחילים? */}
               <h2 className="text-7xl sm:text-8xl md:text-9xl font-display font-normal tracking-tight leading-[0.95] text-black">
                 מאיפה <br />
                 מתחילים?
               </h2>
 
-              {/* MAIN PARAGRAPHS - NO BOX/FRAME */}
               <div className="space-y-6 mt-8 max-w-2xl text-lg text-babun-primary/95 leading-relaxed font-light">
                 <p>
                   זו השאלה שאני שומע הכי הרבה. מאנשים שרוצים לקנות דירה ראשונה. מאנשים שרוצים להשקיע ולא יודעים בדיוק איך. מאנשים שכבר קנו - ואחר כך הבנו שהיו שאלות שלא שאלו.
@@ -205,7 +213,7 @@ export default function Book() {
               </div>
             </div>
 
-            {/* Left Column: Large Book Mockup Image (7/12) - ALIGNED PORTRAIT TO LEFT AND FULLY ENLARGED */}
+            {/* Left Column: Large Book Mockup Image */}
             <div className="lg:col-span-7 flex justify-center lg:justify-end w-full">
               <div className="w-full max-w-[650px] aspect-[4/5] lg:-ml-8">
                 <img 
@@ -221,10 +229,16 @@ export default function Book() {
         </div>
       </section>
 
-      {/* 3. OPTIONS CARDS SECTION - Relocated below metric block section, styled with black BG & Zero borders, columns of icons and CTA */}
+      {/* 3. OPTIONS CARDS SECTION */}
       <section id="options-section" className="py-20 bg-black relative scroll-mt-20">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           
+          {/* Out of stock notification banner */}
+          <div className="mb-10 bg-red-500/15 border border-red-500/30 rounded-babun-lg p-5 text-center text-white text-sm max-w-2xl mx-auto flex items-center justify-center gap-3">
+            <AlertTriangle size={18} className="text-red-400 shrink-0" />
+            <span><strong className="text-red-400 font-black">הספר אזל מהמלאי.</strong> הירשמו לרשימת ההמתנה ונודיע לכם ראשונים עם צאת המהדורה החדשה.</span>
+          </div>
+
           {/* Columns layout with icons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center pb-12" dir="rtl">
             {/* Column 1 */}
@@ -256,26 +270,25 @@ export default function Book() {
               <div className="w-16 h-16 bg-babun-accent/10 border border-babun-accent/25 text-babun-accent rounded-full mb-4 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
                 <Truck size={28} />
               </div>
-              <span className="text-lg font-medium text-white/95">משלוח עד הבית</span>
+              <span className="text-lg font-medium text-white/95">משלוח עד הבית בהדפסה</span>
             </div>
           </div>
 
-          <div className="max-w-md mx-auto text-center">
+          <div className="max-w-md mx-auto text-center space-y-3">
             <button 
               onClick={() => scrollToId("checkout-form-section")}
-              className="w-full bg-babun-accent hover:bg-white text-babun-primary font-bold py-5 px-8 rounded-babun-md transition-all duration-300 text-center cursor-pointer flex items-center justify-center gap-3 text-lg"
+              className="w-full bg-babun-accent hover:bg-white text-babun-primary font-bold py-5 px-8 rounded-babun-md transition-all duration-300 text-center cursor-pointer flex items-center justify-center gap-3 text-lg shadow-lg"
             >
-              <span>להזמנה עכשיו</span>
-              <ArrowLeft size={20} className="stroke-[2.5]" />
+              <Clock size={20} className="stroke-[2.5]" />
+              <span>הצטרפות לרשימת המתנה (ללא עלות)</span>
             </button>
+            <p className="text-white/50 text-xs">שריין מקום ללא התחייבות כספית מראש</p>
           </div>
 
         </div>
       </section>
 
-
-
-      {/* 5. 6 PARTS OF BOOK */}
+      {/* 4. 6 PARTS OF BOOK */}
       <section className="py-24 bg-babun-light border-y border-babun-primary/5">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           
@@ -372,7 +385,7 @@ export default function Book() {
         </div>
       </section>
 
-      {/* TALMUDIC QUOTE BANNER (ציטוט חז"ל - שליש בקרקע) */}
+      {/* TALMUDIC QUOTE BANNER */}
       <section className="relative py-28 overflow-hidden text-center">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
@@ -396,7 +409,7 @@ export default function Book() {
         </div>
       </section>
 
-      {/* 6. READER TESTIMONIALS */}
+      {/* 5. READER TESTIMONIALS */}
       <section className="py-24 bg-white relative">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           
@@ -480,7 +493,7 @@ export default function Book() {
         </div>
       </section>
 
-      {/* 7. ABOUT JACOB REINITZ SECTION */}
+      {/* 6. ABOUT JACOB REINITZ SECTION */}
       <section className="py-24 bg-white relative">
         <div className="max-w-7xl mx-auto px-4 md:px-8 text-right">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
@@ -538,7 +551,7 @@ export default function Book() {
         </div>
       </section>
 
-      {/* 8. FAQs SECTION */}
+      {/* 7. FAQs SECTION */}
       <section className="py-24 bg-zinc-100/70 border-y border-babun-primary/5 relative">
         <div className="max-w-4xl mx-auto px-4 md:px-8">
           
@@ -559,11 +572,61 @@ export default function Book() {
                 onClick={() => toggleFaq(0)}
                 className="w-full py-5 px-6 md:px-8 text-right font-display font-bold text-lg text-babun-primary hover:text-babun-accent transition-colors flex items-center justify-between gap-4"
               >
-                <span>לאיזה שלב הספר מתאים?</span>
+                <span>מתי תהיה זמינה המהדורה הבאה?</span>
                 <ChevronDown size={18} className={`text-babun-primary/40 transition-transform duration-300 ${openFaq === 0 ? 'rotate-180 text-babun-accent' : ''}`} />
               </button>
               <AnimatePresence initial={false}>
                 {openFaq === 0 && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                  >
+                    <div className="px-6 md:px-8 pb-6 border-t border-babun-primary/5 text-base text-babun-primary/75 font-light leading-relaxed">
+                      ההדפסה החדשה נמצאת כעת בהכנה מול בית הדפוס. כל מי שנרשם ברשימת ההמתנה יקבל עדכון אישי מוקדם ב-SMS/אימייל עוד לפני פתיחת המכירה לקהל הרחב.
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* FAQ 2 */}
+            <div className="bg-white border border-babun-primary/5 rounded-babun-md overflow-hidden transition-all duration-300 shadow-sm">
+              <button 
+                onClick={() => toggleFaq(1)}
+                className="w-full py-5 px-6 md:px-8 text-right font-display font-bold text-lg text-babun-primary hover:text-babun-accent transition-colors flex items-center justify-between gap-4"
+              >
+                <span>האם ההרשמה לרשימת ההמתנה מחייבת אותי בתשלום?</span>
+                <ChevronDown size={18} className={`text-babun-primary/40 transition-transform duration-300 ${openFaq === 1 ? 'rotate-180 text-babun-accent' : ''}`} />
+              </button>
+              <AnimatePresence initial={false}>
+                {openFaq === 1 && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                  >
+                    <div className="px-6 md:px-8 pb-6 border-t border-babun-primary/5 text-base text-babun-primary/75 font-light leading-relaxed">
+                      לא, ההרשמה היא ללא שום עלות או התחייבות כספית. מטרתה לשריין עבורך עדיפות ולקבל קישור ישיר לרכישה ברגע שהמלאי יחודש.
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* FAQ 3 */}
+            <div className="bg-white border border-babun-primary/5 rounded-babun-md overflow-hidden transition-all duration-300 shadow-sm">
+              <button 
+                onClick={() => toggleFaq(2)}
+                className="w-full py-5 px-6 md:px-8 text-right font-display font-bold text-lg text-babun-primary hover:text-babun-accent transition-colors flex items-center justify-between gap-4"
+              >
+                <span>לאיזה שלב הספר מתאים?</span>
+                <ChevronDown size={18} className={`text-babun-primary/40 transition-transform duration-300 ${openFaq === 2 ? 'rotate-180 text-babun-accent' : ''}`} />
+              </button>
+              <AnimatePresence initial={false}>
+                {openFaq === 2 && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
@@ -578,63 +641,13 @@ export default function Book() {
               </AnimatePresence>
             </div>
 
-            {/* FAQ 2 */}
-            <div className="bg-white border border-babun-primary/5 rounded-babun-md overflow-hidden transition-all duration-300 shadow-sm">
-              <button 
-                onClick={() => toggleFaq(1)}
-                className="w-full py-5 px-6 md:px-8 text-right font-display font-bold text-lg text-babun-primary hover:text-babun-accent transition-colors flex items-center justify-between gap-4"
-              >
-                <span>האם הספר מתאים למי שאין לו ידע קודם?</span>
-                <ChevronDown size={18} className={`text-babun-primary/40 transition-transform duration-300 ${openFaq === 1 ? 'rotate-180 text-babun-accent' : ''}`} />
-              </button>
-              <AnimatePresence initial={false}>
-                {openFaq === 1 && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25, ease: "easeInOut" }}
-                  >
-                    <div className="px-6 md:px-8 pb-6 border-t border-babun-primary/5 text-base text-babun-primary/75 font-light leading-relaxed">
-                      זה בדיוק בשבילו. הספר אינו מניח שאתה יודע כלום מראש. הוא נכתב בצורה פשוטה, שווה לכל נפש, ומתחיל מהבסיס הפיננסי הרחב ועד לסגירת העסקה.
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* FAQ 3 */}
-            <div className="bg-white border border-babun-primary/5 rounded-babun-md overflow-hidden transition-all duration-300 shadow-sm">
-              <button 
-                onClick={() => toggleFaq(2)}
-                className="w-full py-5 px-6 md:px-8 text-right font-display font-bold text-lg text-babun-primary hover:text-babun-accent transition-colors flex items-center justify-between gap-4"
-              >
-                <span>האם הספר מכסה גם השקעות, לא רק דירה ראשונה?</span>
-                <ChevronDown size={18} className={`text-babun-primary/40 transition-transform duration-300 ${openFaq === 2 ? 'rotate-180 text-babun-accent' : ''}`} />
-              </button>
-              <AnimatePresence initial={false}>
-                {openFaq === 2 && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25, ease: "easeInOut" }}
-                  >
-                    <div className="px-6 md:px-8 pb-6 border-t border-babun-primary/5 text-base text-babun-primary/75 font-light leading-relaxed">
-                      כן בהחלט. חלקים גדולים ומכובדים בספר מוקדשים ומוכוונים לפרספקטיבה של משקיעים - ניתוח גובה תשואה, אומדן סיכונים, בדיקת ביקוש שכירות וניתוח היתכנות של עסקאות מורכבות יותר.
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
             {/* FAQ 4 */}
             <div className="bg-white border border-babun-primary/5 rounded-babun-md overflow-hidden transition-all duration-300 shadow-sm">
               <button 
                 onClick={() => toggleFaq(3)}
                 className="w-full py-5 px-6 md:px-8 text-right font-display font-bold text-lg text-babun-primary hover:text-babun-accent transition-colors flex items-center justify-between gap-4"
               >
-                <span>כמה זמן לוקח לקרוא את הספר?</span>
+                <span>האם הספר מתאים למי שאין לו ידע קודם?</span>
                 <ChevronDown size={18} className={`text-babun-primary/40 transition-transform duration-300 ${openFaq === 3 ? 'rotate-180 text-babun-accent' : ''}`} />
               </button>
               <AnimatePresence initial={false}>
@@ -646,7 +659,7 @@ export default function Book() {
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                   >
                     <div className="px-6 md:px-8 pb-6 border-t border-babun-primary/5 text-base text-babun-primary/75 font-light leading-relaxed">
-                      הספר תמציתי ומדויק ביותר. ערב אחד מרוכז יספיק לקריאה ראשונה של כל הספר. לאחר מכן, מומלץ מאוד לחזור במהלך השבועות הבאים לפרקים הספציפיים שהכי רלוונטיים לשלב שבו העסקה שלכם עומדת כעת.
+                      זה בדיוק בשבילו. הספר אינו מניח שאתה יודע כלום מראש. הוא נכתב בצורה פשוטה, שווה לכל נפש, ומתחיל מהבסיס הפיננסי הרחב ועד לסגירת העסקה.
                     </div>
                   </motion.div>
                 )}
@@ -671,7 +684,7 @@ export default function Book() {
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                   >
                     <div className="px-6 md:px-8 pb-6 border-t border-babun-primary/5 text-base text-babun-primary/75 font-light leading-relaxed">
-                      הספר מעניק לך את בסיס הידע, הכלים והמושגים הנדרשים. פגישת הייעוץ מיישמת את כל המנגנונים הללו ומפצחת אותם ישירות על המקרה הספציפי והנתונים הפיננסיים האישיים שלך. הרבה אנשים קוראים את הספר תחילה, ומגיעים לפגישה כאשר הם כבר בעלי הבנה ומעלים שאלות ממוקדות ואיכותיות פי כמה.
+                      הספר מעניק לך את בסיס הידע, הכלים והמושגים הנדרשים. פגישת הייעוץ מיישמת את כל המנגנונים הללו ומפצחת אותם ישירות על המקרה הספציפי והנתונים הפיננסיים האישיים שלך.
                     </div>
                   </motion.div>
                 )}
@@ -682,7 +695,7 @@ export default function Book() {
         </div>
       </section>
 
-      {/* 9. BOOKING / ORDER FORM CHECKOUT SECTION */}
+      {/* 8. WAITING LIST REGISTRATION SECTION (REPLACING OLD ORDER CHECKOUT) */}
       <section id="checkout-form-section" className="py-24 bg-babun-accent text-babun-primary relative scroll-mt-20">
         <div className="absolute inset-0 mesh-grid opacity-10 z-0" />
         
@@ -692,48 +705,58 @@ export default function Book() {
             
             {/* Form Input Side */}
             <div className="space-y-6">
-              <div className="text-center">
+              <div className="text-center space-y-3">
+                <div className="inline-flex items-center gap-2 bg-red-600/15 border border-red-600/30 text-red-700 px-4 py-1.5 rounded-full text-xs md:text-sm font-black mb-2 shadow-xs">
+                  <AlertTriangle size={16} className="text-red-600" />
+                  <span className="text-red-600 font-black">הספר אזל מהמלאי</span>
+                </div>
                 <h2 className="text-3xl md:text-5xl font-display font-black text-babun-primary" id="order-title">
-                  הזמן את הספר עוד היום!
+                  הצטרפות לרשימת המתנה
                 </h2>
+                <p className="text-sm md:text-base text-babun-primary/80 max-w-lg mx-auto font-light leading-relaxed">
+                  בשל הביקוש הרב, המהדורה הנוכחית של "שליש בקרקע" אזלה. השאירו פרטים ונשריין עבורכם עותק בעדיפות ראשונה ברגע שההדפסה החדשה תהיה זמינה.
+                </p>
               </div>
 
-              {checkoutStatus === "success" ? (
+              {submitStatus === "success" ? (
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="bg-white p-8 md:p-12 rounded-babun-lg text-center shadow-xl border border-babun-primary/5"
                 >
-                  <div className="w-14 h-14 bg-babun-accent text-babun-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle2 size={28} className="stroke-[2.5]" />
+                  <div className="w-16 h-16 bg-emerald-500/10 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-5 border border-emerald-500/20">
+                    <CheckCircle2 size={32} className="stroke-[2.5]" />
                   </div>
-                  <h3 className="text-xl font-display font-bold text-babun-primary mb-2">
-                    הפרטים נקלטו בהצלחה!
+                  <h3 className="text-2xl font-display font-black text-babun-primary mb-3">
+                    נרשמת בהצלחה לרשימת ההמתנה!
                   </h3>
-                  <p className="text-sm text-babun-primary/80 mb-4 leading-relaxed">
-                    תודה רבה. פרטי המשלוח נשמרו במערכת. כעת אנו מעבירים אותך לעמוד התשלום המאובטח להשלמת הרכישה.
+                  <p className="text-sm md:text-base text-babun-primary/80 mb-6 leading-relaxed max-w-md mx-auto">
+                    תודה רבה! פרטיך נקלטו במערכת ושוריין עבורך מקום למהדורה הבאה. נעדכן אותך בטלפון או באימייל מיד עם פתיחת ההזמנות להדפסה החדשה.
                   </p>
-                  <p className="text-babun-primary text-sm font-bold animate-pulse mb-6">
-                    מעביר לתשלום באופן אוטומטי...
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-                    <a 
-                      href="https://plando.co.il/self_services/embed_store/24804?ak=597df96284d52e5dd3be33b6ff7afc68"
-                      className="bg-babun-accent hover:bg-babun-accent/90 text-babun-primary font-black py-4 px-8 rounded-full shadow-lg transition-all duration-300 hover:scale-105 inline-flex items-center gap-2 cursor-pointer text-base"
+                  
+                  <div className="bg-babun-light p-4 rounded-babun-md text-xs text-babun-primary/70 mb-8 max-w-md mx-auto">
+                    💡 <strong>בינתיים, ניתן לקבוע פגישת ייעוץ אישית</strong> או להאזין לפודקאסטים ולמאמרים המקצועיים באתר.
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
+                    <Link
+                      to="/consulting"
+                      className="w-full sm:w-auto bg-babun-primary hover:bg-zinc-900 text-white font-bold py-3.5 px-6 rounded-full shadow-md transition-all text-xs flex items-center justify-center gap-2"
                     >
-                      <span>מעבר לתשלום מאובטח (149 ₪)</span>
-                      <ArrowLeft size={18} />
-                    </a>
-                    <button 
-                      onClick={() => setCheckoutStatus(null)}
-                      className="text-xs text-babun-primary/60 hover:text-babun-primary underline font-bold"
+                      <Calendar size={14} />
+                      <span>לתיאום פגישת ייעוץ</span>
+                    </Link>
+                    <Link
+                      to="/"
+                      className="w-full sm:w-auto bg-white hover:bg-zinc-100 text-babun-primary font-bold py-3.5 px-6 rounded-full border border-babun-primary/20 shadow-xs transition-all text-xs flex items-center justify-center gap-2"
                     >
-                      בצע הזמנה נוספת
-                    </button>
+                      <span>חזרה לדף הבית</span>
+                      <ArrowLeft size={14} />
+                    </Link>
                   </div>
                 </motion.div>
               ) : (
-                <form onSubmit={handleCheckoutSubmit} className="space-y-4 max-w-xl mx-auto">
+                <form onSubmit={handleWaitingListSubmit} className="space-y-4 max-w-xl mx-auto bg-white/60 p-6 md:p-8 rounded-babun-lg border border-babun-primary/10 shadow-sm backdrop-blur-xs">
                   {errorMsg && (
                     <div className="bg-red-500/10 border border-red-500/20 text-red-600 p-4 rounded-babun-md text-xs font-bold">
                       {errorMsg}
@@ -742,7 +765,7 @@ export default function Book() {
 
                   <div className="space-y-1.5 text-right">
                     <label className="block text-xs font-bold text-babun-primary/80">
-                      שם מלא לקבלת המשלוח <span className="text-red-500">*</span>
+                      שם מלא <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <input 
@@ -751,16 +774,16 @@ export default function Book() {
                         required
                         value={formData.name}
                         onChange={handleInputChange}
-                        placeholder="ישראל משה ישראלי"
-                        className="w-full bg-white border border-babun-primary/10 rounded-babun-md px-10 py-3.5 text-right outline-none focus:border-babun-accent transition-all text-sm text-babun-primary"
+                        placeholder="ישראל ישראלי"
+                        className="w-full bg-white border border-babun-primary/15 rounded-babun-md px-10 py-3.5 text-right outline-none focus:border-babun-primary transition-all text-sm text-babun-primary shadow-2xs"
                       />
-                      <User size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/30" />
+                      <User size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/40" />
                     </div>
                   </div>
 
                   <div className="space-y-1.5 text-right">
                     <label className="block text-xs font-bold text-babun-primary/80">
-                      מספר טלפון לתיאום משלוח <span className="text-red-500">*</span>
+                      מספר טלפון לקבלת עדכון (SMS / וואטסאפ) <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <input 
@@ -770,68 +793,84 @@ export default function Book() {
                         value={formData.phone}
                         onChange={handleInputChange}
                         placeholder="050-1234567"
-                        className="w-full bg-white border border-babun-primary/10 rounded-babun-md px-10 py-3.5 text-right outline-none focus:border-babun-accent transition-all text-sm text-babun-primary"
+                        className="w-full bg-white border border-babun-primary/15 rounded-babun-md px-10 py-3.5 text-right outline-none focus:border-babun-primary transition-all text-sm text-babun-primary shadow-2xs"
                       />
-                      <Phone size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/30" />
+                      <Phone size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/40" />
                     </div>
                   </div>
 
                   <div className="space-y-1.5 text-right">
                     <label className="block text-xs font-bold text-babun-primary/80">
-                      כתובת מלאה למשלוח (עיר, רחוב ומספר בית) <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <input 
-                        type="text"
-                        name="address"
-                        required
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        placeholder="רחוב מצדה 3, בני ברק, דירה 12"
-                        className="w-full bg-white border border-babun-primary/10 rounded-babun-md px-10 py-3.5 text-right outline-none focus:border-babun-accent transition-all text-sm text-babun-primary"
-                      />
-                      <MapPin size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/30" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5 text-right">
-                    <label className="block text-xs font-bold text-babun-primary/80">
-                      כתובת אימייל (לקבלת חשבונית ופרטי מעקב) <span className="text-red-500">*</span>
+                      כתובת אימייל
                     </label>
                     <div className="relative">
                       <input 
                         type="email"
                         name="email"
-                        required
                         value={formData.email}
                         onChange={handleInputChange}
                         placeholder="yourmail@domain.com"
-                        className="w-full bg-white border border-babun-primary/10 rounded-babun-md px-10 py-3.5 text-left outline-none focus:border-babun-accent transition-all text-sm text-babun-primary"
+                        className="w-full bg-white border border-babun-primary/15 rounded-babun-md px-10 py-3.5 text-left outline-none focus:border-babun-primary transition-all text-sm text-babun-primary shadow-2xs"
                       />
-                      <Mail size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/30" />
+                      <Mail size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/40" />
                     </div>
                   </div>
 
-                  <div className="pt-4 text-center">
+                  <div className="space-y-1.5 text-right">
+                    <label className="block text-xs font-bold text-babun-primary/80">
+                      עיר / יישוב (אופציונלי)
+                    </label>
+                    <div className="relative">
+                      <input 
+                        type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        placeholder="ירושלים / בני ברק / תל אביב"
+                        className="w-full bg-white border border-babun-primary/15 rounded-babun-md px-10 py-3.5 text-right outline-none focus:border-babun-primary transition-all text-sm text-babun-primary shadow-2xs"
+                      />
+                      <MapPin size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/40" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 text-right">
+                    <label className="block text-xs font-bold text-babun-primary/80">
+                      הערות או כמות עותקים מבוקשת (אופציונלי)
+                    </label>
+                    <div className="relative">
+                      <input 
+                        type="text"
+                        name="notes"
+                        value={formData.notes}
+                        onChange={handleInputChange}
+                        placeholder="למשל: מעוניין ב-2 עותקים / למסירה כמתנה"
+                        className="w-full bg-white border border-babun-primary/15 rounded-babun-md px-10 py-3.5 text-right outline-none focus:border-babun-primary transition-all text-sm text-babun-primary shadow-2xs"
+                      />
+                      <MessageSquare size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/40" />
+                    </div>
+                  </div>
+
+                  <div className="pt-3 text-center space-y-3">
                     <button 
                       type="submit"
-                      disabled={checkoutStatus === "loading"}
-                      className="w-full bg-babun-primary hover:bg-zinc-900 text-white font-bold py-4.5 px-6 rounded-babun-md transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-xl"
+                      disabled={submitStatus === "loading"}
+                      className="w-full bg-babun-primary hover:bg-zinc-900 text-white font-bold py-4 px-6 rounded-babun-md transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg hover:shadow-xl"
                     >
-                      {checkoutStatus === "loading" ? (
+                      {submitStatus === "loading" ? (
                         <>
                           <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                          <span>מעבד הזמנה...</span>
+                          <span>שומר פרטים ברשימת ההמתנה...</span>
                         </>
                       ) : (
                         <>
-                          <ShoppingBag size={18} />
-                          <span>מעבר לתשלום</span>
+                          <Clock size={18} />
+                          <span>הצטרפות לרשימת ההמתנה (ללא התחייבות)</span>
                         </>
                       )}
                     </button>
-                    <p className="text-center text-babun-primary/50 text-[11px] mt-3">
-                      משלוח עד הבית - עד 5 ימי עסקים לכל נקודה בארץ
+                    
+                    <p className="text-center text-babun-primary/60 text-[11px] font-medium">
+                      🔒 ההרשמה אינה דורשת תשלום מראש • נעדכן אתכם מיד כשהספר יודפס מחדש
                     </p>
                   </div>
                 </form>
@@ -846,3 +885,4 @@ export default function Book() {
     </div>
   );
 }
+

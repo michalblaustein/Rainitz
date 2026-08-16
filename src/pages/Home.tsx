@@ -221,26 +221,27 @@ export default function Home() {
             {/* Image Side (Left) */}
             <div className="lg:col-span-5 relative order-2 flex justify-center">
               <div className="relative w-full max-w-lg aspect-square">
-                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 1 }}
-                  className="absolute inset-0 rounded-full overflow-hidden bg-black shadow-inner z-10 pointer-events-none"
-                 >
-                   <iframe 
-                     src="https://www.youtube.com/embed/i6-AD36z860?autoplay=1&mute=1&loop=1&playlist=i6-AD36z860&controls=0&modestbranding=1&playsinline=1&rel=0&showinfo=0&iv_load_policy=3" 
-                     title="יעקב רייניץ - סרטון הסבר"
-                     frameBorder="0"
-                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                     style={{ 
-                       position: 'absolute',
-                       top: '0',
-                       left: '-38.89%',
-                       width: '177.78%',
-                       height: '100%'
-                     }}
-                   />
-                 </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 1 }}
+                    className="absolute inset-0 rounded-full overflow-hidden bg-babun-primary shadow-2xl z-10 pointer-events-none"
+                    style={{ maskImage: 'radial-gradient(circle, white 100%, black 100%)', WebkitMaskImage: '-webkit-radial-gradient(circle, white 100%, black 100%)' }}
+                  >
+                    <iframe 
+                      src="https://player.vimeo.com/video/1218630094?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1&playsinline=1&dnt=1" 
+                      title="יעקב רייניץ - וידאו"
+                      frameBorder="0"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      className="absolute top-1/2 left-1/2 min-w-full min-h-full w-[177.77vw] h-[56.25vw] max-w-none max-h-none -translate-x-1/2 -translate-y-1/2 object-cover pointer-events-none"
+                      style={{
+                        width: '180%',
+                        height: '180%',
+                        minWidth: '100%',
+                        minHeight: '100%',
+                      }}
+                    />
+                  </motion.div>
 
                  {/* Floating Cards */}
                  <motion.div
@@ -728,18 +729,18 @@ export default function Home() {
       {/* NEWSLETTER */}
       <section className="relative py-24 md:py-32 overflow-hidden bg-[#121212] flex items-center">
          {/* Video Background */}
-         <div className="absolute inset-0 z-0 opacity-60 select-none pointer-events-none">
+         <div className="absolute inset-0 z-0 opacity-60 select-none pointer-events-none overflow-hidden">
             <iframe 
-               className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150"
-               src="https://www.youtube.com/embed/i6-AD36z860?autoplay=1&mute=1&loop=1&playlist=i6-AD36z860&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
-               allow="autoplay; encrypted-media"
+               className="absolute top-1/2 left-1/2 min-w-full min-h-full w-[180%] h-[180%] aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-125"
+               src="https://player.vimeo.com/video/1218634309?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1&playsinline=1&dnt=1"
+               allow="autoplay; fullscreen; picture-in-picture"
                frameBorder="0"
             />
             {/* Transparent click/tap block layer */}
             <div className="absolute inset-0 bg-transparent z-[10] pointer-events-auto" />
             {/* Dark Gradient Overlay & Black Semi-Transparent Layer */}
-            <div className="absolute inset-0 bg-black/50 z-[1]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 z-[2]" />
+            <div className="absolute inset-0 bg-black/60 z-[1]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/60 z-[2]" />
          </div>
 
          <div className="w-full max-w-none px-4 md:px-12 lg:px-24 relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16 text-right">

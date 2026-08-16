@@ -13,7 +13,8 @@ import {
   ArrowLeft, 
   ArrowRight,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  ExternalLink
 } from "lucide-react";
 import { syncLeadToBackend } from "../lib/leadSync";
 
@@ -50,8 +51,12 @@ const BLOCKED_DATES = [
 
 export default function Scheduler() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [viewMode, setViewMode] = useState<"custom" | "plando">("custom");
+  const [viewMode, setViewMode] = useState<"custom" | "google" | "plando">("custom");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Google Calendar URLs
+  const googleCalendarEmbedUrl = "https://calendar.google.com/calendar/embed?src=r0504141516%40gmail.com&ctz=Asia%2FJerusalem&hl=he&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&showTz=1&mode=WEEK";
+  const googleCalendarDirectUrl = "https://calendar.google.com/calendar/embed?src=r0504141516%40gmail.com&ctz=Asia%2FJerusalem";
 
   // Form state
   const [name, setName] = useState("");
@@ -179,35 +184,105 @@ export default function Scheduler() {
     <div className="bg-zinc-50 min-h-screen pt-32 pb-24 font-sans text-right" dir="rtl">
       <div className="max-w-4xl mx-auto px-4 md:px-8">
         
-        {/* Toggle between custom interface (Fillout style) and fallback (Plando standard) */}
+        {/* Toggle between Google Calendar, Plando and custom interface */}
         {step !== 3 && (
           <div className="flex justify-center mb-8">
-            <div className="bg-white p-1.5 rounded-full border border-zinc-200 shadow-sm flex items-center">
+            <div className="bg-white p-1.5 rounded-full border border-zinc-200 shadow-sm flex items-center flex-wrap justify-center gap-1">
+              <button
+                onClick={() => setViewMode("google")}
+                className={`px-5 py-2.5 rounded-full font-bold text-xs md:text-sm transition-all flex items-center gap-2 cursor-pointer ${
+                  viewMode === "google" 
+                    ? "bg-babun-primary text-babun-accent shadow-md" 
+                    : "text-zinc-600 hover:text-babun-primary"
+                }`}
+              >
+                <CalendarIcon className="w-4 h-4" />
+                <span>יומן גוגל בלייב (Google Calendar)</span>
+              </button>
               <button
                 onClick={() => setViewMode("custom")}
-                className={`px-5 py-2 rounded-full font-bold text-sm transition-all ${
+                className={`px-5 py-2.5 rounded-full font-bold text-xs md:text-sm transition-all flex items-center gap-2 cursor-pointer ${
                   viewMode === "custom" 
                     ? "bg-babun-primary text-babun-accent shadow-md" 
                     : "text-zinc-600 hover:text-babun-primary"
                 }`}
               >
-                סנכרון חכם דמוי Fillout (מומלץ)
+                <span>סנכרון חכם (Plando)</span>
               </button>
               <button
                 onClick={() => setViewMode("plando")}
-                className={`px-5 py-2 rounded-full font-bold text-sm transition-all ${
+                className={`px-5 py-2.5 rounded-full font-bold text-xs md:text-sm transition-all flex items-center gap-2 cursor-pointer ${
                   viewMode === "plando" 
                     ? "bg-babun-primary text-babun-accent shadow-md" 
                     : "text-zinc-600 hover:text-babun-primary"
                 }`}
               >
-                היומן המלא של Plando
+                <span>חנות Plando לתשלום</span>
               </button>
             </div>
           </div>
         )}
 
-        {viewMode === "plando" && step !== 3 ? (
+        {viewMode === "google" && step !== 3 ? (
+          /* GOOGLE CALENDAR EMBED VIEW */
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-3xl overflow-hidden border border-zinc-200 shadow-xl space-y-0"
+          >
+            <div className="bg-babun-primary text-white px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-3">
+                <CalendarIcon className="w-6 h-6 text-babun-accent" />
+                <span className="font-display font-bold text-lg">זמנים פנויים ביומן גוגל בלייב</span>
+              </div>
+              <a
+                href={googleCalendarDirectUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs bg-babun-accent text-babun-primary font-bold px-5 py-2.5 rounded-full hover:bg-white transition-colors flex items-center gap-1.5 shadow"
+              >
+                <span>פתיחת היומן בחלון חדש</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            {/* Public Sharing Notice */}
+            <div className="bg-amber-50 border-b border-amber-200 p-4 text-right flex items-start gap-3 text-xs text-amber-900 leading-relaxed">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">הוראה חשובה להצגת הלוח (במידה ומופיע מסך לבן):</p>
+                <p className="mt-0.5 text-amber-800">
+                  אם היומן נראה ריק או לבן, יש לוודא בהגדרות Google Calendar שהיומן של <span className="font-mono dir-ltr font-bold">r0504141516@gmail.com</span> סומן כ-<strong>"Make available to public" (זמין לציבור)</strong>. בכל שלב ניתן ללחוץ על הכפתור למעלה לפתיחה ישירה בגוגל.
+                </p>
+              </div>
+            </div>
+
+            <div className="relative bg-zinc-50 min-h-[550px] w-full p-4">
+              <iframe 
+                src={googleCalendarEmbedUrl}
+                title="Google Calendar Schedule"
+                className="w-full min-h-[550px] border-0 rounded-2xl shadow-inner"
+              />
+            </div>
+
+            <div className="p-6 bg-zinc-50 border-t border-zinc-100 text-right text-zinc-600 text-xs flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex items-start gap-2 max-w-xl">
+                <AlertCircle className="w-4 h-4 text-babun-primary shrink-0 mt-0.5" />
+                <p className="leading-relaxed">
+                  <strong>קביעת תור ביומן גוגל:</strong> לאחר ביצוע התשלום במערכת פלאנדו, הפגישה תאושר ותתואם ביומן בשעה שבחרתם.
+                </p>
+              </div>
+              <a
+                href="https://plando.co.il/self_services/embed_store/24802?ak=597df96284d52e5dd3be33b6ff7afc68"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-babun-primary hover:bg-babun-primary/90 text-white font-bold px-6 py-2.5 rounded-full text-xs shadow transition-all"
+              >
+                מעבר לתשלום בפלאנדו
+              </a>
+            </div>
+          </motion.div>
+        ) : viewMode === "plando" && step !== 3 ? (
           /* FALLBACK PLANDO IFRAME */
           <motion.div 
             initial={{ opacity: 0, y: 15 }}

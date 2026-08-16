@@ -21,7 +21,12 @@ import {
   Sparkles,
   BookOpen,
   Send,
-  Star
+  Star,
+  ExternalLink,
+  AlertCircle,
+  ChevronRight,
+  ChevronLeft,
+  X
 } from "lucide-react";
 
 function AnimatedNumber({ value }: { value: number }) {
@@ -37,7 +42,7 @@ function AnimatedNumber({ value }: { value: number }) {
 }
 
 export default function Consulting() {
-  // Booking Form State
+  // Booking Form & Workflow State
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -46,7 +51,34 @@ export default function Consulting() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showFilloutModal, setShowFilloutModal] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // URLs for payment & scheduling
+  const filloutUrl = "https://forms.fillout.com/t/5PqiqpTtogus";
+  const plandoPaymentUrl = "https://plando.co.il/self_services/embed_store/24802?ak=597df96284d52e5dd3be33b6ff7afc68";
+
+  // Re-initialize Fillout embed script when needed
+  useEffect(() => {
+    if (typeof (window as any).Fillout !== "undefined") {
+      try {
+        (window as any).Fillout?.init?.();
+      } catch (e) {}
+    }
+  }, [isSubmitted, showFilloutModal]);
+
+  const openFilloutPopup = () => {
+    // Attempt triggering native Fillout script button if rendered
+    const filloutBtn = document.querySelector('[data-fillout-id="5PqiqpTtogus"] button, [data-fillout-id="5PqiqpTtogus"]') as HTMLElement;
+    if (filloutBtn && typeof (window as any).Fillout !== "undefined") {
+      try {
+        filloutBtn.click();
+        return;
+      } catch (e) {}
+    }
+    // Fallback to responsive full-experience modal
+    setShowFilloutModal(true);
+  };
 
   // FAQ State
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -94,12 +126,9 @@ export default function Consulting() {
 
       setIsSubmitting(false);
       setIsSubmitted(true);
-      setFormData({ fullName: "", phone: "", email: "", message: "" });
 
-      // Automatically redirect to payment URL
-      setTimeout(() => {
-        window.location.href = "https://plando.co.il/self_services/embed_store/24802?ak=597df96284d52e5dd3be33b6ff7afc68";
-      }, 1500);
+      // Open Plando payment link in new window automatically
+      window.open(plandoPaymentUrl, "_blank");
     } catch (err: any) {
       console.error("Error saving lead:", err);
       
@@ -115,13 +144,9 @@ export default function Consulting() {
         });
       } catch (e) {}
 
-      // Fallback in case of firestore/network error
       setIsSubmitting(false);
       setIsSubmitted(true);
-      setFormData({ fullName: "", phone: "", email: "", message: "" });
-      setTimeout(() => {
-        window.location.href = "https://plando.co.il/self_services/embed_store/24802?ak=597df96284d52e5dd3be33b6ff7afc68";
-      }, 1500);
+      window.open(plandoPaymentUrl, "_blank");
     }
   };
 
@@ -206,15 +231,15 @@ export default function Consulting() {
         <div className="absolute inset-0 z-0 opacity-80 select-none pointer-events-none">
           <iframe 
             className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto aspect-video -translate-x-1/2 -translate-y-1/2 pointer-events-none object-cover scale-150"
-            src="https://www.youtube.com/embed/imkI4EN5xAQ?autoplay=1&mute=1&loop=1&playlist=imkI4EN5xAQ&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&disablekb=1&fs=0&autohide=1"
-            allow="autoplay; encrypted-media"
+            src="https://player.vimeo.com/video/1218634309?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1&playsinline=1&dnt=1"
+            allow="autoplay; fullscreen; picture-in-picture"
             frameBorder="0"
           />
           {/* Transparent click/tap block layer */}
           <div className="absolute inset-0 bg-transparent z-[10] pointer-events-auto" />
           {/* Dark Gradient Overlay & Black Semi-Transparent Layer */}
-          <div className="absolute inset-0 bg-black/15 z-[1]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-babun-primary/70 via-transparent to-babun-primary/20 z-[2]" />
+          <div className="absolute inset-0 bg-black/60 z-[1]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-babun-primary/90 via-black/40 to-babun-primary/60 z-[2]" />
         </div>
 
         <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10 text-right">
@@ -535,186 +560,283 @@ export default function Consulting() {
         </div>
       </section>
 
-      {/* 9. BOOKING FORM SECTION */}
+      {/* 9. BOOKING FORM SECTION WITH PLANDO & FILLOUT */}
       <section id="booking-section" className="py-24 bg-babun-accent relative scroll-mt-28 w-full overflow-hidden">
         <div className="absolute inset-0 mesh-grid opacity-10 z-0 pointer-events-none" />
         
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             
-            {/* Right Side: Message & Directional CTA */}
-            <div className="lg:col-span-5 text-right flex flex-col justify-center space-y-6">
-              <h2 className="text-3xl md:text-5xl font-display font-black text-babun-primary leading-tight">
-                שאלה אחת בפגישה <br />
-                יכולה לשנות החלטה <br />
-                של מאות אלפי שקלים.
+            {/* Right Side: Message & Info */}
+            <div className="lg:col-span-5 text-right flex flex-col justify-start space-y-6 pt-0">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-black text-babun-primary leading-tight">
+                קביעת פגישת ייעוץ <br />
+                אישית וממוקדת
               </h2>
               
-              <div 
-                className="flex items-center gap-2 text-babun-primary font-bold text-lg md:text-xl group cursor-pointer inline-flex self-start"
-                onClick={() => {
-                  const nameInput = document.getElementsByName("fullName")[0];
-                  if (nameInput) nameInput.focus();
-                }}
-              >
-                <span>קבע פגישה עכשיו</span>
-                <ArrowLeft size={20} className="stroke-[2.5px] transition-transform duration-300 group-hover:-translate-x-1" />
-              </div>
+              <p className="text-babun-primary/80 font-medium text-base leading-relaxed">
+                מלאו את פרטיכם ותעברו לדף תשלום, מיד אחרי אישור התשלום תוכלו לקבוע פגישה בזמן שנוח לכם.
+              </p>
             </div>
 
-            {/* Left Side: Booking Form */}
+            {/* Left Side: Form or Post-Payment Status */}
             <div className="lg:col-span-7">
-              <div className="bg-transparent text-babun-primary rounded-babun-lg p-8 md:p-12">
-                {isSubmitted ? (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="bg-neutral-50 border border-babun-primary/10 p-8 rounded-babun-md text-center max-w-xl mx-auto"
-                  >
-                    <div className="w-16 h-16 bg-babun-primary text-babun-accent rounded-full flex items-center justify-center mx-auto mb-6">
-                      <CheckCircle2 size={32} className="stroke-[2.5]" />
-                    </div>
-                    <h3 className="text-2xl font-display font-bold text-babun-primary mb-3">
-                      הבקשה התקבלה בהצלחה!
-                    </h3>
-                    <p className="text-babun-primary text-base leading-relaxed font-light mb-4">
-                      תודה רבה. פרטיך נרשמו בהצלחה במערכת. כעת אנו מעבירים אותך לעמוד התשלום המאובטח להשלמת ההזמנה.
-                    </p>
-                    <p className="text-babun-primary text-sm font-bold animate-pulse mb-6">
-                      מעביר לתשלום באופן אוטומטי...
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-                      <a 
-                        href="https://plando.co.il/self_services/embed_store/24802?ak=597df96284d52e5dd3be33b6ff7afc68"
-                        className="bg-babun-accent hover:bg-babun-accent/90 text-babun-primary font-black py-4 px-8 rounded-full shadow-lg transition-all duration-300 hover:scale-105 inline-flex items-center gap-2 cursor-pointer text-base"
-                      >
-                        <span>מעבר לתשלום מאובטח</span>
-                        <ArrowLeft size={18} />
-                      </a>
-                      <button 
-                        onClick={() => setIsSubmitted(false)}
-                        className="text-xs text-babun-primary/60 hover:text-babun-primary underline font-bold"
-                      >
-                        שלח פנייה חדשה
-                      </button>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {errorMsg && (
-                      <div className="bg-red-500/15 border border-red-500/30 text-red-900 p-4 rounded-babun-md text-sm text-right font-medium">
-                        {errorMsg}
+              <div className="bg-white text-babun-primary rounded-babun-xl p-6 md:p-10 shadow-2xl border border-babun-primary/10">
+                
+                <AnimatePresence mode="wait">
+                  {isSubmitted ? (
+                    <motion.div
+                      key="submitted-state"
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -15 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-neutral-50 border border-babun-primary/10 p-8 rounded-babun-md text-center space-y-6"
+                    >
+                      <div className="w-16 h-16 bg-babun-primary text-babun-accent rounded-full flex items-center justify-center mx-auto shadow-md">
+                        <CheckCircle2 size={34} className="stroke-[2.5]" />
                       </div>
-                    )}
+                      
+                      <div>
+                        <h3 className="text-2xl font-display font-black text-babun-primary mb-2">
+                          הפרטים נשמרו בהצלחה!
+                        </h3>
+                        <p className="text-babun-primary/80 text-base leading-relaxed font-normal">
+                          תודה {formData.fullName}. חלון התשלום המאובטח בפלאנדו נפתח בחלון נפרד. לאחר השלמת ואישור התשלום, לחצו על הכפתור מטה לקביעת מועד הפגישה ביומן.
+                        </p>
+                      </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Full Name */}
-                      <div className="space-y-2">
-                        <label className="block text-sm font-bold text-babun-primary text-right">
-                          שם מלא <span className="text-red-600">*</span>
-                        </label>
-                        <div className="relative">
-                          <input 
-                            type="text"
-                            name="fullName"
-                            required
-                            value={formData.fullName}
-                            onChange={handleInputChange}
-                            placeholder="ישראל ישראלי"
-                            className="w-full bg-neutral-50 hover:bg-neutral-100 focus:bg-white text-babun-primary border border-babun-primary/15 focus:border-babun-primary rounded-babun-md px-12 py-4 text-right outline-none transition-all duration-300 font-medium placeholder-babun-primary/40"
+                      {/* Main Action Buttons */}
+                      <div className="space-y-4 pt-2">
+                        {/* Primary Button: Open Fillout Calendar */}
+                        <button 
+                          type="button"
+                          onClick={openFilloutPopup}
+                          className="w-full bg-babun-primary hover:bg-babun-primary/95 text-white font-black py-4 px-8 rounded-full shadow-lg transition-all duration-300 hover:scale-102 flex items-center justify-center gap-3 cursor-pointer text-base"
+                        >
+                          <Calendar size={20} className="text-babun-accent" />
+                          <span>אישור תשלום - קביעת מועד ביומן (Fillout)</span>
+                          <ArrowLeft size={18} />
+                        </button>
+
+                        {/* Re-open payment if needed */}
+                        <div className="pt-1">
+                          <a 
+                            href={plandoPaymentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full bg-babun-accent hover:bg-babun-accent/90 text-babun-primary font-bold py-3.5 px-6 rounded-full border border-babun-primary/20 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer text-sm"
+                          >
+                            <span>מעבר לתשלום בפלאנדו (אם החלון לא נפתח)</span>
+                            <ExternalLink size={16} />
+                          </a>
+                        </div>
+
+                        {/* Official Fillout Popup Embed Trigger Element */}
+                        <div className="hidden">
+                          <div 
+                            data-fillout-id="5PqiqpTtogus" 
+                            data-fillout-embed-type="popup" 
+                            data-fillout-dynamic-resize 
+                            data-fillout-button-color="#000000" 
+                            data-fillout-inherit-parameters 
+                            data-fillout-popup-size="medium"
                           />
-                          <User size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/50 pointer-events-none" />
                         </div>
                       </div>
 
-                      {/* Phone */}
-                      <div className="space-y-2">
-                        <label className="block text-sm font-bold text-babun-primary text-right">
-                          מספר טלפון <span className="text-red-600">*</span>
-                        </label>
-                        <div className="relative">
-                          <input 
-                            type="tel"
-                            name="phone"
-                            required
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            placeholder="050-0000000"
-                            className="w-full bg-neutral-50 hover:bg-neutral-100 focus:bg-white text-babun-primary border border-babun-primary/15 focus:border-babun-primary rounded-babun-md px-12 py-4 text-right outline-none transition-all duration-300 font-medium placeholder-babun-primary/40"
-                          />
-                          <Phone size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/50 pointer-events-none" />
-                        </div>
+                      <div className="pt-4 border-t border-babun-primary/10">
+                        <button 
+                          type="button"
+                          onClick={() => setIsSubmitted(false)}
+                          className="text-xs text-babun-primary/60 hover:text-babun-primary underline font-bold cursor-pointer"
+                        >
+                          עדכון פרטים / שליחת טופס מחדש
+                        </button>
                       </div>
-                    </div>
-
-                    {/* Email */}
-                    <div className="space-y-2">
-                      <label className="block text-sm font-bold text-babun-primary text-right">
-                        כתובת מייל <span className="text-red-600">*</span>
-                      </label>
-                      <div className="relative">
-                        <input 
-                          type="email"
-                          name="email"
-                          required
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          placeholder="yourname@gmail.com"
-                          className="w-full bg-neutral-50 hover:bg-neutral-100 focus:bg-white text-babun-primary border border-babun-primary/15 focus:border-babun-primary rounded-babun-md px-12 py-4 text-left outline-none transition-all duration-300 font-medium placeholder-babun-primary/40"
-                        />
-                        <Mail size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/50 pointer-events-none" />
-                      </div>
-                    </div>
-
-                    {/* Topic / Message */}
-                    <div className="space-y-2">
-                      <label className="block text-sm font-bold text-babun-primary text-right">
-                        על מה תרצה לדבר? <span className="text-babun-primary/70 font-light">(בקצרה)</span>
-                      </label>
-                      <div className="relative">
-                        <textarea 
-                          name="message"
-                          rows={3}
-                          value={formData.message}
-                          onChange={handleInputChange}
-                          placeholder="למשל: בוחנים רכישת דירת 4 חדרים בשכונה..."
-                          className="w-full bg-neutral-50 hover:bg-neutral-100 focus:bg-white text-babun-primary border border-babun-primary/15 focus:border-babun-primary rounded-babun-md px-12 py-4 text-right outline-none transition-all duration-300 resize-none font-medium placeholder-babun-primary/40"
-                        />
-                        <MessageSquare size={18} className="absolute right-4 top-4 text-babun-primary/50 pointer-events-none" />
-                      </div>
-                    </div>
-
-                    {/* Submit button */}
-                    <div className="pt-4">
-                      <button 
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-babun-primary hover:bg-babun-primary/95 text-white font-bold py-5 px-8 rounded-[100px] transition-all duration-300 flex items-center justify-center gap-3 shadow-lg cursor-pointer text-lg"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                            <span>שולח...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Send size={18} />
-                            <span>קבע פגישה עכשיו</span>
-                          </>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="form-state"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <form onSubmit={handleSubmit} className="space-y-6">
+                        {errorMsg && (
+                          <div className="bg-red-500/15 border border-red-500/30 text-red-900 p-4 rounded-babun-md text-sm text-right font-medium">
+                            {errorMsg}
+                          </div>
                         )}
-                      </button>
-                      <p className="text-center text-babun-primary/80 font-medium text-sm mt-6 leading-relaxed">
-                        עם סיום תהליך התשלום, תינתן לכם האפשרות לתאם את מועד ומיקום הפגישה באמצעות היומן הדיגיטלי, בהתאם לנוחיותכם.
-                      </p>
-                    </div>
-                  </form>
-                )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Full Name */}
+                          <div className="space-y-2">
+                            <label className="block text-sm font-bold text-babun-primary text-right">
+                              שם מלא <span className="text-red-600">*</span>
+                            </label>
+                            <div className="relative">
+                              <input 
+                                type="text"
+                                name="fullName"
+                                required
+                                value={formData.fullName}
+                                onChange={handleInputChange}
+                                placeholder="ישראל ישראלי"
+                                className="w-full bg-neutral-50 hover:bg-neutral-100 focus:bg-white text-babun-primary border border-babun-primary/15 focus:border-babun-primary rounded-babun-md px-12 py-4 text-right outline-none transition-all duration-300 font-medium placeholder-babun-primary/40"
+                              />
+                              <User size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/50 pointer-events-none" />
+                            </div>
+                          </div>
+
+                          {/* Phone */}
+                          <div className="space-y-2">
+                            <label className="block text-sm font-bold text-babun-primary text-right">
+                              מספר טלפון <span className="text-red-600">*</span>
+                            </label>
+                            <div className="relative">
+                              <input 
+                                type="tel"
+                                name="phone"
+                                required
+                                value={formData.phone}
+                                onChange={handleInputChange}
+                                placeholder="050-0000000"
+                                className="w-full bg-neutral-50 hover:bg-neutral-100 focus:bg-white text-babun-primary border border-babun-primary/15 focus:border-babun-primary rounded-babun-md px-12 py-4 text-right outline-none transition-all duration-300 font-medium placeholder-babun-primary/40"
+                              />
+                              <Phone size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/50 pointer-events-none" />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Email */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-bold text-babun-primary text-right">
+                            כתובת מייל <span className="text-red-600">*</span>
+                          </label>
+                          <div className="relative">
+                            <input 
+                              type="email"
+                              name="email"
+                              required
+                              value={formData.email}
+                              onChange={handleInputChange}
+                              placeholder="yourname@gmail.com"
+                              className="w-full bg-neutral-50 hover:bg-neutral-100 focus:bg-white text-babun-primary border border-babun-primary/15 focus:border-babun-primary rounded-babun-md px-12 py-4 text-left outline-none transition-all duration-300 font-medium placeholder-babun-primary/40"
+                            />
+                            <Mail size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-babun-primary/50 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        {/* Topic / Message */}
+                        <div className="space-y-2">
+                          <label className="block text-sm font-bold text-babun-primary text-right">
+                            על מה תרצה לדבר? <span className="text-babun-primary/70 font-light">(בקצרה)</span>
+                          </label>
+                          <div className="relative">
+                            <textarea 
+                              name="message"
+                              rows={3}
+                              value={formData.message}
+                              onChange={handleInputChange}
+                              placeholder="למשל: בוחנים רכישת דירת 4 חדרים בשכונה..."
+                              className="w-full bg-neutral-50 hover:bg-neutral-100 focus:bg-white text-babun-primary border border-babun-primary/15 focus:border-babun-primary rounded-babun-md px-12 py-4 text-right outline-none transition-all duration-300 resize-none font-medium placeholder-babun-primary/40"
+                            />
+                            <MessageSquare size={18} className="absolute right-4 top-4 text-babun-primary/50 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        {/* Submit button */}
+                        <div className="pt-2">
+                          <button 
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full bg-babun-primary hover:bg-babun-primary/95 text-white font-bold py-5 px-8 rounded-[100px] transition-all duration-300 flex items-center justify-center gap-3 shadow-lg cursor-pointer text-lg"
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                                <span>מעביר לתשלום...</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>המשך לתשלום</span>
+                                <ArrowLeft size={20} />
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </form>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
               </div>
             </div>
 
           </div>
         </div>
       </section>
+
+      {/* FILLOUT POPUP MODAL */}
+      <AnimatePresence>
+        {showFilloutModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white w-full max-w-4xl h-[85vh] max-h-[750px] rounded-babun-xl shadow-2xl overflow-hidden flex flex-col border border-babun-primary/20 relative"
+            >
+              {/* Modal Header */}
+              <div className="p-4 px-6 bg-neutral-900 text-white flex items-center justify-between border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <Calendar size={20} className="text-babun-accent" />
+                  <h3 className="font-display font-bold text-base md:text-lg">
+                    קביעת מועד לפגישת ייעוץ (Fillout)
+                  </h3>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <a
+                    href={filloutUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-neutral-300 hover:text-white flex items-center gap-1 bg-white/10 px-3 py-1.5 rounded-full transition-all"
+                  >
+                    <span>חלון חדש</span>
+                    <ExternalLink size={12} />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setShowFilloutModal(false)}
+                    className="p-1.5 text-neutral-400 hover:text-white rounded-full hover:bg-white/10 transition-all cursor-pointer"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Iframe Content */}
+              <div className="flex-1 w-full h-full bg-white relative">
+                <iframe
+                  src={filloutUrl}
+                  className="w-full h-full border-0"
+                  title="קביעת מועד לפגישת ייעוץ - Fillout"
+                  allow="camera; microphone; autoplay; encrypted-media; fullscreen"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
