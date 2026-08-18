@@ -641,7 +641,7 @@ export default function Articles() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(updatedList),
           });
-          alert("הכתבה עודכנה בהצלחה בשרת הגיבוי לחלופין!");
+          alert("הכתבה עודכנה בהצלחה!");
         }
       } else {
         try {
@@ -664,12 +664,13 @@ export default function Articles() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(updatedList),
           });
-          alert("הכתבה פורסמה בהצלחה בשרת הגיבוי לחלופין!");
+          alert("הכתבה פורסמה בהצלחה!");
         }
       }
 
-      // Clear Form state
+      // Close both the add/edit modal and return to articles list view
       handleCloseAddForm();
+      handleCloseArticle();
     } catch (err: any) {
       console.error("Failed to save article to Firestore:", err);
       alert(`שגיאה בשמירת הכתבה: ${err.message}`);
