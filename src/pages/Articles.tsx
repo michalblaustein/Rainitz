@@ -738,55 +738,67 @@ export default function Articles() {
     const readingTime = Math.max(1, Math.ceil((selectedArticle.content?.length || 600) / 450));
 
     return (
-      <div className="bg-white min-h-screen pt-36 md:pt-44 pb-24 selection:bg-babun-accent selection:text-babun-primary text-right" dir="rtl">
-        <div className="max-w-5xl mx-auto px-4 md:px-8">
-          
-          {/* Top Breadcrumb / Back Button */}
-          <div className="flex items-center justify-between mb-8">
-            <button
-              onClick={handleCloseArticle}
-              className="inline-flex items-center gap-2 text-zinc-500 hover:text-babun-primary font-display font-medium text-sm transition-colors cursor-pointer group"
-            >
-              <span>חזרה לכל המאמרים</span>
-              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            </button>
+      <div className="bg-white min-h-screen selection:bg-babun-accent selection:text-babun-primary text-right" dir="rtl">
+        {/* Dark Hero Header for Detail Page */}
+        <section className="relative bg-babun-primary text-white pt-40 md:pt-48 pb-16 md:pb-20 overflow-hidden border-b border-babun-primary/20">
+          <div
+            className="absolute inset-0 opacity-20 z-0"
+            style={{
+              backgroundImage:
+                "radial-gradient(ellipse at center, rgba(30,41,59,0.6) 0%, rgba(15,23,42,1) 100%)",
+            }}
+          />
+          <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
+            {/* Category Tag & Admin Controls */}
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <span className="inline-block bg-babun-accent text-babun-primary font-bold text-xs px-3.5 py-1 rounded-[2px] uppercase tracking-wider font-display">
+                {selectedArticle.category || "מאמר מקצועי"}
+              </span>
 
-            {isAdminMode && selectedArticle.id && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    const art = selectedArticle;
-                    handleCloseArticle();
-                    handleEditArticleClick(art);
-                  }}
-                  className="text-xs font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-3 py-1.5 rounded-sm flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <Edit size={13} />
-                  <span>ערוך כתבה</span>
-                </button>
+              {isAdminMode && selectedArticle.id && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const art = selectedArticle;
+                      handleCloseArticle();
+                      handleEditArticleClick(art);
+                    }}
+                    className="text-xs font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-3.5 py-1.5 rounded-sm flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                  >
+                    <Edit size={13} />
+                    <span>ערוך כתבה</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Article Main Headline */}
+            <h1 className="text-3xl md:text-5xl lg:text-[52px] font-display font-black text-white leading-[1.18] tracking-tight mb-6">
+              {selectedArticle.title}
+            </h1>
+
+            {/* Bottom Meta Bar: Date on Right, Back Link on Left */}
+            <div className="flex items-center justify-between gap-4 pt-2 border-t border-white/10">
+              {/* Right: Date & Reading Time */}
+              <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 font-sans">
+                <span>{selectedArticle.date}</span>
+                <span>•</span>
+                <span>{readingTime} דק' קריאה</span>
               </div>
-            )}
+
+              {/* Left: Back to all articles button */}
+              <button
+                onClick={handleCloseArticle}
+                className="inline-flex items-center gap-2 text-zinc-300 hover:text-babun-accent font-display font-medium text-xs md:text-sm transition-colors cursor-pointer group"
+              >
+                <span>חזרה לכל המאמרים</span>
+                <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" />
+              </button>
+            </div>
           </div>
+        </section>
 
-          {/* Category Tag */}
-          <div className="mb-4">
-            <span className="inline-block bg-babun-accent text-babun-primary font-bold text-xs px-3.5 py-1 rounded-[2px] uppercase tracking-wider font-display">
-              {selectedArticle.category || "מאמר מקצועי"}
-            </span>
-          </div>
-
-          {/* Article Main Headline */}
-          <h1 className="text-3xl md:text-5xl lg:text-[54px] font-display font-black text-babun-primary leading-[1.18] tracking-tight mb-4">
-            {selectedArticle.title}
-          </h1>
-
-          {/* Meta Info (Date & Reading Time) */}
-          <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 mb-10 font-sans">
-            <span>{selectedArticle.date}</span>
-            <span>•</span>
-            <span>{readingTime} דק' קריאה</span>
-          </div>
-
+        <div className="max-w-5xl mx-auto px-4 md:px-8 pt-10 md:pt-14 pb-24">
           {/* Main Hero Image / Video Banner */}
           {selectedArticle.categoryId === "podcast" && getYoutubeId(selectedArticle.link) ? (
             <div className="w-full aspect-video rounded-sm overflow-hidden bg-black relative shadow-lg mb-12 border border-zinc-200">
