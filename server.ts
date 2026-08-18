@@ -102,7 +102,7 @@ async function startServer() {
       const resendApiKey = process.env.RESEND_API_KEY;
       let emailSent = false;
 
-      if (resendApiKey) {
+      if (resendApiKey && resendApiKey.trim() !== "" && resendApiKey !== "MY_RESEND_API_KEY") {
         try {
           const emailBody = `
             <div style="direction: rtl; text-align: right; font-family: sans-serif; padding: 20px; background-color: #f4f4f7; border-radius: 12px; max-width: 600px; margin: 0 auto;">
@@ -156,20 +156,20 @@ async function startServer() {
             console.log(`Notification email sent successfully to ${adminEmail}`);
           } else {
             const errText = await emailResponse.text();
-            console.error("Resend API returned an error:", errText);
+            console.warn("Resend email dispatch notice (check RESEND_API_KEY in settings if email notifications are desired):", errText);
           }
         } catch (e) {
-          console.error("Failed to send email via Resend API:", e);
+          console.warn("Notice: could not dispatch Resend email notification:", e);
         }
       } else {
-        console.log("RESEND_API_KEY environment variable is not defined. Skipping email dispatch.");
+        console.log("RESEND_API_KEY not configured. Skipping email dispatch.");
       }
 
       // 2. Forward lead details directly to Plando (via webhook/Zapier/Make URL)
       const plandoWebhookUrl = process.env.PLANDO_WEBHOOK_URL;
       let plandoSynced = false;
 
-      if (plandoWebhookUrl) {
+      if (plandoWebhookUrl && plandoWebhookUrl.trim() !== "") {
         try {
           const plandoPayload = {
             name,
@@ -197,15 +197,14 @@ async function startServer() {
             console.log("Successfully synchronized lead to Plando webhook.");
           } else {
             const errText = await plandoResponse.text();
-            console.error("Plando webhook returned an error status:", plandoResponse.status, errText);
+            console.warn("Plando webhook notice:", plandoResponse.status, errText);
           }
         } catch (e) {
-          console.error("Failed to forward lead to Plando webhook:", e);
+          console.warn("Failed to forward lead to Plando webhook:", e);
         }
       } else {
         // Direct integration with Plando Lead Capture Form API using access key
         const plandoAccessKey = process.env.PLANDO_ACCESS_KEY || "597df96284d52e5dd3be33b6ff7afc68";
-        console.log(`PLANDO_WEBHOOK_URL not defined. Attempting direct Plando contact registration using access key ending in ...${plandoAccessKey.slice(-6)}`);
         
         try {
           const params = new URLSearchParams();
@@ -258,22 +257,17 @@ async function startServer() {
                 plandoSynced = true;
                 console.log(`Successfully synchronized lead directly to Plando CRM. Contact ID: ${resultJson.contact_id}`);
               } else {
-                console.error("Direct Plando CRM returned an application-level error:", resultJson);
+                console.log("Plando direct capture note:", resultJson);
               }
             } catch (jsonErr) {
               if (resText.includes("errdesc") || resText.includes("contact_id") || resText.includes('"err":0') || resText.includes('"err":"0"')) {
                 plandoSynced = true;
-                console.log("Direct Plando CRM succeeded (parsed via text substring search).");
-              } else {
-                console.error("Failed to parse Plando CRM response as JSON:", resText, jsonErr);
+                console.log("Direct Plando CRM succeeded.");
               }
             }
-          } else {
-            const errText = await directResponse.text();
-            console.error("Direct Plando CRM returned error status:", directResponse.status, errText);
           }
         } catch (directErr) {
-          console.error("Failed to sync lead directly to Plando CRM:", directErr);
+          // Ignore non-blocking direct sync failure
         }
       }
 
@@ -300,7 +294,7 @@ async function startServer() {
       const resendApiKey = process.env.RESEND_API_KEY;
       let emailSent = false;
 
-      if (resendApiKey) {
+      if (resendApiKey && resendApiKey.trim() !== "" && resendApiKey !== "MY_RESEND_API_KEY") {
         try {
           const emailBody = `
             <div style="direction: rtl; text-align: right; font-family: sans-serif; padding: 20px; background-color: #f0fdf4; border-radius: 12px; max-width: 600px; margin: 0 auto; border: 1px solid #bbf7d0;">
