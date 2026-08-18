@@ -621,7 +621,8 @@ export default function Consulting() {
                           src={plandoPaymentUrl} 
                           title="טופס תשלום מאובטח פלאנדו"
                           className="w-full h-[650px] md:h-[720px] border-0"
-                          allow="payment *"
+                          allow="payment *; payment; fullscreen; clipboard-write"
+                          sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
                         />
                       </div>
 
