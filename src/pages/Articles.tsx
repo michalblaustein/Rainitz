@@ -26,6 +26,7 @@ import {
   Info,
   UploadCloud,
   CheckCircle,
+  Share2,
 } from "lucide-react";
 import {
   collection,
@@ -93,6 +94,14 @@ export default function Articles() {
 
   // Sync selectedArticle from URL id query parameter
   const articleIdParam = searchParams.get("id");
+
+  const [copiedLink, setCopiedLink] = useState<boolean>(false);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
 
   useEffect(() => {
     if (articleIdParam && articlesList.length > 0) {
@@ -726,189 +735,243 @@ export default function Articles() {
         );
 
   if (selectedArticle) {
+    const readingTime = Math.max(1, Math.ceil((selectedArticle.content?.length || 600) / 450));
+
     return (
-      <div className="bg-babun-light min-h-screen pt-40 pb-20 selection:bg-babun-accent selection:text-babun-primary relative overflow-hidden">
-        
-        {/* Blurred Header Banner */}
-        <div className="absolute top-0 left-0 right-0 h-[480px] overflow-hidden pointer-events-none z-0 select-none bg-babun-primary">
-          <img
-            src={getDisplayImage(selectedArticle.innerImage || selectedArticle.image)}
-            className="w-full h-full object-cover blur-3xl scale-110 opacity-30 brightness-[0.98] contrast-[0.95]"
-            referrerPolicy="no-referrer"
-            alt=""
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-babun-light/50 to-babun-light" />
-        </div>
-
-        <div className="max-w-5xl mx-auto px-4 md:px-8 relative z-10">
+      <div className="bg-white min-h-screen pt-36 md:pt-44 pb-24 selection:bg-babun-accent selection:text-babun-primary text-right" dir="rtl">
+        <div className="max-w-5xl mx-auto px-4 md:px-8">
           
-          {/* Back button */}
-          <button
-            onClick={handleCloseArticle}
-            className="inline-flex items-center gap-2 text-babun-primary hover:bg-babun-primary hover:text-white font-display font-bold text-sm mb-12 transition-colors cursor-pointer group bg-white px-5 py-3 rounded-babun-md shadow-xs border border-babun-primary/5 relative z-10"
-          >
-            <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            <span>חזרה לכל התכנים והמאמרים</span>
-          </button>
+          {/* Top Breadcrumb / Back Button */}
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={handleCloseArticle}
+              className="inline-flex items-center gap-2 text-zinc-500 hover:text-babun-primary font-display font-medium text-sm transition-colors cursor-pointer group"
+            >
+              <span>חזרה לכל המאמרים</span>
+              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            </button>
 
-          {selectedArticle.categoryId === "podcast" ? (
-            /* ==================== PODCAST PAGE LAYOUT ==================== */
-            <div className="flex flex-col gap-10 text-right w-full dir-rtl">
-              {/* YouTube Player or Fallback Cover - MASSIVE IMAGE & VIDEO */}
-              {getYoutubeId(selectedArticle.link) ? (
-                <div className="w-full aspect-video rounded-babun-xl overflow-hidden bg-black relative border border-babun-primary/10 shadow-2xl">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${getYoutubeId(selectedArticle.link)}?autoplay=0&rel=0`}
-                    title={selectedArticle.title}
-                    className="w-full h-full border-0 absolute inset-0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              ) : (
-                <div className="w-full aspect-video rounded-babun-xl overflow-hidden bg-[#efede8] border border-babun-primary/5 shadow-md">
-                  <ImageWithSkeleton
-                    src={getDisplayImage(selectedArticle.image)}
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                    alt={selectedArticle.title}
+            {isAdminMode && selectedArticle.id && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const art = selectedArticle;
+                    handleCloseArticle();
+                    handleEditArticleClick(art);
+                  }}
+                  className="text-xs font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-3 py-1.5 rounded-sm flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Edit size={13} />
+                  <span>ערוך כתבה</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Category Tag */}
+          <div className="mb-4">
+            <span className="inline-block bg-babun-accent text-babun-primary font-bold text-xs px-3.5 py-1 rounded-[2px] uppercase tracking-wider font-display">
+              {selectedArticle.category || "מאמר מקצועי"}
+            </span>
+          </div>
+
+          {/* Article Main Headline */}
+          <h1 className="text-3xl md:text-5xl lg:text-[54px] font-display font-black text-babun-primary leading-[1.18] tracking-tight mb-4">
+            {selectedArticle.title}
+          </h1>
+
+          {/* Meta Info (Date & Reading Time) */}
+          <div className="flex items-center gap-2 text-xs font-medium text-zinc-400 mb-10 font-sans">
+            <span>{selectedArticle.date}</span>
+            <span>•</span>
+            <span>{readingTime} דק' קריאה</span>
+          </div>
+
+          {/* Main Hero Image / Video Banner */}
+          {selectedArticle.categoryId === "podcast" && getYoutubeId(selectedArticle.link) ? (
+            <div className="w-full aspect-video rounded-sm overflow-hidden bg-black relative shadow-lg mb-12 border border-zinc-200">
+              <iframe
+                src={`https://www.youtube.com/embed/${getYoutubeId(selectedArticle.link)}?autoplay=0&rel=0`}
+                title={selectedArticle.title}
+                className="w-full h-full border-0 absolute inset-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          ) : (
+            <div className="w-full overflow-hidden rounded-sm mb-12 shadow-sm border border-zinc-100 bg-zinc-50">
+              <img
+                src={getDisplayImage(selectedArticle.image || selectedArticle.innerImage)}
+                className="w-full max-h-[640px] object-cover"
+                referrerPolicy="no-referrer"
+                alt={selectedArticle.title}
+              />
+            </div>
+          )}
+
+          {/* Two-Column Layout (Article Body + Sticky Share Sidebar) */}
+          <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start justify-between">
+            
+            {/* Right Side: Main Article Content */}
+            <div className="w-full lg:w-[72%] space-y-6">
+              
+              {/* Optional Scanned Newspaper / Inner Image */}
+              {selectedArticle.innerImage && selectedArticle.innerImage !== selectedArticle.image && (
+                <div className="mb-8 p-4 bg-zinc-50 border border-zinc-200 rounded-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-zinc-500">צילום העיתון / המאמר המקורי:</span>
+                  </div>
+                  <img
+                    src={getDisplayImage(selectedArticle.innerImage)}
+                    alt="סריקת מאמר"
+                    className="w-full h-auto max-h-[85vh] object-contain rounded-sm shadow-xs bg-white"
                   />
                 </div>
               )}
 
-              {/* Podcast Title, Meta & Description */}
-              <div className="flex flex-col text-right dir-rtl w-full bg-white p-8 md:p-12 rounded-babun-xl border-r-8 border-babun-accent shadow-md space-y-6">
-                <div className="flex items-center justify-between flex-row-reverse pb-4 border-b border-babun-primary/5">
-                  <span className="bg-babun-accent/15 text-babun-primary px-4 py-1.5 text-xs font-bold rounded-babun-sm">
-                    {selectedArticle.category || "פודקאסט"}
-                  </span>
-                  <div className="flex items-center gap-2 text-xs font-bold text-babun-primary/40">
-                    <span>{selectedArticle.date}</span>
-                    <Calendar size={13} />
-                  </div>
-                </div>
-                
-                <h1 className="text-3xl md:text-5xl font-display font-black text-babun-primary leading-tight tracking-tight">
-                  {selectedArticle.title}
-                </h1>
-
-                {selectedArticle.content ? (
-                  <div className="markdown-body prose prose-slate max-w-none text-right text-babun-primary/95 text-base md:text-lg leading-relaxed pt-2 space-y-4">
-                    <Markdown>{selectedArticle.content}</Markdown>
-                  </div>
-                ) : (
-                  <p className="text-babun-primary/40 text-sm italic pt-2">
-                    אין תיאור מוקלד לפרק זה.
-                  </p>
-                )}
-              </div>
-
-              {/* Admin controls inside the page */}
-              {isAdminMode && selectedArticle.id && (
-                <div className="flex justify-end pt-4">
-                  <button
-                    onClick={() => {
-                      const art = selectedArticle;
-                      handleCloseArticle();
-                      handleEditArticleClick(art);
+              {/* Text / Markdown Content */}
+              {selectedArticle.content ? (
+                <div className="article-content text-zinc-800 text-base md:text-lg leading-[1.85] space-y-6">
+                  <Markdown
+                    components={{
+                      h1: ({node, ...props}) => (
+                        <div className="bg-[#FBFBFA] border-r-4 border-babun-accent py-3.5 px-6 my-8 rounded-[2px] shadow-xs">
+                          <h1 className="text-xl md:text-2xl font-black text-babun-primary font-display m-0 leading-snug" {...props} />
+                        </div>
+                      ),
+                      h2: ({node, ...props}) => (
+                        <div className="bg-[#FBFBFA] border-r-4 border-babun-accent py-3.5 px-6 my-8 rounded-[2px] shadow-xs">
+                          <h2 className="text-xl md:text-2xl font-black text-babun-primary font-display m-0 leading-snug" {...props} />
+                        </div>
+                      ),
+                      h3: ({node, ...props}) => (
+                        <div className="bg-[#FBFBFA] border-r-4 border-babun-accent py-3 px-5 my-6 rounded-[2px] shadow-xs">
+                          <h3 className="text-lg md:text-xl font-bold text-babun-primary font-display m-0 leading-snug" {...props} />
+                        </div>
+                      ),
+                      h4: ({node, ...props}) => (
+                        <div className="bg-[#FBFBFA] border-r-4 border-babun-accent py-2.5 px-4 my-5 rounded-[2px] shadow-xs">
+                          <h4 className="text-base md:text-lg font-bold text-babun-primary font-display m-0" {...props} />
+                        </div>
+                      ),
+                      p: ({node, ...props}) => (
+                        <p className="text-zinc-700 text-base md:text-lg leading-[1.85] mb-5 font-normal" {...props} />
+                      ),
+                      strong: ({node, ...props}) => (
+                        <strong className="font-bold text-babun-primary" {...props} />
+                      ),
+                      ul: ({node, ...props}) => (
+                        <ul className="list-disc list-inside space-y-2.5 my-5 text-zinc-700 mr-2" {...props} />
+                      ),
+                      ol: ({node, ...props}) => (
+                        <ol className="list-decimal list-inside space-y-2.5 my-5 text-zinc-700 mr-2" {...props} />
+                      ),
+                      blockquote: ({node, ...props}) => (
+                        <blockquote className="border-r-4 border-babun-accent bg-babun-accent/5 py-4 px-6 my-6 text-zinc-800 font-medium italic rounded-sm" {...props} />
+                      ),
                     }}
-                    className="bg-babun-accent/20 hover:bg-babun-accent/35 text-babun-primary text-xs font-bold px-5 py-3 rounded-babun-sm flex items-center gap-1.5 cursor-pointer transition-all border border-babun-accent/10"
                   >
-                    <Edit size={14} />
-                    <span>ערוך פודקאסט זה</span>
-                  </button>
+                    {selectedArticle.content}
+                  </Markdown>
+                </div>
+              ) : (
+                <p className="text-zinc-400 italic text-base">אין תוכן מוקלד לכתבה זו.</p>
+              )}
+
+              {/* External Source Link */}
+              {selectedArticle.link && selectedArticle.link !== "#" && (
+                <div className="pt-8 border-t border-zinc-200 mt-10">
+                  <a
+                    href={selectedArticle.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-babun-primary text-white hover:bg-black text-xs font-bold px-6 py-3.5 rounded-sm shadow-sm transition-all"
+                  >
+                    <ExternalLink size={14} />
+                    <span>פתח קישור למקור הכתבה</span>
+                  </a>
                 </div>
               )}
             </div>
-          ) : (
-            /* ==================== STANDARD ARTICLE PAGE LAYOUT ==================== */
-            <div className="flex flex-col gap-10 text-right">
-              {/* Top Meta info & Header */}
-              <div className="border-b border-babun-primary/10 pb-6">
-                <div className="flex items-center justify-between flex-row-reverse mb-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-babun-primary/40">
-                    <span>{selectedArticle.date}</span>
-                    <Calendar size={13} />
-                  </div>
-                  <span className="bg-babun-primary/5 text-babun-primary px-3 py-1 text-xs font-bold rounded-babun-sm">
-                    {selectedArticle.category}
-                  </span>
-                </div>
-                
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-display font-black text-babun-primary leading-tight tracking-tight">
-                  {selectedArticle.title}
-                </h1>
-              </div>
 
-              {/* Image side - Simulated newspaper framing */}
-              <div className="w-full bg-[#efede8] p-8 rounded-babun-xl flex flex-col justify-center items-center relative border border-babun-primary/5 shadow-inner">
-                <div className="bg-white p-6 shadow-xl border border-dashed border-babun-primary/10 rounded-babun-md w-full flex items-center justify-center relative group">
-                  <ImageWithSkeleton
-                    src={getDisplayImage(selectedArticle.innerImage || selectedArticle.image)}
-                    className="w-full max-h-[85vh] object-contain shadow-none rounded-none"
-                    referrerPolicy="no-referrer"
-                    alt={selectedArticle.title}
-                  />
-                </div>
-              </div>
+            {/* Left Side: Sticky Sidebar (Share + Tools) */}
+            <div className="w-full lg:w-[25%] shrink-0 space-y-6">
+              <div className="sticky top-28 bg-white border border-zinc-200/80 rounded-sm p-6 space-y-5 shadow-xs">
+                <span className="text-xs font-bold text-zinc-400 block tracking-wider uppercase">
+                  שיתוף המאמר
+                </span>
 
-              {/* Content text */}
-              <div className="p-8 md:p-14 bg-white rounded-babun-xl border border-babun-primary/5 shadow-md text-right">
-                <div className="markdown-body prose prose-slate max-w-none text-right text-babun-primary/95 text-base md:text-lg leading-relaxed space-y-6 mb-8">
-                  {selectedArticle.content ? (
-                    <Markdown>{selectedArticle.content}</Markdown>
+                {/* Copy Link Button */}
+                <button
+                  onClick={handleCopyLink}
+                  className="w-full flex items-center justify-center gap-2 border border-zinc-200 hover:border-zinc-400 bg-white hover:bg-zinc-50 text-zinc-800 hover:text-black py-3 px-4 rounded-sm text-xs font-bold shadow-2xs transition-all cursor-pointer"
+                >
+                  {copiedLink ? (
+                    <>
+                      <Check size={15} className="text-emerald-600" />
+                      <span className="text-emerald-600">הקישור הועתק!</span>
+                    </>
                   ) : (
-                    <p className="text-babun-primary/75 italic">
-                      אין טקסט מוקלד לכתבה זו.
-                    </p>
+                    <>
+                      <Share2 size={15} className="text-zinc-500" />
+                      <span>העתק קישור</span>
+                    </>
                   )}
-                </div>
+                </button>
 
-                {/* Footer and interactions */}
-                <div className="border-t border-babun-primary/5 pt-8 flex items-center justify-between flex-row-reverse gap-4">
-                  {selectedArticle.link && selectedArticle.link !== "#" && (
-                    <a
-                      href={selectedArticle.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-babun-primary text-white hover:bg-babun-primary/90 text-xs font-bold px-6 py-4 rounded-babun-sm flex items-center gap-2 shadow-md shadow-babun-primary/5"
-                    >
-                      <ExternalLink size={14} />
-                      <span>פתח קישור חיצוני</span>
-                    </a>
-                  )}
+                {/* WhatsApp Share Button */}
+                <a
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(selectedArticle.title + "\n" + window.location.href)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#128C7E] py-3 px-4 rounded-sm text-xs font-bold transition-all"
+                >
+                  <MessageCircle size={15} />
+                  <span>שתף בוואטסאפ</span>
+                </a>
 
-                  {isAdminMode && selectedArticle.id && (
+                {/* Admin Quick Actions */}
+                {isAdminMode && selectedArticle.id && (
+                  <div className="pt-4 border-t border-zinc-200/80 space-y-2">
+                    <span className="text-[11px] font-bold text-zinc-400 block">ניהול</span>
                     <button
                       onClick={() => {
                         const art = selectedArticle;
                         handleCloseArticle();
                         handleEditArticleClick(art);
                       }}
-                      className="bg-babun-accent/20 hover:bg-babun-accent/35 text-babun-primary text-xs font-bold px-5 py-3 rounded-babun-sm flex items-center gap-1.5 cursor-pointer transition-all border border-babun-accent/10"
+                      className="w-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 text-xs font-bold py-2.5 px-3 rounded-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-amber-500/20"
                     >
-                      <Edit size={14} />
-                      <span>ערוך כתבה זו</span>
+                      <Edit size={13} />
+                      <span>ערוך מאמר זה</span>
                     </button>
-                  )}
-                </div>
+                    <button
+                      onClick={() => handleDeleteArticle(selectedArticle.id, selectedArticle.title)}
+                      className="w-full bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold py-2.5 px-3 rounded-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-red-200"
+                    >
+                      <Trash2 size={13} />
+                      <span>מחק מאמר</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
-          )}
 
-          {/* Call to action inside the page to keep flow */}
-          <section className="py-24 text-center bg-black mt-24 rounded-babun-xl relative overflow-hidden">
-            <div className="max-w-3xl mx-auto px-4">
-              <h3 className="text-2xl md:text-4xl font-display font-black text-white mb-6 leading-tight">
+          </div>
+
+          {/* Bottom Consultation CTA */}
+          <section className="py-16 md:py-20 text-center bg-black mt-24 rounded-sm relative overflow-hidden">
+            <div className="max-w-2xl mx-auto px-4">
+              <h3 className="text-2xl md:text-4xl font-display font-black text-white mb-4 leading-tight">
                 שאלה אחת יכולה לחסוך לך <br className="hidden md:block" />
                 <span className="text-babun-accent">עשרות אלפי שקלים.</span>
               </h3>
-              <p className="text-sm md:text-base text-white/70 font-light mb-8 max-w-xl mx-auto leading-relaxed">
+              <p className="text-xs md:text-sm text-white/70 font-light mb-8 max-w-lg mx-auto leading-relaxed">
                 פגישת ייעוץ אישית עם יעקב רייניץ. שעה אחת. תשובות ישירות. בלי אינטרסים נסתרים.
               </p>
               <Link
                 to="/consulting"
-                className="btn-babun-primary inline-block px-10 py-4 shadow-xl font-display font-bold text-sm"
+                className="btn-babun-primary inline-block px-10 py-3.5 shadow-xl font-display font-bold text-xs"
               >
                 קביעת פגישה ←
               </Link>

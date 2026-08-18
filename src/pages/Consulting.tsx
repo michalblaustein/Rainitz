@@ -55,8 +55,9 @@ export default function Consulting() {
   const [errorMsg, setErrorMsg] = useState("");
 
   // URLs for payment & scheduling
-  const filloutUrl = "https://forms.fillout.com/t/5PqiqpTtogus";
-  const plandoPaymentUrl = "https://plando.co.il/self_services/embed_store/24802?ak=597df96284d52e5dd3be33b6ff7afc68";
+  const filloutFormId = "ekmXie9Vt9us";
+  const filloutUrl = `https://forms.fillout.com/t/${filloutFormId}`;
+  const plandoPaymentUrl = "https://plando.co.il/self_services/embed_store/25442?ak=597df96284d52e5dd3be33b6ff7afc68";
 
   // Re-initialize Fillout embed script when needed
   useEffect(() => {
@@ -69,7 +70,7 @@ export default function Consulting() {
 
   const openFilloutPopup = () => {
     // Attempt triggering native Fillout script button if rendered
-    const filloutBtn = document.querySelector('[data-fillout-id="5PqiqpTtogus"] button, [data-fillout-id="5PqiqpTtogus"]') as HTMLElement;
+    const filloutBtn = document.querySelector(`[data-fillout-id="${filloutFormId}"] button, [data-fillout-id="${filloutFormId}"]`) as HTMLElement;
     if (filloutBtn && typeof (window as any).Fillout !== "undefined") {
       try {
         filloutBtn.click();
@@ -126,9 +127,6 @@ export default function Consulting() {
 
       setIsSubmitting(false);
       setIsSubmitted(true);
-
-      // Open Plando payment link in new window automatically
-      window.open(plandoPaymentUrl, "_blank");
     } catch (err: any) {
       console.error("Error saving lead:", err);
       
@@ -146,7 +144,6 @@ export default function Consulting() {
 
       setIsSubmitting(false);
       setIsSubmitted(true);
-      window.open(plandoPaymentUrl, "_blank");
     }
   };
 
@@ -582,78 +579,61 @@ export default function Consulting() {
 
             {/* Left Side: Form or Post-Payment Status */}
             <div className="lg:col-span-7">
-              <div className="bg-white text-babun-primary rounded-babun-xl p-6 md:p-10 shadow-2xl border border-babun-primary/10">
+              <div className={`bg-white text-babun-primary rounded-babun-xl shadow-2xl border border-babun-primary/10 transition-all ${
+                isSubmitted ? "p-3 sm:p-4 md:p-6" : "p-6 md:p-10"
+              }`}>
                 
                 <AnimatePresence mode="wait">
                   {isSubmitted ? (
                     <motion.div
                       key="submitted-state"
-                      initial={{ opacity: 0, y: 15 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -15 }}
-                      transition={{ duration: 0.3 }}
-                      className="bg-neutral-50 border border-babun-primary/10 p-8 rounded-babun-md text-center space-y-6"
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-3 text-right"
                     >
-                      <div className="w-16 h-16 bg-babun-primary text-babun-accent rounded-full flex items-center justify-center mx-auto shadow-md">
-                        <CheckCircle2 size={34} className="stroke-[2.5]" />
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-2xl font-display font-black text-babun-primary mb-2">
-                          הפרטים נשמרו בהצלחה!
-                        </h3>
-                        <p className="text-babun-primary/80 text-base leading-relaxed font-normal">
-                          תודה {formData.fullName}. חלון התשלום המאובטח בפלאנדו נפתח בחלון נפרד. לאחר השלמת ואישור התשלום, לחצו על הכפתור מטה לקביעת מועד הפגישה ביומן.
-                        </p>
-                      </div>
-
-                      {/* Main Action Buttons */}
-                      <div className="space-y-4 pt-2">
-                        {/* Primary Button: Open Fillout Calendar */}
-                        <button 
-                          type="button"
-                          onClick={openFilloutPopup}
-                          className="w-full bg-babun-primary hover:bg-babun-primary/95 text-white font-black py-4 px-8 rounded-full shadow-lg transition-all duration-300 hover:scale-102 flex items-center justify-center gap-3 cursor-pointer text-base"
-                        >
-                          <Calendar size={20} className="text-babun-accent" />
-                          <span>אישור תשלום - קביעת מועד ביומן (Fillout)</span>
-                          <ArrowLeft size={18} />
-                        </button>
-
-                        {/* Re-open payment if needed */}
-                        <div className="pt-1">
-                          <a 
-                            href={plandoPaymentUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full bg-babun-accent hover:bg-babun-accent/90 text-babun-primary font-bold py-3.5 px-6 rounded-full border border-babun-primary/20 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer text-sm"
-                          >
-                            <span>מעבר לתשלום בפלאנדו (אם החלון לא נפתח)</span>
-                            <ExternalLink size={16} />
-                          </a>
-                        </div>
-
-                        {/* Official Fillout Popup Embed Trigger Element */}
-                        <div className="hidden">
-                          <div 
-                            data-fillout-id="5PqiqpTtogus" 
-                            data-fillout-embed-type="popup" 
-                            data-fillout-dynamic-resize 
-                            data-fillout-button-color="#000000" 
-                            data-fillout-inherit-parameters 
-                            data-fillout-popup-size="medium"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-babun-primary/10">
+                      {/* Clean Top Navigation Bar */}
+                      <div className="flex items-center justify-between px-2 py-1">
                         <button 
                           type="button"
                           onClick={() => setIsSubmitted(false)}
-                          className="text-xs text-babun-primary/60 hover:text-babun-primary underline font-bold cursor-pointer"
+                          className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-babun-primary font-bold transition-colors cursor-pointer"
                         >
-                          עדכון פרטים / שליחת טופס מחדש
+                          <ChevronRight size={14} />
+                          <span>חזרה לעריכת פרטים</span>
                         </button>
+
+                        <a 
+                          href={plandoPaymentUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-babun-primary transition-colors"
+                        >
+                          <span>פתיחה בחלון נפרד</span>
+                          <ExternalLink size={11} />
+                        </a>
+                      </div>
+
+                      {/* Clean Full Plando Payment Iframe */}
+                      <div className="w-full rounded-lg overflow-hidden bg-white min-h-[640px] border border-zinc-100">
+                        <iframe 
+                          src={plandoPaymentUrl} 
+                          title="טופס תשלום מאובטח פלאנדו"
+                          className="w-full h-[650px] md:h-[720px] border-0"
+                          allow="payment *"
+                        />
+                      </div>
+
+                      {/* Official Fillout Popup Embed Trigger Element */}
+                      <div className="hidden">
+                        <div 
+                          data-fillout-id={filloutFormId} 
+                          data-fillout-embed-type="popup" 
+                          data-fillout-dynamic-resize 
+                          data-fillout-inherit-parameters 
+                          data-fillout-popup-size="medium"
+                        />
                       </div>
                     </motion.div>
                   ) : (

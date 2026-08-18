@@ -273,7 +273,7 @@ export default function Scheduler() {
                 </p>
               </div>
               <a
-                href="https://plando.co.il/self_services/embed_store/24802?ak=597df96284d52e5dd3be33b6ff7afc68"
+                href="https://plando.co.il/self_services/embed_store/25442?ak=597df96284d52e5dd3be33b6ff7afc68"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-babun-primary hover:bg-babun-primary/90 text-white font-bold px-6 py-2.5 rounded-full text-xs shadow transition-all"
