@@ -34,8 +34,8 @@ export default function Navbar() {
       <div 
         className={`w-full transition-all duration-500 ${
           isScrolled || !hasDarkHero
-            ? "bg-white shadow-xl py-4" 
-            : "bg-transparent py-6"
+            ? "bg-white shadow-xl py-3 md:py-4" 
+            : "bg-transparent py-4 md:py-6"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex justify-between items-center">
@@ -44,7 +44,7 @@ export default function Navbar() {
             <img 
               src={isScrolled || !hasDarkHero ? "https://lh3.googleusercontent.com/d/1CYyzzstemzbU_W4xXZKI79Q0msNLNOdQ" : "https://lh3.googleusercontent.com/d/1TtktR-B0LsjkNXjvcdUP8JPkZye4U8Ks"} 
               alt="יעקב רייניץ" 
-              className="h-20 md:h-24 w-auto transition-all duration-300"
+              className="h-14 sm:h-16 md:h-24 w-auto transition-all duration-300 object-contain"
               referrerPolicy="no-referrer"
             />
           </Link>

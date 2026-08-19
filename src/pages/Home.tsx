@@ -212,15 +212,15 @@ export default function Home() {
   return (
     <div className="bg-babun-light" dir="rtl">
       {/* HERO SECTION */}
-      <section className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-black text-white">
+      <section className="relative min-h-screen flex items-center pt-28 sm:pt-36 md:pt-40 pb-16 md:pb-24 overflow-hidden bg-black text-white">
         {/* Background Mesh */}
         <div className="absolute inset-0 mesh-grid z-0" />
         
         <div className="max-w-7xl mx-auto px-4 md:px-8 w-full relative z-10 text-right">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             {/* Image Side (Left) */}
-            <div className="lg:col-span-5 relative order-2 flex justify-center">
-              <div className="relative w-full max-w-lg aspect-square">
+            <div className="lg:col-span-5 relative order-2 flex justify-center w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto">
+              <div className="relative w-full aspect-square">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 30 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -256,12 +256,12 @@ export default function Home() {
                       x: { delay: 0.6 },
                       y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
                     }}
-                    className="absolute top-1/4 -right-12 z-20 bg-white p-6 rounded-babun-lg shadow-2xl text-black text-center min-w-[180px]"
+                    className="absolute top-1/4 -right-4 sm:-right-8 lg:-right-12 z-20 bg-white p-3 sm:p-5 md:p-6 rounded-babun-lg shadow-2xl text-black text-center min-w-[130px] sm:min-w-[170px]"
                  >
-                    <div className="text-4xl font-display font-black text-babun-primary">
+                    <div className="text-2xl sm:text-4xl font-display font-black text-babun-primary">
                       <AnimatedNumber value={2000} />+
                     </div>
-                    <div className="text-sm font-bold opacity-80 mt-1">פגישות ייעוץ</div>
+                    <div className="text-xs sm:text-sm font-bold opacity-80 mt-1">פגישות ייעוץ</div>
                  </motion.div>
 
                  <motion.div
@@ -276,11 +276,11 @@ export default function Home() {
                       x: { delay: 0.8 },
                       y: { duration: 5, repeat: Infinity, ease: "easeInOut" }
                     }}
-                    className="absolute bottom-10 -left-12 z-20 bg-white p-6 rounded-babun-lg shadow-2xl text-black text-center min-w-[180px]"
+                    className="absolute bottom-6 sm:bottom-10 -left-4 sm:-left-8 lg:-left-12 z-20 bg-white p-3 sm:p-5 md:p-6 rounded-babun-lg shadow-2xl text-black text-center min-w-[140px] sm:min-w-[180px]"
                  >
-                    <div className="text-sm font-bold leading-tight mb-3">הפודקאסט הכי מושמע<br />בציבור החרדי</div>
+                    <div className="text-xs sm:text-sm font-bold leading-tight mb-2 sm:mb-3">הפודקאסט הכי מושמע<br />בציבור החרדי</div>
                     <div className="flex justify-center gap-1 text-babun-accent">
-                        {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" />)}
+                        {[...Array(5)].map((_, i) => <Star key={i} size={13} fill="currentColor" className="sm:w-4 sm:h-4" />)}
                     </div>
                  </motion.div>
 
@@ -288,35 +288,35 @@ export default function Home() {
             </div>
 
             {/* Text Side (Right) */}
-            <div className="lg:col-span-7 order-1 flex flex-col items-start text-right w-[1000px] h-[500px]" id="hero-text-side">
+            <div className="lg:col-span-7 order-1 flex flex-col items-start text-right w-full min-h-0" id="hero-text-side">
               <motion.div
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
                 className="flex flex-col items-start w-full text-right"
               >
-                <h1 className="font-display text-white mb-8 tracking-tighter flex flex-col items-start text-right w-full">
-                  <span className="text-6xl md:text-8xl lg:text-[6rem] font-bold leading-[1.05] block w-full">
+                <h1 className="font-display text-white mb-6 md:mb-8 tracking-tighter flex flex-col items-start text-right w-full">
+                  <span className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold leading-[1.08] block w-full">
                     כש<span className="text-babun-accent">אתה</span> לא יודע
                   </span>
-                  <span className="text-6xl md:text-8xl lg:text-[6rem] font-bold leading-[1.05] block w-full">
+                  <span className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-bold leading-[1.08] block w-full mt-1">
                     <span className="text-babun-accent">מה</span> אתה לא יודע
                   </span>
                 </h1>
-                <h2 className="text-2xl md:text-3xl font-normal text-white mb-12 leading-tight text-right w-full">
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-normal text-white mb-8 md:mb-12 leading-relaxed text-right w-full max-w-2xl">
                   <span>חושבים להשקיע בנדל״ן?</span>
-                  <span className="block mt-1">בואו להבין את היכולות שלכם, המספרים, הסיכונים וההזדמנויות.</span>
+                  <span className="block mt-1 text-white/90">בואו להבין את היכולות שלכם, המספרים, הסיכונים וההזדמנויות.</span>
                 </h2>
-                <div className="flex flex-wrap gap-6 justify-start items-center w-full">
+                <div className="flex flex-wrap gap-4 md:gap-6 justify-start items-center w-full">
                    <Link 
                     to="/consulting" 
-                    className="bg-babun-accent text-babun-primary font-bold py-5 px-10 rounded-babun-full text-xl transition-all duration-300 hover:scale-105"
+                    className="bg-babun-accent text-babun-primary font-bold py-4 px-8 sm:py-5 sm:px-10 rounded-babun-full text-base sm:text-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-babun-accent/20"
                    >
                       קביעת פגישת ייעוץ
                    </Link>
                    <Link 
                     to="/about" 
-                    className="bg-white text-babun-primary font-bold py-5 px-10 rounded-babun-full text-xl transition-all duration-300 hover:bg-white/90"
+                    className="bg-white text-babun-primary font-bold py-4 px-8 sm:py-5 sm:px-10 rounded-babun-full text-base sm:text-xl transition-all duration-300 hover:bg-white/90 active:scale-95 shadow-lg"
                    >
                       קרא עוד
                    </Link>
@@ -436,32 +436,33 @@ export default function Home() {
         >
           
           {/* Right Column - Titles */}
-          <div className="flex-1 flex flex-col items-center lg:items-start text-right">
-            <h2 className="text-6xl md:text-[8rem] font-display font-black leading-[0.8] mb-8 text-right">
-              <span className="text-babun-accent block" style={{ paddingRight: '90px' }}>הקורס</span>
-              <span className="text-white block mt-3" style={{ paddingRight: '90px' }}>הבא</span>
-              <span className="text-white block mt-3" style={{ marginTop: '12px', paddingLeft: '5px', paddingRight: '90px' }}>נפתח</span>
+          <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-right">
+            <h2 className="text-5xl sm:text-6xl md:text-[7rem] lg:text-[8rem] font-display font-black leading-[0.9] lg:leading-[0.8] mb-8">
+              <span className="text-babun-accent block lg:pr-16">הקורס</span>
+              <span className="text-white block mt-2 lg:mt-3 lg:pr-16">הבא</span>
+              <span className="text-white block mt-2 lg:mt-3 lg:pr-16">נפתח</span>
             </h2>
           </div>
  
           {/* Center Column - Illustration & Stats */}
-          <div className="flex-shrink-0 relative flex justify-center items-center py-10">
+          <div className="flex-shrink-0 relative flex justify-center items-center py-6 lg:py-10">
             {/* Yellow Circle */}
-            <div className="w-72 h-72 md:w-[450px] md:h-[450px] bg-babun-accent rounded-full relative flex items-center justify-center shadow-[0_0_100px_rgba(255,215,0,0.15)]">
+            <div className="w-64 h-64 sm:w-72 sm:h-72 md:w-[420px] md:h-[420px] bg-babun-accent rounded-full relative flex items-center justify-center shadow-[0_0_100px_rgba(255,215,0,0.15)]">
                <img 
                  src="https://lh3.googleusercontent.com/d/1miE-lXse5oAtOurCfE92ls5lWpxGdUnj" 
                  alt="Illustration" 
-                 className="w-full h-full object-contain"
+                 className="w-full h-full object-contain p-4"
                  referrerPolicy="no-referrer"
                />
  
                {/* Phone Icon Tag (Top-Right) */}
-               <div className="absolute top-10 right-[-20px] md:right-[-40px] bg-white/80 backdrop-blur-md p-6 md:p-10 rounded-full shadow-2xl text-babun-primary z-20 flex items-center justify-center aspect-square">
+               <div className="absolute top-4 right-[-10px] md:top-10 md:right-[-40px] bg-white/80 backdrop-blur-md p-4 sm:p-6 md:p-10 rounded-full shadow-2xl text-babun-primary z-20 flex items-center justify-center aspect-square">
                  <motion.div
                    animate={{ scale: [1, 1.05, 1], rotate: [0, 2, -2, 0] }}
                    transition={{ repeat: Infinity, duration: 4 }}
                  >
-                   <Phone size={64} className="text-black" strokeWidth={2.5} />
+                   <Phone size={36} className="text-black sm:hidden" strokeWidth={2.5} />
+                   <Phone size={64} className="text-black hidden sm:block" strokeWidth={2.5} />
                  </motion.div>
                </div>
             </div>
@@ -469,15 +470,13 @@ export default function Home() {
 
           {/* Left Column - Contact Form (Circular Lead Card) */}
           <div 
-            className="flex-1 flex flex-col items-center lg:items-start text-right relative z-30 -mt-16 sm:-mt-24 lg:mt-0 lg:-translate-y-20"
-            style={{ paddingRight: '-190px', marginRight: '-300px' }}
+            className="flex-1 flex flex-col items-center lg:items-start text-right relative z-30 -mt-8 sm:-mt-12 lg:mt-0 lg:-translate-y-12"
           >
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              style={{ paddingRight: '48px' }}
-              className="bg-white/95 backdrop-blur-md p-10 md:p-12 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 w-[320px] sm:w-[360px] md:w-[380px] lg:w-[400px] aspect-square flex flex-col justify-center items-center text-center mx-auto lg:mx-0"
+              className="bg-white/95 backdrop-blur-md p-6 sm:p-10 md:p-12 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 w-[290px] sm:w-[360px] md:w-[380px] lg:w-[400px] aspect-square flex flex-col justify-center items-center text-center mx-auto lg:mx-0"
             >
               <div className="bg-[#fe0000] text-white px-4 py-1 rounded-full font-black text-xs md:text-sm inline-block mb-3 shadow-md">
                 מחזור חדש נפתח!
