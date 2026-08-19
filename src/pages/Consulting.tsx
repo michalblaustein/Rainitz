@@ -57,7 +57,7 @@ export default function Consulting() {
   // URLs for payment & scheduling
   const filloutFormId = "ekmXie9Vt9us";
   const filloutUrl = `https://forms.fillout.com/t/${filloutFormId}`;
-  const plandoPaymentUrl = "https://plando.co.il/self_services/embed_store/25442?ak=597df96284d52e5dd3be33b6ff7afc68";
+  const cardcomPaymentUrl = "https://secure.cardcom.solutions/EA/EA5/Iu2lXYrhOEqnowhRYPoOTQ/PaymentSP";
 
   // Re-initialize Fillout embed script when needed
   useEffect(() => {
@@ -129,11 +129,11 @@ export default function Consulting() {
         tag: "תיאום פגישת ייעוץ"
       });
 
-      // 3. Direct Redirect to Plando Payment Store (eliminates all iframe blocking/locking issues)
-      window.location.href = plandoPaymentUrl;
+      // 3. Direct Redirect to Cardcom Payment (seamless, secure and supports 3D Secure)
+      window.location.href = cardcomPaymentUrl;
     } catch (err: any) {
       console.error("Error saving lead, redirecting to payment anyway:", err);
-      window.location.href = plandoPaymentUrl;
+      window.location.href = cardcomPaymentUrl;
     }
   };
 
@@ -595,7 +595,7 @@ export default function Consulting() {
                         </button>
 
                         <a 
-                          href={plandoPaymentUrl}
+                          href={cardcomPaymentUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 text-xs font-bold text-babun-primary bg-babun-accent/20 hover:bg-babun-accent/30 px-3 py-1.5 rounded-full transition-colors"
@@ -605,11 +605,11 @@ export default function Consulting() {
                         </a>
                       </div>
 
-                      {/* Clean Full Plando Payment Iframe */}
+                      {/* Cardcom Payment Embed */}
                       <div className="w-full rounded-lg overflow-hidden bg-white min-h-[640px] border border-zinc-100 relative">
                         <iframe 
-                          src={plandoPaymentUrl} 
-                          title="טופס תשלום מאובטח פלאנדו"
+                          src={cardcomPaymentUrl} 
+                          title="טופס תשלום מאובטח קארדקום"
                           className="w-full h-[650px] md:h-[720px] border-0"
                           allow="payment *; payment; fullscreen; clipboard-write; forms; scripts; cross-origin-isolated"
                         />
