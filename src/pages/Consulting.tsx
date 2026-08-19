@@ -608,21 +608,20 @@ export default function Consulting() {
                           href={plandoPaymentUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-babun-primary transition-colors"
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-babun-primary bg-babun-accent/20 hover:bg-babun-accent/30 px-3 py-1.5 rounded-full transition-colors"
                         >
-                          <span>פתיחה בחלון נפרד</span>
-                          <ExternalLink size={11} />
+                          <span>פתיחת דף תשלום מאובטח בלשונית נפרדת</span>
+                          <ExternalLink size={12} />
                         </a>
                       </div>
 
                       {/* Clean Full Plando Payment Iframe */}
-                      <div className="w-full rounded-lg overflow-hidden bg-white min-h-[640px] border border-zinc-100">
+                      <div className="w-full rounded-lg overflow-hidden bg-white min-h-[640px] border border-zinc-100 relative">
                         <iframe 
                           src={plandoPaymentUrl} 
                           title="טופס תשלום מאובטח פלאנדו"
                           className="w-full h-[650px] md:h-[720px] border-0"
-                          allow="payment *; payment; fullscreen; clipboard-write"
-                          sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+                          allow="payment *; payment; fullscreen; clipboard-write; forms; scripts; cross-origin-isolated"
                         />
                       </div>
 
