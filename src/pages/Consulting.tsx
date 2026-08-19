@@ -107,13 +107,17 @@ export default function Consulting() {
 
     try {
       // 1. Save to local Firestore database
-      await addDoc(collection(db, "consulting_leads"), {
-        fullName: formData.fullName,
-        phone: formData.phone,
-        email: formData.email,
-        message: formData.message,
-        createdAt: serverTimestamp(),
-      });
+      try {
+        await addDoc(collection(db, "consulting_leads"), {
+          fullName: formData.fullName,
+          phone: formData.phone,
+          email: formData.email,
+          message: formData.message,
+          createdAt: serverTimestamp(),
+        });
+      } catch (dbErr) {
+        console.warn("Firestore lead save fallback:", dbErr);
+      }
 
       // 2. Sync lead to backend (Plando CRM & Email Alerts)
       await syncLeadToBackend({
@@ -125,25 +129,11 @@ export default function Consulting() {
         tag: "תיאום פגישת ייעוץ"
       });
 
-      setIsSubmitting(false);
-      setIsSubmitted(true);
+      // 3. Direct Redirect to Plando Payment Store (eliminates all iframe blocking/locking issues)
+      window.location.href = plandoPaymentUrl;
     } catch (err: any) {
-      console.error("Error saving lead:", err);
-      
-      // Attempt backend synchronization even if Firestore failed
-      try {
-        await syncLeadToBackend({
-          name: formData.fullName,
-          phone: formData.phone,
-          email: formData.email,
-          message: formData.message || "תיאום פגישת ייעוץ (שגיאת גיבוי פיירבייס)",
-          source: "פגישת ייעוץ אישית",
-          tag: "תיאום פגישת ייעוץ"
-        });
-      } catch (e) {}
-
-      setIsSubmitting(false);
-      setIsSubmitted(true);
+      console.error("Error saving lead, redirecting to payment anyway:", err);
+      window.location.href = plandoPaymentUrl;
     }
   };
 
