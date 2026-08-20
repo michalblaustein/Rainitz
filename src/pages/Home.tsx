@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { syncLeadToBackend } from "../lib/leadSync";
+import { defaultSeedArticles } from "../data/defaultArticles";
 
 
 const services = [
@@ -67,9 +68,9 @@ export default function Home() {
     } catch (e) {
       console.error("Failed to load local articles cache for home page:", e);
     }
-    return [];
+    return defaultSeedArticles.filter((item: any) => item.categoryId === "podcast").slice(0, 4);
   });
-  const [loadingMedia, setLoadingMedia] = useState(true);
+  const [loadingMedia, setLoadingMedia] = useState(false);
 
   useEffect(() => {
     // 1. Initial quick load from server backup (instant load, completely bypasses firestore offline/quota lock)

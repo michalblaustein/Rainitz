@@ -50,6 +50,7 @@ import {
 } from "firebase/auth";
 import { db, auth, handleFirestoreError, OperationType } from "../lib/firebase";
 import ImageWithSkeleton from "../components/common/ImageWithSkeleton";
+import { defaultSeedArticles } from "../data/defaultArticles";
 
 // Category definitions matching the design guidelines
 const mediaCategories = [
@@ -61,7 +62,7 @@ const mediaCategories = [
 ];
 
 // Richly-detailed base seed articles (with copyable, readable Hebrew text)
-const seedArticles: any[] = [];
+const seedArticles: any[] = defaultSeedArticles;
 
 export default function Articles() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -84,10 +85,12 @@ export default function Articles() {
   const [articlesList, setArticlesList] = useState<any[]>(() => {
     try {
       const cached = localStorage.getItem("babun_articles_cache");
-      return cached ? JSON.parse(cached) : [];
-    } catch (e) {
-      return [];
-    }
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return defaultSeedArticles;
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
