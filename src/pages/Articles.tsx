@@ -357,114 +357,97 @@ export default function Articles() {
     }
   }, [articlesList, selectedPodcast]);
 
-  // Load and listen to articles from Firestore
+  // Load and listen to articles from Firestore with resilient multi-tier loading
   useEffect(() => {
-    // 1. Instantaneous quick-load from server backup JSON (independent of Firestore quota/connection status)
     setLoading(true);
-    fetch("/api/articles")
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error("HTTP error");
-      })
-      .then((data) => {
-        let cachedData: any[] = [];
-        try {
-          const cached = localStorage.getItem("babun_articles_cache");
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (Array.isArray(parsed)) {
-              cachedData = parsed;
-            }
-          }
-        } catch (e) {}
+    let isMounted = true;
 
-        if ((!Array.isArray(data) || data.length === 0) && cachedData.length > 0) {
-          console.log("Restoring server backup from client local storage cache (size: " + cachedData.length + ")");
-          setArticlesList(cachedData);
-          fetch("/api/articles/sync", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(cachedData),
-          }).catch((err) => console.warn("Failed to auto-restore articles backup to server:", err));
-        } else if (Array.isArray(data) && data.length > 0) {
-          setArticlesList(data);
-          try {
-            localStorage.setItem("babun_articles_cache", JSON.stringify(data));
-          } catch (lsErr) {}
+    // Helper to safely apply articles and store in client cache & sync server
+    const applyArticles = (data: any[], source: string) => {
+      if (!isMounted || !Array.isArray(data) || data.length === 0) return;
+      setArticlesList(data);
+      setLoading(false);
+      try {
+        localStorage.setItem("babun_articles_cache", JSON.stringify(data));
+      } catch (e) {}
+    };
+
+    // 1. Immediate local cache check for zero-delay rendering
+    try {
+      const cached = localStorage.getItem("babun_articles_cache");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          applyArticles(parsed, "localStorage");
+        }
+      }
+    } catch (e) {}
+
+    // 2. Fetch from server-side backup API (works under every adblocker/filter)
+    fetch("/api/articles")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((serverData) => {
+        if (Array.isArray(serverData) && serverData.length > 0) {
+          applyArticles(serverData, "serverApi");
         }
       })
       .catch((err) => {
-        console.warn("Initial server-side backup fetch failed, trying local storage cache...", err);
-        try {
-          const cached = localStorage.getItem("babun_articles_cache");
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setArticlesList(parsed);
-            }
-          }
-        } catch (e) {
-          console.error("Local storage fallback failed:", e);
-        }
-      })
-      .finally(() => {
-        setLoading(false);
+        console.warn("Server-side articles API check:", err);
       });
 
-    // 2. Setup real-time onSnapshot listener for live changes
+    // 3. Setup real-time listener or one-time getDocs from Firestore
     const articlesRef = collection(db, "articles");
     const q = query(articlesRef, orderBy("createdAt", "desc"));
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const docs = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setArticlesList(docs);
-        try {
-          localStorage.setItem("babun_articles_cache", JSON.stringify(docs));
-        } catch (e) {}
-        
-        // Auto-sync with server backup on successful real-time updates
-        if (docs.length > 0) {
-          fetch("/api/articles/sync", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(docs),
-          }).catch((err) => console.warn("Failed to sync live Firestore docs to server JSON backup:", err));
-        }
-        setLoading(false);
-      },
-      (error) => {
-        console.warn("Firestore real-time subscription failed (Quota or rules), staying with server backup:", error);
-        
-        // Fallback to cache immediately to verify
-        try {
-          const cached = localStorage.getItem("babun_articles_cache");
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setArticlesList(parsed);
-              setLoading(false);
-              return;
-            }
+    let unsubscribe = () => {};
+    try {
+      unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          if (!snapshot.empty) {
+            const docs = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            applyArticles(docs, "firestoreLive");
+            
+            // Sync to server backup
+            fetch("/api/articles/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(docs),
+            }).catch(() => {});
+          } else {
+            if (isMounted) setLoading(false);
           }
-        } catch (e) {
-          console.error("Local cache load fallback error:", e);
+        },
+        async (error) => {
+          console.warn("Firestore onSnapshot error, attempting one-time getDocs:", error);
+          try {
+            const snapshot = await getDocs(q);
+            if (!snapshot.empty) {
+              const docs = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+              }));
+              applyArticles(docs, "firestoreGetDocs");
+            }
+          } catch (getDocsErr) {
+            console.warn("Firestore getDocs fallback also failed (filter/firewall active):", getDocsErr);
+          } finally {
+            if (isMounted) setLoading(false);
+          }
         }
+      );
+    } catch (listenerErr) {
+      console.warn("Could not attach Firestore listener:", listenerErr);
+      if (isMounted) setLoading(false);
+    }
 
-        setArticlesList((prev) => (prev && prev.length > 0 ? prev : seedArticles));
-        setLoading(false);
-      },
-    );
-
-    return () => unsubscribe();
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, []);
 
   // Sync auth state with Firebase Auth

@@ -80,34 +80,40 @@ export default function Consulting() {
     setIsSubmitting(true);
 
     try {
-      // 1. Save to local Firestore database
-      try {
-        await addDoc(collection(db, "consulting_leads"), {
-          fullName: formData.fullName,
-          phone: formData.phone,
-          email: formData.email,
-          message: formData.message,
-          createdAt: serverTimestamp(),
-        });
-      } catch (dbErr) {
+      // 1. Save to local Firestore database (with non-blocking 1.5s timeout)
+      const firestorePromise = addDoc(collection(db, "consulting_leads"), {
+        fullName: formData.fullName,
+        phone: formData.phone,
+        email: formData.email,
+        message: formData.message,
+        createdAt: serverTimestamp(),
+      }).catch((dbErr) => {
         console.warn("Firestore lead save fallback:", dbErr);
-      }
+      });
 
-      // 2. Sync lead to backend (Plando CRM & Email Alerts)
-      await syncLeadToBackend({
+      // 2. Sync lead to backend (Plando CRM & Email Alerts with non-blocking 1.5s timeout)
+      const backendPromise = syncLeadToBackend({
         name: formData.fullName,
         phone: formData.phone,
         email: formData.email,
         message: formData.message || "תיאום פגישת ייעוץ",
         source: "פגישת ייעוץ אישית",
         tag: "תיאום פגישת ייעוץ"
+      }).catch((syncErr) => {
+        console.warn("Backend sync fallback:", syncErr);
       });
 
-      // 3. Direct Redirect to Cardcom Payment (seamless, secure and supports 3D Secure)
-      window.location.href = cardcomPaymentUrl;
+      // Guarantee maximum 1.5 second wait before redirecting so popup-blockers / slow networks never block the user
+      await Promise.race([
+        Promise.allSettled([firestorePromise, backendPromise]),
+        new Promise((resolve) => setTimeout(resolve, 1500))
+      ]);
+
+      // 3. Direct Redirect to Cardcom Payment (top window location)
+      window.top ? (window.top.location.href = cardcomPaymentUrl) : (window.location.href = cardcomPaymentUrl);
     } catch (err: any) {
-      console.error("Error saving lead, redirecting to payment anyway:", err);
-      window.location.href = cardcomPaymentUrl;
+      console.error("Error saving lead, redirecting to payment immediately:", err);
+      window.top ? (window.top.location.href = cardcomPaymentUrl) : (window.location.href = cardcomPaymentUrl);
     }
   };
 
@@ -629,7 +635,7 @@ export default function Consulting() {
                   </div>
 
                   {/* Submit button */}
-                  <div className="pt-2">
+                  <div className="pt-2 space-y-3">
                     <button 
                       type="submit"
                       disabled={isSubmitting}
@@ -638,7 +644,7 @@ export default function Consulting() {
                       {isSubmitting ? (
                         <>
                           <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                          <span>מעביר לתשלום מאובטח...</span>
+                          <span>מעביר לתשלום מאובטח בקארדקום...</span>
                         </>
                       ) : (
                         <>
@@ -647,6 +653,19 @@ export default function Consulting() {
                         </>
                       )}
                     </button>
+
+                    {isSubmitting && (
+                      <div className="text-center pt-1 animate-fadeIn">
+                        <a 
+                          href={cardcomPaymentUrl}
+                          target="_top"
+                          rel="noopener noreferrer"
+                          className="text-xs text-babun-accent hover:underline font-bold"
+                        >
+                          לא הועברת אוטומטית? לחץ כאן למעבר ישיר לתשלום בקארדקום
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </form>
               </div>
