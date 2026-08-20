@@ -62,13 +62,16 @@ export default function Home() {
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.filter((item: any) => item.categoryId === "podcast").slice(0, 4);
+          const existingIds = new Set(parsed.map((p: any) => p.id));
+          const missingDefaults = defaultSeedArticles.filter((d) => !existingIds.has(d.id));
+          const combined = [...missingDefaults, ...parsed];
+          return combined.filter((item: any) => item.categoryId === "podcast" || item.category === "פודקאסטים").slice(0, 4);
         }
       }
     } catch (e) {
       console.error("Failed to load local articles cache for home page:", e);
     }
-    return defaultSeedArticles.filter((item: any) => item.categoryId === "podcast").slice(0, 4);
+    return defaultSeedArticles.filter((item: any) => item.categoryId === "podcast" || item.category === "פודקאסטים").slice(0, 4);
   });
   const [loadingMedia, setLoadingMedia] = useState(false);
 

@@ -27,6 +27,8 @@ import {
   UploadCloud,
   CheckCircle,
   Share2,
+  Play,
+  FileText,
 } from "lucide-react";
 import {
   collection,
@@ -88,7 +90,11 @@ export default function Articles() {
       const cached = localStorage.getItem("babun_articles_cache");
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const existingIds = new Set(parsed.map((p: any) => p.id));
+          const missingDefaults = defaultSeedArticles.filter((d) => !existingIds.has(d.id));
+          return [...missingDefaults, ...parsed];
+        }
       }
     } catch (e) {}
     return defaultSeedArticles;
@@ -350,14 +356,10 @@ export default function Articles() {
 
   // Sync default active podcast
   useEffect(() => {
-    const listToSearch = articlesList.length > 0 ? articlesList : seedArticles;
-    const podcasts = listToSearch.filter((a) => a.categoryId === "podcast");
+    const listToSearch = articlesList.length > 0 ? articlesList : defaultSeedArticles;
+    const podcasts = listToSearch.filter((a) => a.categoryId === "podcast" || a.category === "פודקאסטים");
     if (podcasts.length > 0 && !selectedPodcast) {
-      // Look for episode 6 specifically, or fallback to the first podcast
-      const ep12 = podcasts.find(
-        (p) => p.episodeNum === 12 || p.title.includes("פרק 12"),
-      );
-      setSelectedPodcast(ep12 || podcasts[0]);
+      setSelectedPodcast(podcasts[0]);
     }
   }, [articlesList, selectedPodcast]);
 
@@ -369,10 +371,13 @@ export default function Articles() {
     // Helper to safely apply articles and store in client cache & sync server
     const applyArticles = (data: any[], source: string) => {
       if (!isMounted || !Array.isArray(data) || data.length === 0) return;
-      setArticlesList(data);
+      const existingIds = new Set(data.map((d: any) => d.id));
+      const missingDefaults = defaultSeedArticles.filter((d) => !existingIds.has(d.id));
+      const combined = [...data, ...missingDefaults];
+      setArticlesList(combined);
       setLoading(false);
       try {
-        localStorage.setItem("babun_articles_cache", JSON.stringify(data));
+        localStorage.setItem("babun_articles_cache", JSON.stringify(combined));
       } catch (e) {}
     };
 
@@ -1112,7 +1117,226 @@ export default function Articles() {
                   המנהל יעלה תכנים חמים בקרוב מאוד.
                 </p>
               </div>
+            ) : activeCategory === "podcast" ? (
+              /* DEDICATED PODCAST THEATRE & EPISODES VIEW */
+              <div className="space-y-16">
+                {/* 1. Featured Spotlight Podcast Player */}
+                {selectedPodcast && (
+                  <motion.div
+                    id="podcast-theatre-player"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="bg-[#0f172a] text-white rounded-babun-xl p-6 md:p-10 border border-slate-800 shadow-2xl space-y-8"
+                  >
+                    <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-center">
+                      {/* Left Side: Universal Media Player */}
+                      <div className="w-full lg:w-3/5 shrink-0">
+                        <UniversalMediaPlayer
+                          url={selectedPodcast.link}
+                          title={selectedPodcast.title}
+                          poster={getDisplayImage(selectedPodcast.image || selectedPodcast.innerImage)}
+                          autoPlay={isPlayingPodcast}
+                          className="w-full shadow-2xl rounded-babun-lg"
+                        />
+                      </div>
+
+                      {/* Right Side: Episode Meta & Play Controls */}
+                      <div className="w-full lg:w-2/5 space-y-5 text-right">
+                        <div className="flex items-center justify-end gap-3 flex-wrap">
+                          <span className="bg-babun-accent text-babun-primary font-display font-black px-3 py-1 text-xs uppercase tracking-wider rounded-babun-xs">
+                            פרק מוקרן כעת בנגן
+                          </span>
+                          <span className="text-xs text-slate-400 font-mono flex items-center gap-1.5">
+                            <span>{selectedPodcast.date}</span>
+                            <Calendar size={13} />
+                          </span>
+                        </div>
+
+                        <h3 className="text-2xl md:text-3xl font-display font-black text-white leading-snug">
+                          {selectedPodcast.title}
+                        </h3>
+
+                        {selectedPodcast.summary && (
+                          <p className="text-slate-300 text-sm md:text-base font-light leading-relaxed">
+                            {selectedPodcast.summary}
+                          </p>
+                        )}
+
+                        <div className="pt-4 flex flex-wrap items-center justify-end gap-3">
+                          <button
+                            onClick={() => handleSelectArticle(selectedPodcast)}
+                            className="bg-white hover:bg-zinc-100 text-babun-primary text-xs font-bold font-display px-5 py-3 rounded-babun-sm shadow-md transition-all cursor-pointer flex items-center gap-2"
+                          >
+                            <FileText size={15} />
+                            <span>פתח תמלול וסיכום מלא</span>
+                          </button>
+
+                          {selectedPodcast.link && selectedPodcast.link !== "#" && (
+                            <a
+                              href={selectedPodcast.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="border border-slate-700 hover:border-slate-500 bg-slate-800/60 text-slate-200 text-xs font-medium px-4 py-3 rounded-babun-sm transition-all flex items-center gap-1.5"
+                            >
+                              <ExternalLink size={14} />
+                              <span>פתח קישור ישיר</span>
+                            </a>
+                          )}
+                        </div>
+
+                        {isAdminMode && selectedPodcast.id && (
+                          <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleEditArticleClick(selectedPodcast)}
+                              className="text-amber-400 hover:text-amber-300 text-xs font-bold flex items-center gap-1 cursor-pointer p-1"
+                            >
+                              <Edit size={13} />
+                              <span>ערוך פרק</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteArticle(selectedPodcast.id, selectedPodcast.title)}
+                              className="text-red-400 hover:text-red-300 text-xs font-bold flex items-center gap-1 cursor-pointer p-1"
+                            >
+                              <Trash2 size={13} />
+                              <span>מחק</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* 2. Podcast Episodes Grid */}
+                <div>
+                  <div className="flex items-center justify-between border-b border-babun-primary/10 pb-4 mb-8">
+                    <span className="text-xs font-bold text-babun-primary/40 font-mono">
+                      {filteredArticles.length} פרקים זמינים לצפייה ולהאזנה
+                    </span>
+                    <h4 className="text-xl md:text-2xl font-display font-black text-babun-primary">
+                      כל פרקי הפודקאסט
+                    </h4>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {filteredArticles.map((podcast, idx) => {
+                      const isCurrentlySelected = selectedPodcast?.id === podcast.id;
+                      return (
+                        <motion.div
+                          key={podcast.id || idx}
+                          layout
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: idx * 0.04 }}
+                          className={`group text-right flex flex-col justify-between bg-white p-6 rounded-babun-xl border transition-all duration-300 h-full shadow-md hover:shadow-xl ${
+                            isCurrentlySelected
+                              ? "border-babun-accent ring-2 ring-babun-accent/20 bg-babun-light/30"
+                              : "border-babun-primary/5 hover:border-babun-accent/40"
+                          }`}
+                        >
+                          {/* Thumbnail Cover with Play Overlay */}
+                          <div
+                            onClick={() => {
+                              setSelectedPodcast(podcast);
+                              setIsPlayingPodcast(true);
+                              document.getElementById("podcast-theatre-player")?.scrollIntoView({ behavior: "smooth" });
+                            }}
+                            className="w-full aspect-[16/10] bg-[#0f172a] overflow-hidden rounded-babun-lg relative border border-babun-primary/5 shrink-0 shadow-sm cursor-pointer"
+                          >
+                            <ImageWithSkeleton
+                              src={getDisplayImage(podcast.image || podcast.innerImage)}
+                              className="w-full h-full object-cover group-hover:scale-103 transition-all duration-700"
+                              referrerPolicy="no-referrer"
+                              alt={podcast.title}
+                            />
+                            <div className="absolute inset-0 bg-black/35 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                              <div className="w-14 h-14 rounded-full bg-babun-accent text-babun-primary flex items-center justify-center shadow-xl group-hover:scale-115 transition-transform duration-300">
+                                <Play size={24} className="fill-current translate-x-[-1px]" />
+                              </div>
+                            </div>
+                            {isCurrentlySelected && (
+                              <div className="absolute top-3 right-3 bg-babun-primary text-babun-accent font-display font-bold px-2.5 py-1 text-[10px] rounded-babun-xs shadow-md">
+                                מוצג כעת בנגן
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 w-full flex flex-col justify-between pt-4">
+                            <div>
+                              <div className="flex items-center gap-2 justify-end text-[11px] font-bold opacity-30 mb-2 font-mono">
+                                <span>{podcast.date}</span>
+                                <Calendar size={12} />
+                              </div>
+                              <h5
+                                onClick={() => handleSelectArticle(podcast)}
+                                className="text-lg font-display font-bold text-babun-primary group-hover:text-babun-accent transition-colors leading-snug line-clamp-2 cursor-pointer"
+                              >
+                                {podcast.title}
+                              </h5>
+                              {podcast.summary && (
+                                <p className="text-babun-primary/60 text-xs mt-2.5 line-clamp-2 font-light leading-relaxed">
+                                  {podcast.summary}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Actions Bar */}
+                            <div className="mt-5 pt-3 border-t border-babun-primary/5 flex items-center justify-between">
+                              <button
+                                onClick={() => handleSelectArticle(podcast)}
+                                className="text-babun-primary/60 hover:text-babun-primary text-xs font-bold flex items-center gap-1 cursor-pointer"
+                              >
+                                <span>תמלול</span>
+                                <ArrowLeft size={13} />
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  setSelectedPodcast(podcast);
+                                  setIsPlayingPodcast(true);
+                                  document.getElementById("podcast-theatre-player")?.scrollIntoView({ behavior: "smooth" });
+                                }}
+                                className="bg-babun-primary hover:bg-black text-white text-xs font-bold font-display px-3.5 py-2 rounded-babun-sm flex items-center gap-1.5 cursor-pointer shadow-xs transition-all"
+                              >
+                                <Play size={12} className="fill-current" />
+                                <span>נגן פרק זה</span>
+                              </button>
+                            </div>
+
+                            {isAdminMode && podcast.id && (
+                              <div className="flex items-center justify-between mt-3 pt-2 border-t border-babun-primary/5 border-dashed">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteArticle(podcast.id, podcast.title);
+                                  }}
+                                  className="text-red-500 hover:text-red-700 p-1.5 cursor-pointer rounded-babun-sm hover:bg-red-50 transition-colors"
+                                  title="מחק פודקאסט"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+
+                                <button
+                                  onClick={(e) => handleEditArticleClick(podcast, e)}
+                                  className="text-babun-primary hover:text-babun-accent p-1.5 cursor-pointer rounded-babun-sm hover:bg-babun-primary/5 transition-colors flex items-center gap-1 text-[11px] font-bold font-display mr-auto"
+                                  title="ערוך פודקאסט"
+                                >
+                                  <Edit size={14} />
+                                  <span>ערוך פודקאסט</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             ) : (
+              /* STANDARD ARTICLE & MAGAZINE VIEW */
               <div className="space-y-16">
                 {filteredArticles.length > 0 && (
                   <motion.div
