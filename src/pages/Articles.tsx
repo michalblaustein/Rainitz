@@ -50,6 +50,7 @@ import {
 } from "firebase/auth";
 import { db, auth, handleFirestoreError, OperationType } from "../lib/firebase";
 import ImageWithSkeleton from "../components/common/ImageWithSkeleton";
+import UniversalMediaPlayer, { detectMediaType } from "../components/common/UniversalMediaPlayer";
 import { defaultSeedArticles } from "../data/defaultArticles";
 
 // Category definitions matching the design guidelines
@@ -786,15 +787,13 @@ export default function Articles() {
         </section>
 
         <div className="max-w-5xl mx-auto px-4 md:px-8 pt-10 md:pt-14 pb-24">
-          {/* Main Hero Image / Video Banner */}
-          {selectedArticle.categoryId === "podcast" && getYoutubeId(selectedArticle.link) ? (
-            <div className="w-full aspect-video rounded-sm overflow-hidden bg-black relative shadow-lg mb-12 border border-zinc-200">
-              <iframe
-                src={`https://www.youtube.com/embed/${getYoutubeId(selectedArticle.link)}?autoplay=0&rel=0`}
+          {/* Main Hero Image / Video / Stream Banner */}
+          {selectedArticle.link && detectMediaType(selectedArticle.link) !== "unknown" ? (
+            <div className="mb-12">
+              <UniversalMediaPlayer
+                url={selectedArticle.link}
                 title={selectedArticle.title}
-                className="w-full h-full border-0 absolute inset-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
+                poster={getDisplayImage(selectedArticle.image || selectedArticle.innerImage)}
               />
             </div>
           ) : (
@@ -1515,15 +1514,34 @@ export default function Articles() {
                   {/* Outer Link */}
                   <div>
                     <label className="block text-xs font-black font-display text-babun-primary uppercase tracking-wider mb-2">
-                      קישור חיצוני (למשל פודקאסט יוטיוב)
+                      קישור חיצוני (פודקאסט / יוטיוב / Bunny CDN / m3u8)
                     </label>
                     <input
                       type="url"
-                      placeholder="הדבק קישור (למשל: https://youtube.com/...) - אופציונלי"
+                      placeholder="הדבק קישור (למשל: playlist.m3u8, YouTube, Vimeo, MP4, MP3)"
                       value={formLink}
-                      onChange={(e) => setFormLink(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFormLink(val);
+                        const detected = detectMediaType(val);
+                        if (detected !== "unknown" && formCategory === "weekly") {
+                          setFormCategory("podcast");
+                        }
+                      }}
                       className="w-full border border-babun-primary/15 rounded-babun-md px-4 py-3.5 text-sm focus:outline-hidden focus:border-babun-accent focus:ring-1 focus:ring-babun-accent bg-babun-light/20 text-right font-mono"
                     />
+                    {formLink && detectMediaType(formLink) !== "unknown" && (
+                      <div className="mt-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-sm flex items-center justify-end gap-1">
+                        <span>
+                          {detectMediaType(formLink) === "hls" && "✨ זוהה שידור וידאו HLS / Bunny Stream – ינוגן בנגן מובנה!"}
+                          {detectMediaType(formLink) === "youtube" && "✨ זוהה סרטון YouTube – ינוגן בנגן מובנה!"}
+                          {detectMediaType(formLink) === "vimeo" && "✨ זוהה סרטון Vimeo – ינוגן בנגן מובנה!"}
+                          {detectMediaType(formLink) === "audio" && "✨ זוהה קובץ שמע / פודקאסט – ינוגן בנגן שמע ייעודי!"}
+                          {detectMediaType(formLink) === "video" && "✨ זוהה קובץ וידאו MP4 – ינוגן ישירות באתר!"}
+                        </span>
+                        <CheckCircle size={13} className="text-emerald-600" />
+                      </div>
+                    )}
                   </div>
                 </div>
 
