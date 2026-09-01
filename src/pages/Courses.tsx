@@ -824,7 +824,7 @@ export default function Courses() {
                   </div>
                   <div className="text-left bg-babun-primary/5 px-4 py-2 rounded-2xl border border-babun-primary/5">
                     <span className="text-xs text-zinc-500 font-bold block">רישום מוקדם</span>
-                    <span className="text-2xl font-black text-babun-primary font-display">1,700 ₪</span>
+                    <span className="text-2xl font-black text-babun-primary font-display">2,500 ₪</span>
                   </div>
                 </div>
 

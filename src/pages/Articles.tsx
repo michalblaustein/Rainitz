@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useParams, useNavigate } from "react-router-dom";
 import Markdown from "react-markdown";
 import {
   MessageCircle,
@@ -69,6 +69,8 @@ const seedArticles: any[] = defaultSeedArticles;
 
 export default function Articles() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { id: routeParamId } = useParams();
+  const navigate = useNavigate();
   const hasEditParam = searchParams.get("edit") === "true" || searchParams.get("admin") === "true";
 
   const [activeCategory, setActiveCategory] = useState<string>(() => {
@@ -83,8 +85,11 @@ export default function Articles() {
     const categoryParam = searchParams.get("category");
     if (categoryParam && mediaCategories.some(cat => cat.id === categoryParam)) {
       setActiveCategory(categoryParam);
+    } else if (!categoryParam) {
+      setActiveCategory("all");
     }
   }, [searchParams]);
+
   const [articlesList, setArticlesList] = useState<any[]>(() => {
     try {
       const cached = localStorage.getItem("babun_articles_cache");
@@ -102,8 +107,8 @@ export default function Articles() {
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
 
-  // Sync selectedArticle from URL id query parameter
-  const articleIdParam = searchParams.get("id");
+  // Sync selectedArticle from route param or URL id query parameter
+  const articleIdParam = routeParamId || searchParams.get("id");
 
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
 
@@ -118,28 +123,27 @@ export default function Articles() {
       const found = articlesList.find((art) => art.id === articleIdParam);
       if (found) {
         setSelectedArticle(found);
+        document.title = `${found.title} | יעקב רייניץ`;
       } else {
         setSelectedArticle(null);
+        document.title = "מאגר ידע, מאמרים ופודקאסטים | יעקב רייניץ";
       }
     } else {
       setSelectedArticle(null);
+      document.title = "מאגר ידע, מאמרים ופודקאסטים | יעקב רייניץ";
     }
   }, [articleIdParam, articlesList]);
 
   const handleSelectArticle = (article: any) => {
-    setSearchParams(prev => {
-      const next = new URLSearchParams(prev);
-      next.set("id", article.id);
-      return next;
-    });
+    navigate(`/articles/${article.id}`);
   };
 
   const handleCloseArticle = () => {
-    setSearchParams(prev => {
-      const next = new URLSearchParams(prev);
-      next.delete("id");
-      return next;
-    });
+    if (activeCategory && activeCategory !== "all") {
+      navigate(`/articles?category=${activeCategory}`);
+    } else {
+      navigate("/articles");
+    }
   };
 
   // Admin access control states
@@ -344,6 +348,7 @@ export default function Articles() {
 
   const [selectedPodcast, setSelectedPodcast] = useState<any | null>(null);
   const [isPlayingPodcast, setIsPlayingPodcast] = useState<boolean>(false);
+  const [heroVideoLoaded, setHeroVideoLoaded] = useState<boolean>(false);
 
   // Helper to extract YouTube video ID from links
   const getYoutubeId = (url: string) => {
@@ -378,6 +383,7 @@ export default function Articles() {
       setLoading(false);
       try {
         localStorage.setItem("babun_articles_cache", JSON.stringify(combined));
+        window.dispatchEvent(new CustomEvent("articles_updated", { detail: combined }));
       } catch (e) {}
     };
 
@@ -628,6 +634,10 @@ export default function Articles() {
             art.id === editingArticleId ? { ...art, ...articleData } : art
           );
           setArticlesList(updatedList);
+          try {
+            localStorage.setItem("babun_articles_cache", JSON.stringify(updatedList));
+            window.dispatchEvent(new CustomEvent("articles_updated", { detail: updatedList }));
+          } catch (e) {}
           await fetch("/api/articles/sync", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -651,6 +661,10 @@ export default function Articles() {
           };
           const updatedList = [newDoc, ...articlesList];
           setArticlesList(updatedList);
+          try {
+            localStorage.setItem("babun_articles_cache", JSON.stringify(updatedList));
+            window.dispatchEvent(new CustomEvent("articles_updated", { detail: updatedList }));
+          } catch (e) {}
           await fetch("/api/articles/sync", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -683,6 +697,10 @@ export default function Articles() {
 
       const updatedList = articlesList.filter((art) => art.id !== id);
       setArticlesList(updatedList);
+      try {
+        localStorage.setItem("babun_articles_cache", JSON.stringify(updatedList));
+        window.dispatchEvent(new CustomEvent("articles_updated", { detail: updatedList }));
+      } catch (e) {}
       if (selectedArticle?.id === id) {
         setSelectedArticle(null);
       }
@@ -989,23 +1007,69 @@ export default function Articles() {
   return (
     <div className="bg-babun-light min-h-screen pb-0 selection:bg-babun-accent selection:text-babun-primary">
       {/* PAGE HERO */}
-      <section className="bg-babun-primary text-white pt-64 md:pt-[280px] pb-20 relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-15 z-0"
-          style={{
-            backgroundImage:
-              "radial-gradient(ellipse at center, rgba(30,41,59,0.5) 0%, rgba(15,23,42,1) 100%)",
-          }}
-        />
+      <section className="bg-babun-primary text-white pt-52 pb-24 md:pt-64 md:pb-28 relative overflow-hidden">
+        {/* Full-Bleed Video Background */}
+        <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
+          {/* Instant High-Res Video Poster displayed on frame 0 */}
+          <img
+            src="https://i.vimeocdn.com/video/2196055375-8a53d9b62c9324bd6c2f025bb91b41dc5126cd29eef2589f0576ab043fdc9453-d_640"
+            alt="יעקב רייניץ"
+            fetchPriority="high"
+            className="absolute inset-0 w-full h-full object-cover scale-105"
+          />
+
+          {/* Vimeo Background Video */}
+          <iframe
+            src="https://player.vimeo.com/video/1222960766?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1&playsinline=1&dnt=1&quality=720p"
+            title="יעקב רייניץ - רקע וידאו מאמרים"
+            frameBorder="0"
+            loading="eager"
+            onLoad={() => setHeroVideoLoaded(true)}
+            allow="autoplay; fullscreen; picture-in-picture"
+            className={`absolute top-1/2 left-1/2 min-w-full min-h-full w-[177.77vw] h-[56.25vw] max-w-none max-h-none -translate-x-1/2 -translate-y-1/2 object-cover scale-125 transition-opacity duration-1000 ${
+              heroVideoLoaded ? "opacity-90" : "opacity-0"
+            }`}
+            style={{
+              width: '180%',
+              height: '180%',
+              minWidth: '100%',
+              minHeight: '100%',
+            }}
+          />
+
+          {/* Transparent click/tap block layer */}
+          <div className="absolute inset-0 bg-transparent z-[10] pointer-events-auto" />
+
+          {/* Black Semi-Transparent Overlay & Gradient Layer */}
+          <div className="absolute inset-0 bg-black/60 z-[1]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-babun-primary via-black/50 to-babun-primary/75 z-[2]" />
+          <div className="absolute inset-0 mesh-grid opacity-5 z-[3]" />
+        </div>
+
+        {/* Ambient subtle gold glow */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-babun-accent/10 rounded-full blur-[120px] pointer-events-none z-10" />
+
         <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 text-right">
-          <div className="border-b border-white/10 pb-20">
-            <div className="space-y-6">
-              <h1 className="text-4xl md:text-6xl lg:text-[76px] font-display font-black leading-[1.1] text-white">
-                בנדל"ן, <br className="hidden md:block" />
-                הידע הוא הנכס{" "}
-                <span className="text-babun-accent font-black">הכי יקר</span>
-              </h1>
-            </div>
+          <div className="max-w-4xl space-y-6">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.7 }}
+              className="text-4xl md:text-6xl lg:text-[76px] font-display font-black leading-[1.1] text-white tracking-tight drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]"
+            >
+              בנדל"ן, <br />
+              הידע הוא הנכס{" "}
+              <span className="text-babun-accent font-black">הכי יקר.</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.7 }}
+              className="text-slate-200 text-base md:text-xl font-light max-w-2xl leading-relaxed md:leading-[32px] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]"
+            >
+              מאמרים מקצועיים, פודקאסטים, טורים שבועיים וקווי מידע עם יעקב רייניץ — כל הכלים והתובנות להשקעות נדל"ן חכמות ובטוחות.
+            </motion.p>
           </div>
         </div>
       </section>

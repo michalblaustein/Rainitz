@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin, Linkedin, Facebook, Send } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { db } from "../../lib/firebase";
+import { defaultSeedArticles } from "../../data/defaultArticles";
 
 const getDisplayImage = (url: string) => {
   if (!url) return "";
@@ -18,30 +21,6 @@ const getDisplayImage = (url: string) => {
   return url;
 };
 
-const defaultArticlesFallback = [
-  {
-    id: "default_1",
-    title: 'שוק הנדל"ן 2026: מה באמת קורה מאחורי הקלעים?',
-    date: "15.05.2026",
-    category: "טור שבועי",
-    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=80&h=80&q=50"
-  },
-  {
-    id: "default_2",
-    title: "המדריך המלא למשקיע המתחיל: איך לא ליפול בפח?",
-    date: "10.05.2026",
-    category: "מאמר מקצועי",
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=80&h=80&q=50"
-  },
-  {
-    id: "default_3",
-    title: "פודקאסט: למה כולם מדברים על התחדשות עירונית?",
-    date: "05.05.2026",
-    category: "פודקאסט",
-    image: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=80&h=80&q=50"
-  }
-];
-
 export default function Footer() {
   const [latestArticles, setLatestArticles] = useState<any[]>(() => {
     try {
@@ -53,23 +32,58 @@ export default function Footer() {
         }
       }
     } catch (e) {}
-    return defaultArticlesFallback;
+    return defaultSeedArticles.slice(0, 3);
   });
 
   useEffect(() => {
+    // 1. Listen for local events (e.g. when admin adds an article in the same session)
+    const handleLocalUpdate = (e: any) => {
+      if (e?.detail && Array.isArray(e.detail) && e.detail.length > 0) {
+        setLatestArticles(e.detail.slice(0, 3));
+      }
+    };
+    window.addEventListener("articles_updated", handleLocalUpdate);
+
+    // 2. Fetch server API
     fetch("/api/articles")
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error("HTTP error");
-      })
+      .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          setLatestArticles(data.slice(0, 3));
+          const existingIds = new Set(data.map((d: any) => d.id));
+          const missingDefaults = defaultSeedArticles.filter((d) => !existingIds.has(d.id));
+          const combined = [...data, ...missingDefaults];
+          setLatestArticles(combined.slice(0, 3));
         }
       })
       .catch((err) => {
-        console.warn("Failed to fetch latest articles in Footer:", err);
+        console.warn("Footer articles fetch fallback:", err);
       });
+
+    // 3. Firestore live listener
+    let unsubscribe = () => {};
+    try {
+      const articlesRef = collection(db, "articles");
+      const q = query(articlesRef, orderBy("createdAt", "desc"));
+      unsubscribe = onSnapshot(q, (snapshot) => {
+        if (!snapshot.empty) {
+          const docs = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          const existingIds = new Set(docs.map((d: any) => d.id));
+          const missingDefaults = defaultSeedArticles.filter((d) => !existingIds.has(d.id));
+          const combined = [...docs, ...missingDefaults];
+          setLatestArticles(combined.slice(0, 3));
+        }
+      }, (err) => {
+        console.warn("Footer firestore listener warn:", err);
+      });
+    } catch (e) {}
+
+    return () => {
+      window.removeEventListener("articles_updated", handleLocalUpdate);
+      unsubscribe();
+    };
   }, []);
 
   return (
@@ -99,7 +113,7 @@ export default function Footer() {
               <li><Link to="/courses" className="hover:text-babun-accent transition-colors">קורסים</Link></li>
               <li><Link to="/consulting" className="hover:text-babun-accent transition-colors">פגישת ייעוץ</Link></li>
               <li><Link to="/book" className="hover:text-babun-accent transition-colors">הספר "שליש בקרקע"</Link></li>
-              <li><Link to="/articles?category=podcast" className="hover:text-babun-accent transition-colors">מאמרים ופודקאסטים</Link></li>
+              <li><Link to="/articles" className="hover:text-babun-accent transition-colors">מאמרים ופודקאסטים</Link></li>
               <li><Link to="/calculators" className="hover:text-babun-accent transition-colors">מחשבוני נדל"ן</Link></li>
             </ul>
           </div>
@@ -125,16 +139,18 @@ export default function Footer() {
 
           {/* COLUMN 4 - FAR-LEFT: RECENT ARTICLES & PODCASTS */}
           <div className="flex flex-col items-start w-full">
-            <h5 className="text-xl font-display font-bold text-babun-accent mb-8 w-full">כתבות ופודקאסטים</h5>
+            <Link to="/articles" className="text-xl font-display font-bold text-babun-accent mb-8 w-full hover:text-white transition-colors block">
+              כתבות ופודקאסטים
+            </Link>
             <div className="space-y-4 w-full">
               {latestArticles.map((article, idx) => (
                 <Link 
                   key={article.id || idx}
-                  to="/articles" 
+                  to={`/articles/${article.id || ""}`} 
                   className={`group flex items-center gap-4 hover:text-babun-accent transition-colors w-full ${idx > 0 ? "border-t border-white/5 pt-4" : ""}`}
                 >
                   <img 
-                    src={getDisplayImage(article.image)} 
+                    src={getDisplayImage(article.image || article.innerImage)} 
                     alt={article.title} 
                     className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
                     referrerPolicy="no-referrer"

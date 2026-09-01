@@ -55,6 +55,7 @@ export default function Home() {
   const [coursePhone, setCoursePhone] = useState("");
   const [courseEmail, setCourseEmail] = useState("");
   const [courseStatus, setCourseStatus] = useState<null | "loading" | "success">(null);
+  const [heroVideoLoaded, setHeroVideoLoaded] = useState(false);
 
   const [latestMedia, setLatestMedia] = useState<any[]>(() => {
     try {
@@ -223,18 +224,32 @@ export default function Home() {
             <div className="lg:col-span-5 relative order-2 flex justify-center w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto">
               <div className="relative w-full aspect-square">
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: 0.2, duration: 1 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
                     className="absolute inset-0 rounded-full overflow-hidden bg-babun-primary shadow-2xl z-10 pointer-events-none"
                     style={{ maskImage: 'radial-gradient(circle, white 100%, black 100%)', WebkitMaskImage: '-webkit-radial-gradient(circle, white 100%, black 100%)' }}
                   >
+                    {/* Instant High-Res Video Poster displayed on frame 0 */}
+                    <img
+                      src="https://i.vimeocdn.com/video/2190633761-18d5d8077236dbecbc57c7f8792fbb8a2d6fa5fba2ed1afdc10e9e83ad30eb0b-d_640"
+                      alt="יעקב רייניץ"
+                      fetchPriority="high"
+                      loading="eager"
+                      className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                    />
+
+                    {/* Vimeo Background Video with Eager Loading and Auto-Optimized Quality */}
                     <iframe 
-                      src="https://player.vimeo.com/video/1218630094?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1&playsinline=1&dnt=1" 
+                      src="https://player.vimeo.com/video/1218630094?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1&playsinline=1&dnt=1&quality=720p" 
                       title="יעקב רייניץ - וידאו"
                       frameBorder="0"
+                      loading="eager"
+                      onLoad={() => setHeroVideoLoaded(true)}
                       allow="autoplay; fullscreen; picture-in-picture"
-                      className="absolute top-1/2 left-1/2 min-w-full min-h-full w-[177.77vw] h-[56.25vw] max-w-none max-h-none -translate-x-1/2 -translate-y-1/2 object-cover pointer-events-none"
+                      className={`absolute top-1/2 left-1/2 min-w-full min-h-full w-[177.77vw] h-[56.25vw] max-w-none max-h-none -translate-x-1/2 -translate-y-1/2 object-cover pointer-events-none transition-opacity duration-700 ${
+                        heroVideoLoaded ? "opacity-100" : "opacity-0"
+                      }`}
                       style={{
                         width: '180%',
                         height: '180%',
@@ -420,9 +435,9 @@ export default function Home() {
       </section>
 
       {/* TELEPHONIC COURSE SECTION */}
-      <section className="bg-black pt-16 pb-32 lg:pb-48 relative overflow-visible lg:h-[650px]" dir="rtl">
+      <section className="bg-black pt-16 pb-28 lg:pb-36 relative overflow-visible min-h-[640px] flex items-center" dir="rtl">
         {/* Grid Background */}
-        <div className="absolute inset-x-0 top-0 opacity-[0.15] lg:h-[750px] overflow-hidden" 
+        <div className="absolute inset-x-0 top-0 opacity-[0.15] h-full overflow-hidden" 
              style={{ 
                backgroundImage: `linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)`,
                backgroundSize: '100px 100px'
@@ -433,53 +448,27 @@ export default function Home() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24"
+          className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 w-full flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12"
         >
           
           {/* Right Column - Titles */}
           <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-right">
-            <h2 className="text-5xl sm:text-6xl md:text-[7rem] lg:text-[8rem] font-display font-black leading-[0.9] lg:leading-[0.8] mb-8">
-              <span className="text-babun-accent block lg:pr-16">הקורס</span>
-              <span className="text-white block mt-2 lg:mt-3 lg:pr-16">הבא</span>
-              <span className="text-white block mt-2 lg:mt-3 lg:pr-16">נפתח</span>
+            <h2 className="text-5xl sm:text-6xl md:text-[6.5rem] lg:text-[7.5rem] font-display font-black leading-[0.9] lg:leading-[0.85] mb-6">
+              <span className="text-babun-accent block lg:pr-8">הקורס</span>
+              <span className="text-white block mt-2 lg:mt-3 lg:pr-8">הבא</span>
+              <span className="text-white block mt-2 lg:mt-3 lg:pr-8">נפתח</span>
             </h2>
           </div>
- 
-          {/* Center Column - Illustration & Stats */}
-          <div className="flex-shrink-0 relative flex justify-center items-center py-6 lg:py-10">
-            {/* Yellow Circle */}
-            <div className="w-64 h-64 sm:w-72 sm:h-72 md:w-[420px] md:h-[420px] bg-babun-accent rounded-full relative flex items-center justify-center shadow-[0_0_100px_rgba(255,215,0,0.15)]">
-               <img 
-                 src="https://lh3.googleusercontent.com/d/1miE-lXse5oAtOurCfE92ls5lWpxGdUnj" 
-                 alt="Illustration" 
-                 className="w-full h-full object-contain p-4"
-                 referrerPolicy="no-referrer"
-               />
- 
-               {/* Phone Icon Tag (Top-Right) */}
-               <div className="absolute top-4 right-[-10px] md:top-10 md:right-[-40px] bg-white/80 backdrop-blur-md p-4 sm:p-6 md:p-10 rounded-full shadow-2xl text-babun-primary z-20 flex items-center justify-center aspect-square">
-                 <motion.div
-                   animate={{ scale: [1, 1.05, 1], rotate: [0, 2, -2, 0] }}
-                   transition={{ repeat: Infinity, duration: 4 }}
-                 >
-                   <Phone size={36} className="text-black sm:hidden" strokeWidth={2.5} />
-                   <Phone size={64} className="text-black hidden sm:block" strokeWidth={2.5} />
-                 </motion.div>
-               </div>
-            </div>
-          </div>
 
-          {/* Left Column - Contact Form (Circular Lead Card) */}
-          <div 
-            className="flex-1 flex flex-col items-center lg:items-start text-right relative z-30 -mt-8 sm:-mt-12 lg:mt-0 lg:-translate-y-12"
-          >
+          {/* Center Column - Enlarged Contact Form (Circular Lead Card) */}
+          <div className="flex-shrink-0 flex flex-col items-center justify-center relative z-20 my-4 lg:my-0">
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="bg-white/95 backdrop-blur-md p-6 sm:p-10 md:p-12 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 w-[290px] sm:w-[360px] md:w-[380px] lg:w-[400px] aspect-square flex flex-col justify-center items-center text-center mx-auto lg:mx-0"
+              className="bg-white/95 backdrop-blur-md p-8 sm:p-12 md:p-14 lg:p-16 rounded-full shadow-[0_25px_60px_rgba(0,0,0,0.6)] border border-white/30 w-[340px] sm:w-[440px] md:w-[500px] lg:w-[540px] aspect-square flex flex-col justify-center items-center text-center mx-auto"
             >
-              <div className="bg-[#fe0000] text-white px-4 py-1 rounded-full font-black text-xs md:text-sm inline-block mb-3 shadow-md">
+              <div className="bg-[#fe0000] text-white px-5 py-1.5 rounded-full font-black text-xs sm:text-sm inline-block mb-3 sm:mb-4 shadow-md">
                 מחזור חדש נפתח!
               </div>
 
@@ -487,24 +476,24 @@ export default function Home() {
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center w-full max-w-[200px] sm:max-w-[220px]"
+                  className="text-center w-full max-w-[240px] sm:max-w-[280px]"
                 >
-                  <CheckCircle size={44} className="text-green-500 mx-auto mb-3 animate-bounce" />
-                  <div className="text-babun-primary font-bold text-lg leading-tight mb-2">פרטיך התקבלו בהצלחה!</div>
+                  <CheckCircle size={52} className="text-green-500 mx-auto mb-3 animate-bounce" />
+                  <div className="text-babun-primary font-bold text-xl leading-tight mb-2">פרטיך התקבלו בהצלחה!</div>
                   <p className="text-babun-primary/70 text-sm leading-snug">הסילבוס המלא של הקורס יישלח אליך בהקדם.</p>
                 </motion.div>
               ) : (
-                <div className="w-full max-w-[200px] sm:max-w-[220px] md:max-w-[240px]">
-                  <p className="text-babun-primary text-sm md:text-base font-bold mb-3 leading-tight px-2">
+                <div className="w-full max-w-[240px] sm:max-w-[290px] md:max-w-[320px]">
+                  <p className="text-babun-primary text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 leading-tight px-2">
                     השאירו פרטים לקבלת הסילבוס:
                   </p>
                   
-                  <form onSubmit={handleCourseSyllabus} className="flex flex-col gap-2 w-full">
+                  <form onSubmit={handleCourseSyllabus} className="flex flex-col gap-2.5 sm:gap-3 w-full">
                     <input 
                       required 
                       type="text" 
                       placeholder="שם מלא"
-                      className="w-full h-9 bg-gray-50/80 px-4 rounded-full border border-gray-200 focus:border-babun-accent focus:bg-white outline-none text-xs text-center text-babun-primary placeholder:text-gray-400"
+                      className="w-full h-10 sm:h-11 bg-gray-50/90 px-4 rounded-full border border-gray-200 focus:border-babun-accent focus:bg-white outline-none text-xs sm:text-sm text-center text-babun-primary placeholder:text-gray-400 shadow-inner"
                       value={courseName}
                       onChange={e => setCourseName(e.target.value)}
                     />
@@ -512,7 +501,7 @@ export default function Home() {
                       required 
                       type="tel" 
                       placeholder="מספר טלפון"
-                      className="w-full h-9 bg-gray-50/80 px-4 rounded-full border border-gray-200 focus:border-babun-accent focus:bg-white outline-none text-xs text-center text-babun-primary placeholder:text-gray-400"
+                      className="w-full h-10 sm:h-11 bg-gray-50/90 px-4 rounded-full border border-gray-200 focus:border-babun-accent focus:bg-white outline-none text-xs sm:text-sm text-center text-babun-primary placeholder:text-gray-400 shadow-inner"
                       value={coursePhone}
                       onChange={e => setCoursePhone(e.target.value)}
                     />
@@ -520,7 +509,7 @@ export default function Home() {
                       required 
                       type="email" 
                       placeholder="כתובת אימייל"
-                      className="w-full h-9 bg-gray-50/80 px-4 rounded-full border border-gray-200 focus:border-babun-accent focus:bg-white outline-none text-xs text-center text-babun-primary placeholder:text-gray-400"
+                      className="w-full h-10 sm:h-11 bg-gray-50/90 px-4 rounded-full border border-gray-200 focus:border-babun-accent focus:bg-white outline-none text-xs sm:text-sm text-center text-babun-primary placeholder:text-gray-400 shadow-inner"
                       value={courseEmail}
                       onChange={e => setCourseEmail(e.target.value)}
                     />
@@ -529,7 +518,7 @@ export default function Home() {
                       whileTap={{ scale: 0.98 }}
                       disabled={courseStatus === "loading"}
                       type="submit"
-                      className="bg-babun-primary text-white font-bold w-full h-9 rounded-full shadow-md transition-colors hover:bg-black disabled:opacity-50 flex items-center justify-center text-xs"
+                      className="bg-babun-primary text-white font-bold w-full h-10 sm:h-11 rounded-full shadow-md transition-colors hover:bg-black disabled:opacity-50 flex items-center justify-center text-xs sm:text-sm cursor-pointer mt-1"
                     >
                       {courseStatus === "loading" ? (
                         <motion.div
@@ -546,7 +535,19 @@ export default function Home() {
               )}
             </motion.div>
           </div>
- 
+
+          {/* Left Column - Yellow Circle overlapping slightly onto the white circle */}
+          <div className="flex-1 flex justify-center lg:justify-start items-center relative z-30 lg:translate-y-[100px] lg:translate-x-[20px] -mt-8 lg:mt-0">
+            <div className="w-60 h-60 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-[380px] lg:h-[380px] bg-babun-accent rounded-full relative flex items-center justify-center shadow-[0_15px_60px_rgba(0,0,0,0.35)] border-2 border-babun-accent/40">
+               <img 
+                 src="https://lh3.googleusercontent.com/d/1miE-lXse5oAtOurCfE92ls5lWpxGdUnj" 
+                 alt="Illustration" 
+                 className="w-full h-full object-contain p-4"
+                 referrerPolicy="no-referrer"
+               />
+            </div>
+          </div>
+
         </motion.div>
       </section>
 
@@ -639,7 +640,7 @@ export default function Home() {
                   viewport={{ once: true }}
                   className="flex flex-col h-full group cursor-pointer"
                 >
-                  <Link to="/articles?category=podcast" className="flex flex-col h-full bg-white hover:bg-zinc-50/50 p-6 rounded-none border-2 border-babun-primary transition-all duration-300">
+                  <Link to={`/articles/${latestMedia[0].id || ""}`} className="flex flex-col h-full bg-white hover:bg-zinc-50/50 p-6 rounded-none border-2 border-babun-primary transition-all duration-300">
                     <div className="relative aspect-[16/9] rounded-none overflow-hidden mb-6 border border-babun-primary/25">
                       <img 
                         src={getDisplayImage(latestMedia[0].image)} 
@@ -688,7 +689,7 @@ export default function Home() {
                     transition={{ delay: index * 0.1 }}
                     className="group"
                   >
-                    <Link to="/articles?category=podcast" className="flex gap-4 p-4 rounded-none bg-white hover:bg-zinc-50/50 transition-all duration-300 border-2 border-babun-primary">
+                    <Link to={`/articles/${item.id || ""}`} className="flex gap-4 p-4 rounded-none bg-white hover:bg-zinc-50/50 transition-all duration-300 border-2 border-babun-primary">
                       <div className="relative w-28 sm:w-36 aspect-[4/3] rounded-none overflow-hidden flex-shrink-0 border border-babun-primary/10">
                         <img 
                           src={getDisplayImage(item.image)} 

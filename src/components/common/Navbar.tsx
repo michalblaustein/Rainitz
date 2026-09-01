@@ -8,7 +8,7 @@ const navLinks = [
   { name: "פגישת ייעוץ", path: "/consulting" },
   { name: "מחשבונים", path: "/calculators" },
   { name: "הספר", path: "/book" },
-  { name: "מאמרים ופודקאסטים", path: "/articles?category=podcast" },
+  { name: "מאמרים ופודקאסטים", path: "/articles" },
 ];
 
 export default function Navbar() {

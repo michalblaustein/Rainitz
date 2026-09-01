@@ -23,6 +23,23 @@ function ScrollAndAnalyticsTracker() {
   useEffect(() => {
     window.scrollTo(0, 0);
 
+    const titleMap: Record<string, string> = {
+      "/": 'יעקב רייניץ - נדל"ן וכלכלה נבונה',
+      "/courses": 'קורסים והכשרות נדל"ן | יעקב רייניץ',
+      "/consulting": 'פגישת ייעוץ אישית | יעקב רייניץ',
+      "/book": 'הספר "שליש בקרקע" | יעקב רייניץ',
+      "/calculators": 'מחשבוני נדל"ן וכלכלה | יעקב רייניץ',
+      "/articles": "מאגר ידע, מאמרים ופודקאסטים | יעקב רייניץ",
+      "/about": 'אודות יעקב רייניץ | מומחה ויועץ נדל"ן',
+      "/contact": "צור קשר | יעקב רייניץ",
+      "/pinuy-binuy": "פינוי בינוי | יעקב רייניץ",
+      "/scheduler": "תיאום פגישה | יעקב רייניץ",
+    };
+
+    if (titleMap[pathname]) {
+      document.title = titleMap[pathname];
+    }
+
     // Track pageview on route change in Google Analytics (SPA support)
     if (typeof (window as any).gtag === "function") {
       const pagePath = pathname + search;
@@ -33,6 +50,7 @@ function ScrollAndAnalyticsTracker() {
       });
       (window as any).gtag("config", "G-94L6RJTJJE", {
         page_path: pagePath,
+        page_title: document.title,
       });
     }
   }, [pathname, search]);
@@ -64,6 +82,8 @@ function AppContent() {
             <Route path="/book" element={<Book />} />
             <Route path="/calculators" element={<Calculators />} />
             <Route path="/articles" element={<Articles />} />
+            <Route path="/articles/:id" element={<Articles />} />
+            <Route path="/article/:id" element={<Articles />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/pinuy-binuy" element={<PinuyBinuyLP />} />
             <Route path="/scheduler" element={<Scheduler />} />
