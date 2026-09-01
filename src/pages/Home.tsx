@@ -536,9 +536,9 @@ export default function Home() {
             </motion.div>
           </div>
 
-          {/* Left Column - Yellow Circle overlapping slightly onto the white circle */}
-          <div className="flex-1 flex justify-center lg:justify-start items-center relative z-30 lg:translate-y-[100px] lg:translate-x-[20px] -mt-8 lg:mt-0">
-            <div className="w-60 h-60 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-[380px] lg:h-[380px] bg-babun-accent rounded-full relative flex items-center justify-center shadow-[0_15px_60px_rgba(0,0,0,0.35)] border-2 border-babun-accent/40">
+          {/* Left Column - Yellow Circle overlapping onto the white form circle */}
+          <div className="flex-1 flex justify-center lg:justify-start items-center relative z-30 lg:translate-y-[60px] lg:translate-x-[80px] lg:-mr-20 -mt-12 lg:mt-0">
+            <div className="w-60 h-60 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-[380px] lg:h-[380px] bg-babun-accent rounded-full relative flex items-center justify-center shadow-[0_20px_60px_rgba(0,0,0,0.45)] border-2 border-babun-accent/40">
                <img 
                  src="https://lh3.googleusercontent.com/d/1miE-lXse5oAtOurCfE92ls5lWpxGdUnj" 
                  alt="Illustration" 

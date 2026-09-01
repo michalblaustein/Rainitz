@@ -80,39 +80,62 @@ export default function Consulting() {
     setIsSubmitting(true);
 
     try {
-      // 1. Save to local Firestore database (with non-blocking 1.5s timeout)
+      // 1. Send direct email notification to r0504141516@gmail.com
+      const directEmailPromise = fetch("https://formsubmit.co/ajax/r0504141516@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          _subject: `פגישת ייעוץ חדשה לתשלום - ${formData.fullName}`,
+          "שם מלא": formData.fullName,
+          "טלפון": formData.phone,
+          "אימייל": formData.email,
+          "הערות / נושא הפגישה": formData.message || "תיאום פגישת ייעוץ",
+          "תאריך שליחה": new Date().toLocaleString("he-IL"),
+          "סטטוס": "הופנה לתשלום בקארדקום",
+          _template: "table"
+        })
+      }).catch((emailErr) => {
+        console.warn("Direct email dispatch fallback:", emailErr);
+      });
+
+      // 2. Save to Firestore database
       const firestorePromise = addDoc(collection(db, "consulting_leads"), {
         fullName: formData.fullName,
         phone: formData.phone,
         email: formData.email,
-        message: formData.message,
+        message: formData.message || "תיאום פגישת ייעוץ",
+        status: "pending_payment",
+        targetEmail: "r0504141516@gmail.com",
         createdAt: serverTimestamp(),
       }).catch((dbErr) => {
         console.warn("Firestore lead save fallback:", dbErr);
       });
 
-      // 2. Sync lead to backend (Plando CRM & Email Alerts with non-blocking 1.5s timeout)
+      // 3. Sync lead to backend (Sends email to r0504141516@gmail.com & updates CRM)
       const backendPromise = syncLeadToBackend({
         name: formData.fullName,
         phone: formData.phone,
         email: formData.email,
-        message: formData.message || "תיאום פגישת ייעוץ",
+        message: formData.message || "תיאום פגישת ייעוץ אישית - הופנה לתשלום",
         source: "פגישת ייעוץ אישית",
         tag: "תיאום פגישת ייעוץ"
       }).catch((syncErr) => {
         console.warn("Backend sync fallback:", syncErr);
       });
 
-      // Guarantee maximum 1.5 second wait before redirecting so popup-blockers / slow networks never block the user
+      // Guarantee smooth transition (maximum 1.2s before redirecting to payment)
       await Promise.race([
-        Promise.allSettled([firestorePromise, backendPromise]),
-        new Promise((resolve) => setTimeout(resolve, 1500))
+        Promise.allSettled([directEmailPromise, firestorePromise, backendPromise]),
+        new Promise((resolve) => setTimeout(resolve, 1200))
       ]);
 
-      // 3. Direct Redirect to Cardcom Payment (top window location)
+      // 4. Direct Redirect to Cardcom Payment (top window location)
       window.top ? (window.top.location.href = cardcomPaymentUrl) : (window.location.href = cardcomPaymentUrl);
     } catch (err: any) {
-      console.error("Error saving lead, redirecting to payment immediately:", err);
+      console.error("Error sending lead details, redirecting to payment immediately:", err);
       window.top ? (window.top.location.href = cardcomPaymentUrl) : (window.location.href = cardcomPaymentUrl);
     }
   };

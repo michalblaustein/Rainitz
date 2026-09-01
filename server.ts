@@ -156,13 +156,37 @@ async function startServer() {
             console.log(`Notification email sent successfully to ${adminEmail}`);
           } else {
             const errText = await emailResponse.text();
-            console.warn("Resend email dispatch notice (check RESEND_API_KEY in settings if email notifications are desired):", errText);
+            console.warn("Resend email dispatch notice:", errText);
           }
         } catch (e) {
           console.warn("Notice: could not dispatch Resend email notification:", e);
         }
-      } else {
-        console.log("RESEND_API_KEY not configured. Skipping email dispatch.");
+      }
+
+      // If email wasn't sent via Resend, send via FormSubmit fallback to guarantee delivery to r0504141516@gmail.com
+      if (!emailSent) {
+        try {
+          await fetch(`https://formsubmit.co/ajax/${adminEmail}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify({
+              _subject: `ליד חדש באתר - ${name || "פנייה חדשה"} (${source || "אתר"})`,
+              name: name || "לא צוין",
+              phone: phone || "לא צוין",
+              email: email || "לא צוין",
+              message: message || "תיאום פגישת ייעוץ",
+              source: source || "פגישת ייעוץ",
+              tag: tag || "תיאום פגישת ייעוץ",
+              _template: "table"
+            })
+          });
+          console.log(`Fallback notification dispatched to ${adminEmail}`);
+        } catch (fbErr) {
+          console.warn("Notice: fallback email dispatch:", fbErr);
+        }
       }
 
       // 2. Forward lead details directly to Plando (via webhook/Zapier/Make URL)
