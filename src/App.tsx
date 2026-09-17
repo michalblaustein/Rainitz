@@ -23,22 +23,21 @@ function ScrollAndAnalyticsTracker() {
   useEffect(() => {
     window.scrollTo(0, 0);
 
+    const siteName = 'יעקב רייניץ - נדל"ן וכלכלה נבונה';
     const titleMap: Record<string, string> = {
-      "/": 'יעקב רייניץ - נדל"ן וכלכלה נבונה',
-      "/courses": 'קורסים והכשרות נדל"ן | יעקב רייניץ',
-      "/consulting": 'פגישת ייעוץ אישית | יעקב רייניץ',
-      "/book": 'הספר "שליש בקרקע" | יעקב רייניץ',
-      "/calculators": 'מחשבוני נדל"ן וכלכלה | יעקב רייניץ',
-      "/articles": "מאגר ידע, מאמרים ופודקאסטים | יעקב רייניץ",
-      "/about": 'אודות יעקב רייניץ | מומחה ויועץ נדל"ן',
-      "/contact": "צור קשר | יעקב רייניץ",
-      "/pinuy-binuy": "פינוי בינוי | יעקב רייניץ",
-      "/scheduler": "תיאום פגישה | יעקב רייניץ",
+      "/": siteName,
+      "/courses": `קורסים והכשרות נדל"ן | ${siteName}`,
+      "/consulting": `פגישת ייעוץ אישית | ${siteName}`,
+      "/book": `הספר "שליש בקרקע" | ${siteName}`,
+      "/calculators": `מחשבוני נדל"ן וכלכלה | ${siteName}`,
+      "/articles": `מאגר ידע, מאמרים ופודקאסטים | ${siteName}`,
+      "/about": `אודות | ${siteName}`,
+      "/contact": `צור קשר | ${siteName}`,
+      "/pinuy-binuy": `פינוי בינוי | ${siteName}`,
+      "/scheduler": `תיאום פגישה | ${siteName}`,
     };
 
-    if (titleMap[pathname]) {
-      document.title = titleMap[pathname];
-    }
+    document.title = titleMap[pathname] || siteName;
 
     // Track pageview on route change in Google Analytics (SPA support)
     if (typeof (window as any).gtag === "function") {

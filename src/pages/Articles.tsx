@@ -124,14 +124,14 @@ export default function Articles() {
       const found = articlesList.find((art) => art.id === articleIdParam);
       if (found) {
         setSelectedArticle(found);
-        document.title = `${found.title} | יעקב רייניץ`;
+        document.title = `${found.title} | יעקב רייניץ - נדל"ן וכלכלה נבונה`;
       } else {
         setSelectedArticle(null);
-        document.title = "מאגר ידע, מאמרים ופודקאסטים | יעקב רייניץ";
+        document.title = 'מאגר ידע, מאמרים ופודקאסטים | יעקב רייניץ - נדל"ן וכלכלה נבונה';
       }
     } else {
       setSelectedArticle(null);
-      document.title = "מאגר ידע, מאמרים ופודקאסטים | יעקב רייניץ";
+      document.title = 'מאגר ידע, מאמרים ופודקאסטים | יעקב רייניץ - נדל"ן וכלכלה נבונה';
     }
   }, [articleIdParam, articlesList]);
 
