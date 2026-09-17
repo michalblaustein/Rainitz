@@ -1,11 +1,12 @@
 import { motion, useMotionValue, useTransform, animate } from "motion/react";
-import { ArrowLeft, ArrowRight, CheckCircle, Target, Shield, BookOpen, Users, MessageCircle, BarChart3, Presentation, Mail, Send, Star, MoveLeft, Phone, CreditCard, ShieldAlert } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Target, Shield, BookOpen, Users, MessageCircle, BarChart3, Presentation, Mail, Send, Star, MoveLeft, Phone, CreditCard, ShieldAlert, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { syncLeadToBackend } from "../lib/leadSync";
 import { defaultSeedArticles } from "../data/defaultArticles";
+import { formatExternalUrl } from "../lib/utils";
 
 
 const services = [
@@ -640,80 +641,116 @@ export default function Home() {
                   viewport={{ once: true }}
                   className="flex flex-col h-full group cursor-pointer"
                 >
-                  <Link to={`/articles/${latestMedia[0].id || ""}`} className="flex flex-col h-full bg-white hover:bg-zinc-50/50 p-6 rounded-none border-2 border-babun-primary transition-all duration-300">
-                    <div className="relative aspect-[16/9] rounded-none overflow-hidden mb-6 border border-babun-primary/25">
-                      <img 
-                        src={getDisplayImage(latestMedia[0].image)} 
-                        alt={latestMedia[0].title} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute top-4 right-4 z-20">
-                        <span className="px-3 py-1 bg-babun-accent text-babun-primary text-[10px] uppercase font-black tracking-widest rounded-none border border-babun-primary">
-                          {latestMedia[0].category || "פודקאסט"}
-                        </span>
-                      </div>
-                      <div className="absolute bottom-4 left-4">
-                        <div className="w-12 h-12 bg-babun-primary text-white rounded-none flex items-center justify-center border border-babun-primary transition-all group-hover:bg-babun-accent group-hover:text-babun-primary group-hover:rotate-[-45deg]">
-                          <ArrowLeft size={22} />
+                  {(() => {
+                    const extUrl = formatExternalUrl(latestMedia[0].link);
+                    const CardElement = extUrl ? "a" : Link;
+                    const cardProps = extUrl
+                      ? { href: extUrl, target: "_blank", rel: "noopener noreferrer" }
+                      : { to: `/articles/${latestMedia[0].id || ""}` };
+
+                    return (
+                      <CardElement
+                        {...(cardProps as any)}
+                        className="flex flex-col h-full bg-white hover:bg-zinc-50/50 p-6 rounded-none border-2 border-babun-primary transition-all duration-300"
+                      >
+                        <div className="relative aspect-[16/9] rounded-none overflow-hidden mb-6 border border-babun-primary/25">
+                          <img 
+                            src={getDisplayImage(latestMedia[0].image)} 
+                            alt={latestMedia[0].title} 
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute top-4 right-4 z-20">
+                            <span className="px-3 py-1 bg-babun-accent text-babun-primary text-[10px] uppercase font-black tracking-widest rounded-none border border-babun-primary">
+                              {latestMedia[0].category || "פודקאסט"}
+                            </span>
+                          </div>
+                          <div className="absolute bottom-4 left-4">
+                            <div className="w-12 h-12 bg-babun-primary text-white rounded-none flex items-center justify-center border border-babun-primary transition-all group-hover:bg-babun-accent group-hover:text-babun-primary group-hover:rotate-[-45deg]">
+                              {extUrl ? <ExternalLink size={22} /> : <ArrowLeft size={22} />}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    <div className="px-2 text-right">
-                      <div className="flex items-center justify-end gap-2 text-babun-primary/60 font-bold text-xs mb-3">
-                        <span>{latestMedia[0].date}</span>
-                        <div className="w-1.5 h-1.5 bg-babun-primary/30 rounded-none" />
-                        <span>יעקב רייניץ</span>
-                      </div>
-                      <h3 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-babun-primary leading-snug group-hover:text-babun-accent transition-colors line-clamp-2">
-                        {latestMedia[0].title}
-                      </h3>
-                      {latestMedia[0].summary && (
-                        <p className="mt-4 text-babun-primary/70 text-sm md:text-base leading-relaxed line-clamp-2 font-medium">
-                          {latestMedia[0].summary}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
+                        <div className="px-2 text-right">
+                          <div className="flex items-center justify-end gap-2 text-babun-primary/60 font-bold text-xs mb-3">
+                            <span>{latestMedia[0].date}</span>
+                            <div className="w-1.5 h-1.5 bg-babun-primary/30 rounded-none" />
+                            <span>יעקב רייניץ</span>
+                          </div>
+                          <h3 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-babun-primary leading-snug group-hover:text-babun-accent transition-colors line-clamp-2">
+                            {latestMedia[0].title}
+                          </h3>
+                          {latestMedia[0].summary && (
+                            <p className="mt-4 text-babun-primary/70 text-sm md:text-base leading-relaxed line-clamp-2 font-medium">
+                              {latestMedia[0].summary}
+                            </p>
+                          )}
+                          {extUrl && (
+                            <div className="mt-4 flex items-center justify-end gap-2 text-babun-primary font-bold text-sm">
+                              <span>האזנה לפודקאסט בעמוד החיצוני</span>
+                              <ExternalLink size={16} />
+                            </div>
+                          )}
+                        </div>
+                      </CardElement>
+                    );
+                  })()}
                 </motion.div>
               </div>
 
               {/* Left Column: 3 Smaller Stacked Articles/Podcasts */}
               <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
-                {latestMedia.slice(1, 4).map((item, index) => (
-                  <motion.div
-                    key={item.id || index}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    className="group"
-                  >
-                    <Link to={`/articles/${item.id || ""}`} className="flex gap-4 p-4 rounded-none bg-white hover:bg-zinc-50/50 transition-all duration-300 border-2 border-babun-primary">
-                      <div className="relative w-28 sm:w-36 aspect-[4/3] rounded-none overflow-hidden flex-shrink-0 border border-babun-primary/10">
-                        <img 
-                          src={getDisplayImage(item.image)} 
-                          alt={item.title} 
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
-                          referrerPolicy="no-referrer"
-                        />
-                        <div className="absolute top-2 right-2 z-20">
-                          <span className="px-2 py-0.5 bg-babun-accent text-babun-primary text-[8px] uppercase font-black tracking-widest rounded-none border border-babun-primary">
-                            {item.category || "פודקאסט"}
-                          </span>
+                {latestMedia.slice(1, 4).map((item, index) => {
+                  const extUrl = formatExternalUrl(item.link);
+                  const CardElement = extUrl ? "a" : Link;
+                  const cardProps = extUrl
+                    ? { href: extUrl, target: "_blank", rel: "noopener noreferrer" }
+                    : { to: `/articles/${item.id || ""}` };
+
+                  return (
+                    <motion.div
+                      key={item.id || index}
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      className="group"
+                    >
+                      <CardElement
+                        {...(cardProps as any)}
+                        className="flex gap-4 p-4 rounded-none bg-white hover:bg-zinc-50/50 transition-all duration-300 border-2 border-babun-primary"
+                      >
+                        <div className="relative w-28 sm:w-36 aspect-[4/3] rounded-none overflow-hidden flex-shrink-0 border border-babun-primary/10">
+                          <img 
+                            src={getDisplayImage(item.image)} 
+                            alt={item.title} 
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute top-2 right-2 z-20">
+                            <span className="px-2 py-0.5 bg-babun-accent text-babun-primary text-[8px] uppercase font-black tracking-widest rounded-none border border-babun-primary">
+                              {item.category || "פודקאסט"}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex flex-col justify-center text-right flex-1 min-w-0">
-                        <div className="flex items-center justify-end gap-1.5 text-babun-primary/60 font-bold text-[10px] mb-2">
-                          <span>{item.date}</span>
+                        <div className="flex flex-col justify-center text-right flex-1 min-w-0">
+                          <div className="flex items-center justify-end gap-1.5 text-babun-primary/60 font-bold text-[10px] mb-2">
+                            <span>{item.date}</span>
+                          </div>
+                          <h4 className="text-base sm:text-lg font-display font-black text-babun-primary leading-tight group-hover:text-babun-accent transition-colors line-clamp-2">
+                            {item.title}
+                          </h4>
+                          {extUrl && (
+                            <div className="mt-2 flex items-center justify-end gap-1 text-[11px] font-bold text-babun-primary/70 group-hover:text-babun-primary">
+                              <span>האזנה לפודקאסט</span>
+                              <ExternalLink size={12} />
+                            </div>
+                          )}
                         </div>
-                        <h4 className="text-base sm:text-lg font-display font-black text-babun-primary leading-tight group-hover:text-babun-accent transition-colors line-clamp-2">
-                          {item.title}
-                        </h4>
-                      </div>
-                    </Link>
-                  </motion.div>
-                ))}
+                      </CardElement>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
           ) : (

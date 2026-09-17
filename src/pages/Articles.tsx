@@ -54,6 +54,7 @@ import { db, auth, handleFirestoreError, OperationType } from "../lib/firebase";
 import ImageWithSkeleton from "../components/common/ImageWithSkeleton";
 import UniversalMediaPlayer, { detectMediaType } from "../components/common/UniversalMediaPlayer";
 import { defaultSeedArticles } from "../data/defaultArticles";
+import { formatExternalUrl } from "../lib/utils";
 
 // Category definitions matching the design guidelines
 const mediaCategories = [
@@ -135,6 +136,13 @@ export default function Articles() {
   }, [articleIdParam, articlesList]);
 
   const handleSelectArticle = (article: any) => {
+    const isPodcast = article.categoryId === "podcast" || article.category === "פודקאסטים";
+    const extUrl = formatExternalUrl(article.link);
+
+    if (isPodcast && extUrl) {
+      window.open(extUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
     navigate(`/articles/${article.id}`);
   };
 
@@ -621,7 +629,7 @@ export default function Articles() {
         image: formImage,
         innerImage: formInnerImage || "",
         content: formContent,
-        link: formLink || "#",
+        link: formatExternalUrl(formLink) || "#",
       };
 
       if (editingArticleId) {
@@ -810,6 +818,29 @@ export default function Articles() {
         </section>
 
         <div className="max-w-5xl mx-auto px-4 md:px-8 pt-10 md:pt-14 pb-24">
+          {/* Direct External Podcast Banner */}
+          {(selectedArticle.categoryId === "podcast" || selectedArticle.category === "פודקאסטים") && formatExternalUrl(selectedArticle.link) && (
+            <div className="mb-10 bg-babun-accent/15 border-2 border-babun-accent p-6 rounded-babun-lg flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm text-right">
+              <div>
+                <h3 className="font-display font-black text-lg md:text-xl text-babun-primary">
+                  הפודקאסט זמין להאזנה ישירה בעמוד המקורי
+                </h3>
+                <p className="text-xs md:text-sm text-babun-primary/75 mt-1 font-medium">
+                  לחץ על הכפתור למעבר מהיר והאזנה לפרק המלא בעמוד החיצוני המקושר
+                </p>
+              </div>
+              <a
+                href={formatExternalUrl(selectedArticle.link)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-babun-primary hover:bg-black text-white py-3 px-6 rounded-babun-sm text-sm font-black font-display inline-flex items-center gap-2 whitespace-nowrap shadow-md hover:scale-102 transition-all cursor-pointer"
+              >
+                <ExternalLink size={16} />
+                <span>מעבר ישיר לפודקאסט</span>
+              </a>
+            </div>
+          )}
+
           {/* Main Hero Image / Video / Stream Banner */}
           {selectedArticle.link && detectMediaType(selectedArticle.link) !== "unknown" ? (
             <div className="mb-12">
@@ -900,16 +931,20 @@ export default function Articles() {
               )}
 
               {/* External Source Link */}
-              {selectedArticle.link && selectedArticle.link !== "#" && (
+              {formatExternalUrl(selectedArticle.link) && (
                 <div className="pt-8 border-t border-zinc-200 mt-10">
                   <a
-                    href={selectedArticle.link}
+                    href={formatExternalUrl(selectedArticle.link)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 bg-babun-primary text-white hover:bg-black text-xs font-bold px-6 py-3.5 rounded-sm shadow-sm transition-all"
                   >
                     <ExternalLink size={14} />
-                    <span>פתח קישור למקור הכתבה</span>
+                    <span>
+                      {selectedArticle.categoryId === "podcast" || selectedArticle.category === "פודקאסטים"
+                        ? "מעבר לעמוד המקורי של הפודקאסט"
+                        : "פתח קישור למקור הכתבה"}
+                    </span>
                   </a>
                 </div>
               )}
@@ -1205,7 +1240,11 @@ export default function Articles() {
                         {filteredArticles[0].category}
                       </div>
                       <div className="absolute bottom-4 left-4 bg-babun-primary/80 backdrop-blur-xs text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Eye size={16} className="text-babun-accent" />
+                        {filteredArticles[0].categoryId === "podcast" || filteredArticles[0].category === "פודקאסטים" ? (
+                          <Play size={16} className="text-babun-accent fill-babun-accent ml-0.5" />
+                        ) : (
+                          <Eye size={16} className="text-babun-accent" />
+                        )}
                       </div>
                     </div>
                     <div className="flex-1 flex flex-col justify-between py-2">
@@ -1222,10 +1261,16 @@ export default function Articles() {
                             {filteredArticles[0].content.replace(/[#*`]/g, '')}
                           </p>
                         )}
-                        <div className="mt-8 flex items-center justify-end gap-2 text-babun-accent font-display font-bold text-sm group-hover:translate-x-[-4px] transition-transform">
-                          <span>קרא עוד</span>
-                          <ArrowLeft size={16} />
-                        </div>
+                        {(() => {
+                          const isPodcast = filteredArticles[0].categoryId === "podcast" || filteredArticles[0].category === "פודקאסטים";
+                          const hasExt = !!formatExternalUrl(filteredArticles[0].link);
+                          return (
+                            <div className="mt-8 flex items-center justify-end gap-2 text-babun-accent font-display font-bold text-sm group-hover:translate-x-[-4px] transition-transform">
+                              <span>{isPodcast && hasExt ? "האזנה לפודקאסט (קישור חיצוני)" : isPodcast ? "האזנה לפודקאסט" : "קרא עוד"}</span>
+                              {isPodcast && hasExt ? <ExternalLink size={16} /> : <ArrowLeft size={16} />}
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       {isAdminMode && filteredArticles[0].id && (
@@ -1279,6 +1324,13 @@ export default function Articles() {
                           <div className="absolute top-3 right-3 bg-babun-accent text-babun-primary font-display font-bold px-2 py-0.5 text-[9px] uppercase tracking-wider rounded-babun-xs">
                             {article.category}
                           </div>
+                          <div className="absolute bottom-3 left-3 bg-babun-primary/80 backdrop-blur-xs text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                            {article.categoryId === "podcast" || article.category === "פודקאסטים" ? (
+                              <Play size={13} className="text-babun-accent fill-babun-accent ml-0.5" />
+                            ) : (
+                              <Eye size={13} className="text-babun-accent" />
+                            )}
+                          </div>
                         </div>
 
                         {/* Info contents */}
@@ -1296,10 +1348,16 @@ export default function Articles() {
                                 {article.content.replace(/[#*`]/g, '')}
                               </p>
                             )}
-                            <div className="mt-4 flex items-center justify-end gap-1.5 text-babun-accent font-display font-bold text-xs group-hover:translate-x-[-3px] transition-transform">
-                              <span>קרא עוד</span>
-                              <ArrowLeft size={14} />
-                            </div>
+                            {(() => {
+                              const isPodcast = article.categoryId === "podcast" || article.category === "פודקאסטים";
+                              const hasExt = !!formatExternalUrl(article.link);
+                              return (
+                                <div className="mt-4 flex items-center justify-end gap-1.5 text-babun-accent font-display font-bold text-xs group-hover:translate-x-[-3px] transition-transform">
+                                  <span>{isPodcast && hasExt ? "האזנה לפודקאסט" : isPodcast ? "האזנה לפודקאסט" : "קרא עוד"}</span>
+                                  {isPodcast && hasExt ? <ExternalLink size={14} /> : <ArrowLeft size={14} />}
+                                </div>
+                              );
+                            })()}
                           </div>
 
                           {isAdminMode && article.id && (
@@ -1584,11 +1642,11 @@ export default function Articles() {
                   {/* Outer Link */}
                   <div>
                     <label className="block text-xs font-black font-display text-babun-primary uppercase tracking-wider mb-2">
-                      קישור חיצוני (פודקאסט / יוטיוב / Bunny CDN / m3u8)
+                      קישור חיצוני (בפודקאסטים יפנה ישירות לעמוד החיצוני)
                     </label>
                     <input
                       type="url"
-                      placeholder="הדבק קישור (למשל: playlist.m3u8, YouTube, Vimeo, MP4, MP3)"
+                      placeholder="הדבק קישור (למשל: Spotify, YouTube, Apple Podcasts, עמוד נחיתה)"
                       value={formLink}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -1600,6 +1658,9 @@ export default function Articles() {
                       }}
                       className="w-full border border-babun-primary/15 rounded-babun-md px-4 py-3.5 text-sm focus:outline-hidden focus:border-babun-accent focus:ring-1 focus:ring-babun-accent bg-babun-light/20 text-right font-mono"
                     />
+                    <p className="mt-1.5 text-[11px] text-babun-primary/60 text-right">
+                      💡 בפודקאסטים, לחיצה על הכרטיס תפנה ישירות לעמוד החיצוני שהזנת כאן.
+                    </p>
                     {formLink && detectMediaType(formLink) !== "unknown" && (
                       <div className="mt-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-sm flex items-center justify-end gap-1">
                         <span>
