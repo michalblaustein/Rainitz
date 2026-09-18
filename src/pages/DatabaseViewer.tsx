@@ -51,9 +51,17 @@ export default function DatabaseViewer() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [syncNotice, setSyncNotice] = useState<string | null>(null);
+
+  // Helper to clean internal UI fields before syncing to server
+  const cleanArticle = (art: any) => {
+    if (!art) return null;
+    const { _source, ...rest } = art;
+    return rest;
+  };
 
   // Load all databases on mount
-  const checkAndLoadData = async () => {
+  const checkAndLoadData = async (shouldAutoSync = true) => {
     setLoading(true);
     
     // 1. Read Local Storage
@@ -125,29 +133,84 @@ export default function DatabaseViewer() {
     defaultSeedArticles.forEach((a) => idMap.set(a.id, { ...a, _source: "ברירת מחדל" }));
     // Server storage
     srvData.forEach((a) => idMap.set(a.id, { ...a, _source: "שרת (זמין לכולם)" }));
-    // Local storage
+    
+    // Check which local articles are not on server yet
+    const srvIds = new Set(srvData.map((s: any) => s.id));
+    const unsyncedItems: any[] = [];
+
     localData.forEach((a) => {
       if (idMap.has(a.id)) {
         idMap.set(a.id, { ...idMap.get(a.id), ...a, _source: "שרת + מקומי" });
       } else {
         idMap.set(a.id, { ...a, _source: "מקומי בלבד (טרם סונכרן)" });
+        unsyncedItems.push(a);
       }
     });
 
     const finalMerged = Array.from(idMap.values());
     setMergedArticles(finalMerged);
     setLoading(false);
+
+    // 5. Automatic background sync: if this computer has local articles missing from the server, auto-sync them!
+    if (shouldAutoSync && unsyncedItems.length > 0) {
+      console.log(`Auto-syncing ${unsyncedItems.length} local articles to server...`);
+      setSyncing(true);
+      try {
+        const fullListToSync = finalMerged.map(cleanArticle).filter(Boolean);
+        const res = await fetch("/api/articles/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(fullListToSync),
+        });
+
+        if (res.ok) {
+          const freshSrvRes = await fetch("/api/articles");
+          if (freshSrvRes.ok) {
+            const freshSrvData = await freshSrvRes.json();
+            setServerArticles(freshSrvData);
+            setServerStatus({
+              ok: true,
+              message: "פעיל וזמין לכל המחשבים",
+              count: freshSrvData.length,
+            });
+
+            // Update merged view to reflect everything is now on server
+            const updatedMap = new Map<string, any>();
+            defaultSeedArticles.forEach((a) => updatedMap.set(a.id, { ...a, _source: "ברירת מחדל" }));
+            freshSrvData.forEach((a) => updatedMap.set(a.id, { ...a, _source: "שרת (זמין לכולם)" }));
+            localData.forEach((a) => {
+              updatedMap.set(a.id, { ...updatedMap.get(a.id), ...a, _source: "שרת + מקומי" });
+            });
+            setMergedArticles(Array.from(updatedMap.values()));
+            setSyncNotice(`בוצע סנכרון אוטומטי מלא! כל ${freshSrvData.length} הכתבות נשמרו בשרת וזמינות כעת לכל המחשבים בעולם.`);
+          }
+        }
+      } catch (autoErr) {
+        console.warn("Auto-sync error:", autoErr);
+      } finally {
+        setSyncing(false);
+      }
+    }
   };
 
   useEffect(() => {
-    checkAndLoadData();
+    checkAndLoadData(true);
   }, []);
 
   // Force Sync to Server
   const handleForceSyncToServer = async () => {
     setSyncing(true);
+    setSyncNotice(null);
     try {
-      const listToSync = localArticles.length > 0 ? localArticles : mergedArticles;
+      // Build a comprehensive, deduplicated list from all sources
+      const combinedMap = new Map<string, any>();
+      defaultSeedArticles.forEach((a) => combinedMap.set(a.id, cleanArticle(a)));
+      serverArticles.forEach((a) => combinedMap.set(a.id, cleanArticle(a)));
+      localArticles.forEach((a) => combinedMap.set(a.id, cleanArticle(a)));
+      mergedArticles.forEach((a) => combinedMap.set(a.id, cleanArticle(a)));
+
+      const listToSync = Array.from(combinedMap.values()).filter(Boolean);
+
       const res = await fetch("/api/articles/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -155,10 +218,16 @@ export default function DatabaseViewer() {
       });
       
       if (res.ok) {
-        alert(`הסנכרון הושלם בהצלחה! ${listToSync.length} כתבות נשמרו בשרת וזמינות כעת מיידית לכל מחשב ברשת.`);
-        await checkAndLoadData();
+        // Also update localStorage and dispatch event for consistency across tabs
+        try {
+          localStorage.setItem("babun_articles_cache", JSON.stringify(listToSync));
+          window.dispatchEvent(new CustomEvent("articles_updated", { detail: listToSync }));
+        } catch (e) {}
+
+        setSyncNotice(`הסנכרון הושלם בהצלחה! כל ${listToSync.length} הכתבות והפודקאסטים נשמרו בשרת וזמינים כעת לכל מחשב בעולם.`);
+        await checkAndLoadData(false);
       } else {
-        alert("שגיאה בסנכרון לשרת. נסה שוב בעוד מספר רגעים.");
+        alert("שגיאה בסנכרון לשרת. אנא נסה שוב.");
       }
     } catch (e: any) {
       alert(`שגיאה בביצוע סנכרון: ${e?.message}`);
@@ -167,9 +236,37 @@ export default function DatabaseViewer() {
     }
   };
 
+  // Sync a single article
+  const handleSyncSingleArticle = async (item: any) => {
+    setSyncing(true);
+    try {
+      const cleaned = cleanArticle(item);
+      const combinedMap = new Map<string, any>();
+      serverArticles.forEach((a) => combinedMap.set(a.id, cleanArticle(a)));
+      combinedMap.set(cleaned.id, cleaned);
+      const listToSync = Array.from(combinedMap.values()).filter(Boolean);
+
+      const res = await fetch("/api/articles/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(listToSync),
+      });
+
+      if (res.ok) {
+        setSyncNotice(`הכתבה "${cleaned.title}" סונכרנה בהצלחה לשרת!`);
+        await checkAndLoadData(false);
+      }
+    } catch (e: any) {
+      alert(`שגיאה בסנכרון הכתבה: ${e?.message}`);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   // Download JSON Backup
   const handleDownloadBackup = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mergedArticles, null, 2));
+    const cleanList = mergedArticles.map(cleanArticle);
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cleanList, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
     downloadAnchor.setAttribute("download", `reinitz_database_articles_${new Date().toISOString().slice(0, 10)}.json`);
@@ -308,6 +405,49 @@ export default function DatabaseViewer() {
 
         </div>
 
+        {/* Sync Notifications & Alerts */}
+        {syncNotice && (
+          <div className="bg-emerald-500/15 border-2 border-emerald-500/40 rounded-2xl p-4 flex items-center justify-between gap-3 text-emerald-200 text-sm font-bold shadow-lg">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2 size={20} className="text-emerald-400 shrink-0" />
+              <span>{syncNotice}</span>
+            </div>
+            <button
+              onClick={() => setSyncNotice(null)}
+              className="text-xs text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/10 cursor-pointer"
+            >
+              הבנתי, תודה
+            </button>
+          </div>
+        )}
+
+        {/* Unsynced Alert Banner */}
+        {mergedArticles.filter((a) => a._source?.includes("מקומי בלבד")).length > 0 && (
+          <div className="bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-amber-500/20 border-2 border-amber-500/60 rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+            <div className="flex items-center gap-3.5">
+              <div className="p-3 bg-amber-500/30 text-amber-300 rounded-xl border border-amber-500/40 shrink-0">
+                <Upload size={24} className="animate-pulse" />
+              </div>
+              <div>
+                <h4 className="text-base font-black text-white flex items-center gap-2">
+                  נמצאו {mergedArticles.filter((a) => a._source?.includes("מקומי בלבד")).length} כתבות במחשב זה שטרם הועלו לשרת!
+                </h4>
+                <p className="text-xs text-amber-100/90 mt-0.5 leading-relaxed">
+                  כרגע רק המחשב שלך רואה את הכתבות האלו המסומנות בצהוב. לחץ על הכפתור כדי להעלות אותן לשרת ולפתוח אותן לכל המחשבים בעולם.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleForceSyncToServer}
+              disabled={syncing}
+              className="w-full md:w-auto px-6 py-3.5 bg-amber-400 hover:bg-amber-300 text-babun-primary font-black rounded-xl text-sm flex items-center justify-center gap-2 transition-all shadow-xl shadow-amber-500/20 cursor-pointer shrink-0"
+            >
+              <Server size={18} />
+              <span>{syncing ? "מעלה ומסנכרן כעת..." : "העלה וסנכרן את כולן לשרת עכשיו 🚀"}</span>
+            </button>
+          </div>
+        )}
+
         {/* Tab Selection & Search */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-white/10">
           <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10 w-fit">
@@ -403,13 +543,26 @@ export default function DatabaseViewer() {
                           )}
                         </td>
                         <td className="p-4 text-center">
-                          <button
-                            onClick={() => setSelectedItem(item)}
-                            className="p-1.5 hover:bg-white/10 rounded-lg text-zinc-300 hover:text-white transition-colors cursor-pointer"
-                            title="צפייה מלאה ברשומה"
-                          >
-                            <Eye size={16} />
-                          </button>
+                          <div className="flex items-center justify-center gap-1.5">
+                            {item._source?.includes("מקומי בלבד") && (
+                              <button
+                                onClick={() => handleSyncSingleArticle(item)}
+                                disabled={syncing}
+                                className="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-400 text-amber-300 hover:text-black border border-amber-500/40 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                                title="העלה כתבה זו לשרת עכשיו"
+                              >
+                                <Upload size={12} />
+                                <span>העלה לשרת</span>
+                              </button>
+                            )}
+                            <button
+                              onClick={() => setSelectedItem(item)}
+                              className="p-1.5 hover:bg-white/10 rounded-lg text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                              title="צפייה מלאה ברשומה"
+                            >
+                              <Eye size={16} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))

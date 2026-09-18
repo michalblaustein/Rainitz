@@ -63,6 +63,36 @@ function AppContent() {
   const location = useLocation();
   const isLandingPage = location.pathname === "/pinuy-binuy" || location.pathname === "/pinuy-binuy/";
 
+  // Auto-sync articles from local cache to server in the background
+  useEffect(() => {
+    try {
+      const cached = localStorage.getItem("babun_articles_cache");
+      if (cached) {
+        const localList = JSON.parse(cached);
+        if (Array.isArray(localList) && localList.length > 0) {
+          fetch("/api/articles")
+            .then((res) => (res.ok ? res.json() : []))
+            .then((serverData) => {
+              const serverIds = new Set((serverData || []).map((s: any) => s.id));
+              const missingOnServer = localList.filter((l: any) => !serverIds.has(l.id));
+              if (missingOnServer.length > 0) {
+                const combined = [...serverData, ...missingOnServer].map((a: any) => {
+                  const { _source, ...rest } = a;
+                  return rest;
+                });
+                fetch("/api/articles/sync", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(combined),
+                }).catch(() => {});
+              }
+            })
+            .catch(() => {});
+        }
+      }
+    } catch (e) {}
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-babun-light selection:bg-babun-accent selection:text-babun-primary font-sans antialiased" dir="rtl">
       {!isLandingPage && <Navbar />}
