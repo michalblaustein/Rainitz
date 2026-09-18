@@ -88,8 +88,9 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // Set payload size limits to allow base64 images
-  app.use(express.json({ limit: "15mb" }));
+  // Set payload size limits to allow base64 images and large articles batches
+  app.use(express.json({ limit: "100mb" }));
+  app.use(express.urlencoded({ limit: "100mb", extended: true }));
 
   // API Routes
   app.post("/api/leads", async (req, res) => {
@@ -371,13 +372,61 @@ async function startServer() {
     }
   });
 
+  // In-memory cache and multi-path file persistence for articles
+  const getPossibleBackupPaths = () => [
+    path.join(process.cwd(), "src", "data", "articles.json"),
+    path.join(process.cwd(), "dist", "data", "articles.json"),
+    path.join("/tmp", "articles.json"),
+  ];
+
+  let inMemoryArticles: any[] = [];
+
+  // Seed inMemoryArticles on server startup from available disk paths
+  for (const p of getPossibleBackupPaths()) {
+    try {
+      if (fs.existsSync(p)) {
+        const raw = fs.readFileSync(p, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          inMemoryArticles = parsed;
+          console.log(`Loaded ${inMemoryArticles.length} articles into server memory from ${p}`);
+          break;
+        }
+      }
+    } catch (e) {}
+  }
+
+  const persistArticlesToDisk = (articles: any[]) => {
+    inMemoryArticles = articles;
+    const jsonStr = JSON.stringify(articles, null, 2);
+    for (const p of getPossibleBackupPaths()) {
+      try {
+        const dir = path.dirname(p);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(p, jsonStr, "utf-8");
+      } catch (e) {
+        // Continue to other backup locations
+      }
+    }
+  };
+
   // API route to get cached/backed-up articles when Firestore is down or blocked (Quota limit)
   app.get("/api/articles", (req, res) => {
     try {
-      const backupPath = path.join(process.cwd(), "src", "data", "articles.json");
-      if (fs.existsSync(backupPath)) {
-        const data = fs.readFileSync(backupPath, "utf-8");
-        return res.json(JSON.parse(data));
+      if (inMemoryArticles && inMemoryArticles.length > 0) {
+        return res.json(inMemoryArticles);
+      }
+      for (const p of getPossibleBackupPaths()) {
+        if (fs.existsSync(p)) {
+          const data = fs.readFileSync(p, "utf-8");
+          const parsed = JSON.parse(data);
+          if (Array.isArray(parsed)) {
+            inMemoryArticles = parsed;
+            return res.json(parsed);
+          }
+        }
       }
       res.json([]);
     } catch (error) {
@@ -386,17 +435,49 @@ async function startServer() {
     }
   });
 
-  // API route to sync/save current articles to server-side backup JSON file from the client
+  // API route to sync/save articles to server-side backup from the client (supports bulk array or single item)
   app.post("/api/articles/sync", (req, res) => {
     try {
-      const articles = req.body;
-      if (!Array.isArray(articles)) {
-        return res.status(400).json({ error: "Payload must be a valid array of articles" });
+      const payload = req.body;
+      let incomingArticles: any[] = [];
+
+      if (Array.isArray(payload)) {
+        const articlesMap = new Map<string, any>();
+        payload.forEach((a) => {
+          if (a && a.id) {
+            articlesMap.set(a.id, a);
+          }
+        });
+        const merged = Array.from(articlesMap.values());
+        persistArticlesToDisk(merged);
+        console.log(`Server-side articles synchronized bulk successfully (total: ${merged.length})`);
+        return res.json({ success: true, count: payload.length, total: merged.length });
       }
-      const backupPath = path.join(process.cwd(), "src", "data", "articles.json");
-      fs.writeFileSync(backupPath, JSON.stringify(articles, null, 2), "utf-8");
-      console.log(`Server-side articles backup updated successfully (count: ${articles.length})`);
-      res.json({ success: true, count: articles.length });
+
+      if (payload && typeof payload === "object" && (payload.article || payload.id)) {
+        incomingArticles = [payload.article || payload];
+      } else if (payload && Array.isArray(payload.articles)) {
+        incomingArticles = payload.articles;
+      } else {
+        return res.status(400).json({ error: "Payload must be an array of articles or a single article object" });
+      }
+
+      // Upsert single items into inMemoryArticles by ID
+      const articlesMap = new Map<string, any>();
+      (inMemoryArticles || []).forEach((a) => {
+        if (a && a.id) articlesMap.set(a.id, a);
+      });
+      incomingArticles.forEach((a) => {
+        if (a && a.id) {
+          articlesMap.set(a.id, { ...articlesMap.get(a.id), ...a });
+        }
+      });
+
+      const merged = Array.from(articlesMap.values());
+      persistArticlesToDisk(merged);
+
+      console.log(`Server-side articles upserted successfully (total: ${merged.length})`);
+      res.json({ success: true, count: incomingArticles.length, total: merged.length });
     } catch (error: any) {
       console.error("Error synchronizing articles to backup JSON:", error);
       res.status(500).json({ error: error?.message || "Failed to update backup" });

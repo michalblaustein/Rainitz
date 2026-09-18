@@ -52,6 +52,7 @@ export default function DatabaseViewer() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [syncNotice, setSyncNotice] = useState<string | null>(null);
+  const [syncProgress, setSyncProgress] = useState<string | null>(null);
 
   // Helper to clean internal UI fields before syncing to server
   const cleanArticle = (art: any) => {
@@ -157,33 +158,54 @@ export default function DatabaseViewer() {
       setSyncing(true);
       try {
         const fullListToSync = finalMerged.map(cleanArticle).filter(Boolean);
-        const res = await fetch("/api/articles/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(fullListToSync),
-        });
-
-        if (res.ok) {
-          const freshSrvRes = await fetch("/api/articles");
-          if (freshSrvRes.ok) {
-            const freshSrvData = await freshSrvRes.json();
-            setServerArticles(freshSrvData);
-            setServerStatus({
-              ok: true,
-              message: "פעיל וזמין לכל המחשבים",
-              count: freshSrvData.length,
-            });
-
-            // Update merged view to reflect everything is now on server
-            const updatedMap = new Map<string, any>();
-            defaultSeedArticles.forEach((a) => updatedMap.set(a.id, { ...a, _source: "ברירת מחדל" }));
-            freshSrvData.forEach((a) => updatedMap.set(a.id, { ...a, _source: "שרת (זמין לכולם)" }));
-            localData.forEach((a) => {
-              updatedMap.set(a.id, { ...updatedMap.get(a.id), ...a, _source: "שרת + מקומי" });
-            });
-            setMergedArticles(Array.from(updatedMap.values()));
-            setSyncNotice(`בוצע סנכרון אוטומטי מלא! כל ${freshSrvData.length} הכתבות נשמרו בשרת וזמינות כעת לכל המחשבים בעולם.`);
+        
+        // Try bulk sync first
+        let syncSuccess = false;
+        try {
+          const res = await fetch("/api/articles/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(fullListToSync),
+          });
+          if (res.ok) {
+            syncSuccess = true;
           }
+        } catch (e) {
+          console.warn("Auto-sync bulk failed, falling back to item-by-item...", e);
+        }
+
+        // If bulk wasn't successful, sync unsynced items individually
+        if (!syncSuccess) {
+          for (const item of unsyncedItems) {
+            try {
+              await fetch("/api/articles/sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(cleanArticle(item)),
+              });
+            } catch (err) {}
+          }
+        }
+
+        const freshSrvRes = await fetch("/api/articles");
+        if (freshSrvRes.ok) {
+          const freshSrvData = await freshSrvRes.json();
+          setServerArticles(freshSrvData);
+          setServerStatus({
+            ok: true,
+            message: "פעיל וזמין לכל המחשבים",
+            count: freshSrvData.length,
+          });
+
+          // Update merged view to reflect everything is now on server
+          const updatedMap = new Map<string, any>();
+          defaultSeedArticles.forEach((a) => updatedMap.set(a.id, { ...a, _source: "ברירת מחדל" }));
+          freshSrvData.forEach((a) => updatedMap.set(a.id, { ...a, _source: "שרת (זמין לכולם)" }));
+          localData.forEach((a) => {
+            updatedMap.set(a.id, { ...updatedMap.get(a.id), ...a, _source: "שרת + מקומי" });
+          });
+          setMergedArticles(Array.from(updatedMap.values()));
+          setSyncNotice(`בוצע סנכרון אוטומטי מלא! כל ${freshSrvData.length} הכתבות נשמרו בשרת וזמינות כעת לכל המחשבים בעולם.`);
         }
       } catch (autoErr) {
         console.warn("Auto-sync error:", autoErr);
@@ -197,10 +219,11 @@ export default function DatabaseViewer() {
     checkAndLoadData(true);
   }, []);
 
-  // Force Sync to Server
+  // Force Sync to Server (Bulk with automatic single-item fallback)
   const handleForceSyncToServer = async () => {
     setSyncing(true);
     setSyncNotice(null);
+    setSyncProgress(null);
     try {
       // Build a comprehensive, deduplicated list from all sources
       const combinedMap = new Map<string, any>();
@@ -211,55 +234,97 @@ export default function DatabaseViewer() {
 
       const listToSync = Array.from(combinedMap.values()).filter(Boolean);
 
-      const res = await fetch("/api/articles/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(listToSync)
-      });
-      
-      if (res.ok) {
-        // Also update localStorage and dispatch event for consistency across tabs
-        try {
-          localStorage.setItem("babun_articles_cache", JSON.stringify(listToSync));
-          window.dispatchEvent(new CustomEvent("articles_updated", { detail: listToSync }));
-        } catch (e) {}
+      setSyncProgress("בודק ומעלה נתונים לשרת...");
 
-        setSyncNotice(`הסנכרון הושלם בהצלחה! כל ${listToSync.length} הכתבות והפודקאסטים נשמרו בשרת וזמינים כעת לכל מחשב בעולם.`);
-        await checkAndLoadData(false);
-      } else {
-        alert("שגיאה בסנכרון לשרת. אנא נסה שוב.");
+      // 1. Try bulk upload first
+      let bulkSucceeded = false;
+      let lastErrorMessage = "";
+
+      try {
+        const res = await fetch("/api/articles/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(listToSync)
+        });
+        
+        if (res.ok) {
+          bulkSucceeded = true;
+        } else {
+          const errBody = await res.text().catch(() => "");
+          lastErrorMessage = `קוד שגיאה מהשרת: ${res.status} (${errBody || res.statusText})`;
+          console.warn("Bulk sync was not ok, trying item-by-item:", res.status, errBody);
+        }
+      } catch (err: any) {
+        lastErrorMessage = err?.message || "בעיית תקשורת";
+        console.warn("Bulk sync network exception, falling back:", err);
       }
+
+      // 2. If bulk upload didn't succeed (e.g. payload too large or timeout), upload item by item!
+      if (!bulkSucceeded) {
+        let successCount = 0;
+        for (let i = 0; i < listToSync.length; i++) {
+          const item = listToSync[i];
+          setSyncProgress(`מעלה כתבה ${i + 1} מתוך ${listToSync.length}: ${item.title?.slice(0, 25)}...`);
+          try {
+            const singleRes = await fetch("/api/articles/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(cleanArticle(item))
+            });
+            if (singleRes.ok) {
+              successCount++;
+            }
+          } catch (itemErr) {
+            console.error(`Failed to sync item ${item.id}:`, itemErr);
+          }
+        }
+
+        if (successCount === 0) {
+          throw new Error(lastErrorMessage || "העלאת הכתבות לשרת נכשלה. אנא בדוק את החיבור לרשת.");
+        }
+      }
+
+      // Also update localStorage and dispatch event for consistency across tabs
+      try {
+        localStorage.setItem("babun_articles_cache", JSON.stringify(listToSync));
+        window.dispatchEvent(new CustomEvent("articles_updated", { detail: listToSync }));
+      } catch (e) {}
+
+      setSyncNotice(`הסנכרון הושלם בהצלחה! כל ${listToSync.length} הכתבות והפודקאסטים נשמרו בשרת וזמינים כעת לכל מחשב בעולם.`);
+      await checkAndLoadData(false);
     } catch (e: any) {
-      alert(`שגיאה בביצוע סנכרון: ${e?.message}`);
+      alert(`שגיאה בסנכרון לשרת: ${e?.message || "אנא נסה שוב"}`);
     } finally {
       setSyncing(false);
+      setSyncProgress(null);
     }
   };
 
   // Sync a single article
   const handleSyncSingleArticle = async (item: any) => {
     setSyncing(true);
+    setSyncNotice(null);
+    const cleaned = cleanArticle(item);
+    setSyncProgress(`מעלה את "${cleaned.title?.slice(0, 25)}..." לשרת...`);
     try {
-      const cleaned = cleanArticle(item);
-      const combinedMap = new Map<string, any>();
-      serverArticles.forEach((a) => combinedMap.set(a.id, cleanArticle(a)));
-      combinedMap.set(cleaned.id, cleaned);
-      const listToSync = Array.from(combinedMap.values()).filter(Boolean);
-
       const res = await fetch("/api/articles/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(listToSync),
+        body: JSON.stringify(cleaned),
       });
 
       if (res.ok) {
         setSyncNotice(`הכתבה "${cleaned.title}" סונכרנה בהצלחה לשרת!`);
         await checkAndLoadData(false);
+      } else {
+        const errText = await res.text().catch(() => "");
+        alert(`שגיאה בהעלאת הכתבה (${res.status}): ${errText || "אנא נסה שוב"}`);
       }
     } catch (e: any) {
-      alert(`שגיאה בסנכרון הכתבה: ${e?.message}`);
+      alert(`שגיאה בסנכרון הכתבה: ${e?.message || "אנא נסה שוב"}`);
     } finally {
       setSyncing(false);
+      setSyncProgress(null);
     }
   };
 
@@ -324,10 +389,10 @@ export default function DatabaseViewer() {
             <button
               onClick={handleForceSyncToServer}
               disabled={syncing}
-              className="px-5 py-2.5 bg-babun-accent text-babun-primary hover:bg-yellow-400 rounded-xl text-sm font-black flex items-center gap-2 transition-all shadow-lg shadow-babun-accent/20 cursor-pointer"
+              className="px-5 py-2.5 bg-babun-accent text-babun-primary hover:bg-yellow-400 rounded-xl text-sm font-black flex items-center gap-2 transition-all shadow-lg shadow-babun-accent/20 cursor-pointer disabled:opacity-75"
             >
-              <Server size={16} />
-              <span>{syncing ? "מסנכרן כעת..." : "סנכרן את הכתבות לכל המחשבים"}</span>
+              <Server size={16} className={syncing ? "animate-spin" : ""} />
+              <span>{syncProgress || (syncing ? "מסנכרן כעת..." : "סנכרן את הכתבות לכל המחשבים")}</span>
             </button>
 
             <button
@@ -440,10 +505,10 @@ export default function DatabaseViewer() {
             <button
               onClick={handleForceSyncToServer}
               disabled={syncing}
-              className="w-full md:w-auto px-6 py-3.5 bg-amber-400 hover:bg-amber-300 text-babun-primary font-black rounded-xl text-sm flex items-center justify-center gap-2 transition-all shadow-xl shadow-amber-500/20 cursor-pointer shrink-0"
+              className="w-full md:w-auto px-6 py-3.5 bg-amber-400 hover:bg-amber-300 text-babun-primary font-black rounded-xl text-sm flex items-center justify-center gap-2 transition-all shadow-xl shadow-amber-500/20 cursor-pointer shrink-0 disabled:opacity-75"
             >
-              <Server size={18} />
-              <span>{syncing ? "מעלה ומסנכרן כעת..." : "העלה וסנכרן את כולן לשרת עכשיו 🚀"}</span>
+              <Server size={18} className={syncing ? "animate-spin" : ""} />
+              <span>{syncProgress || (syncing ? "מעלה ומסנכרן כעת..." : "העלה וסנכרן את כולן לשרת עכשיו 🚀")}</span>
             </button>
           </div>
         )}
