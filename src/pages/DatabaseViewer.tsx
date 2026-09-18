@@ -21,7 +21,7 @@ import {
   ShieldAlert
 } from "lucide-react";
 import { motion } from "motion/react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { defaultSeedArticles } from "../data/defaultArticles";
 
