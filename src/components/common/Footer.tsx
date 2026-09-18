@@ -174,6 +174,7 @@ export default function Footer() {
           <div className="flex gap-8">
             <Link to="/contact" className="hover:text-white transition-colors">מדיניות פרטיות</Link>
             <Link to="/contact" className="hover:text-white transition-colors">הצהרת נגישות</Link>
+            <Link to="/database" className="hover:text-white transition-colors">מסד נתונים</Link>
           </div>
         </div>
       </div>

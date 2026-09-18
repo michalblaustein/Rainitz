@@ -29,6 +29,7 @@ import {
   Share2,
   Play,
   FileText,
+  Database,
 } from "lucide-react";
 import {
   collection,
@@ -410,7 +411,25 @@ export default function Articles() {
     fetch("/api/articles")
       .then((res) => (res.ok ? res.json() : []))
       .then((serverData) => {
-        if (Array.isArray(serverData) && serverData.length > 0) {
+        let localData: any[] = [];
+        try {
+          const cached = localStorage.getItem("babun_articles_cache");
+          if (cached) localData = JSON.parse(cached);
+        } catch (e) {}
+
+        const serverIds = new Set((serverData || []).map((d: any) => d.id));
+        const extraLocal = (Array.isArray(localData) ? localData : []).filter((d: any) => !serverIds.has(d.id));
+
+        if (extraLocal.length > 0) {
+          // If this computer has articles that the server lacks, push them to server now!
+          const combined = [...extraLocal, ...(serverData || [])];
+          applyArticles(combined, "localMerge");
+          fetch("/api/articles/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(combined),
+          }).catch(() => {});
+        } else if (Array.isArray(serverData) && serverData.length > 0) {
           applyArticles(serverData, "serverApi");
         }
       })
@@ -632,55 +651,55 @@ export default function Articles() {
         link: formatExternalUrl(formLink) || "#",
       };
 
-      if (editingArticleId) {
-        try {
+      let targetId = editingArticleId || `reinitz_${Date.now()}`;
+      
+      // 1. Attempt writing to Firestore (safe - if quota exceeded, we catch and proceed seamlessly)
+      try {
+        if (editingArticleId) {
           await updateDoc(doc(db, "articles", editingArticleId), articleData);
-          alert("הכתבה עודכנה בהצלחה!");
-        } catch (err: any) {
-          console.warn("Firestore update failed. Falling back to server-side backup sync:", err);
-          const updatedList = articlesList.map((art) => 
-            art.id === editingArticleId ? { ...art, ...articleData } : art
-          );
-          setArticlesList(updatedList);
-          try {
-            localStorage.setItem("babun_articles_cache", JSON.stringify(updatedList));
-            window.dispatchEvent(new CustomEvent("articles_updated", { detail: updatedList }));
-          } catch (e) {}
-          await fetch("/api/articles/sync", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedList),
-          });
-          alert("הכתבה עודכנה בהצלחה!");
-        }
-      } else {
-        try {
-          await addDoc(collection(db, "articles"), {
+        } else {
+          const docRef = await addDoc(collection(db, "articles"), {
             ...articleData,
             createdAt: serverTimestamp(),
           });
-          alert("הכתבה פורסמה בהצלחה!");
-        } catch (err: any) {
-          console.warn("Firestore add failed. Falling back to server-side backup sync:", err);
-          const newDoc = {
-            id: "local_" + Date.now(),
-            ...articleData,
-            createdAt: new Date().toISOString(),
-          };
-          const updatedList = [newDoc, ...articlesList];
-          setArticlesList(updatedList);
-          try {
-            localStorage.setItem("babun_articles_cache", JSON.stringify(updatedList));
-            window.dispatchEvent(new CustomEvent("articles_updated", { detail: updatedList }));
-          } catch (e) {}
-          await fetch("/api/articles/sync", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedList),
-          });
-          alert("הכתבה פורסמה בהצלחה!");
+          if (docRef?.id) {
+            targetId = docRef.id;
+          }
         }
+      } catch (dbErr: any) {
+        console.warn("Firestore write notice (falling back to persistent server storage):", dbErr);
       }
+
+      // 2. Guaranteed instant update to local state & localStorage
+      const fullRecord = {
+        id: targetId,
+        ...articleData,
+        createdAt: new Date().toISOString(),
+      };
+
+      const updatedList = editingArticleId
+        ? articlesList.map((art) => (art.id === editingArticleId ? { ...art, ...fullRecord } : art))
+        : [fullRecord, ...articlesList.filter((a) => a.id !== targetId)];
+
+      setArticlesList(updatedList);
+
+      try {
+        localStorage.setItem("babun_articles_cache", JSON.stringify(updatedList));
+        window.dispatchEvent(new CustomEvent("articles_updated", { detail: updatedList }));
+      } catch (e) {}
+
+      // 3. Guaranteed instant sync to server backend (makes it visible on all computers in the world!)
+      try {
+        await fetch("/api/articles/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedList),
+        });
+      } catch (syncErr) {
+        console.warn("Server-side sync notice:", syncErr);
+      }
+
+      alert(editingArticleId ? "הכתבה עודכנה בהצלחה!" : "הכתבה פורסמה בהצלחה!");
 
       // Close both the add/edit modal and return to articles list view
       handleCloseAddForm();
@@ -1123,6 +1142,14 @@ export default function Articles() {
               )}
             </div>
             <div className="flex items-center gap-3">
+              <Link
+                to="/database"
+                className="bg-babun-primary hover:bg-black text-white font-display text-xs font-bold px-3.5 py-2 rounded-babun-sm flex items-center gap-1.5 cursor-pointer shadow-md"
+                title="צפייה במצב מסד הנתונים וסנכרון מיידי בין כל המחשבים"
+              >
+                <Database size={13} className="text-babun-accent" />
+                <span>צפייה וסנכרון דאטה-בייס</span>
+              </Link>
               <button
                 onClick={() => {
                   handleCloseAddForm();

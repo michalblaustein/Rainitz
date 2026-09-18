@@ -15,6 +15,7 @@ const Book = lazy(() => import("./pages/Book"));
 const Articles = lazy(() => import("./pages/Articles"));
 const PinuyBinuyLP = lazy(() => import("./pages/PinuyBinuyLP"));
 const Scheduler = lazy(() => import("./pages/Scheduler"));
+const DatabaseViewer = lazy(() => import("./pages/DatabaseViewer"));
 
 // Component to scroll to top on route change & track Google Analytics pageviews
 function ScrollAndAnalyticsTracker() {
@@ -35,6 +36,7 @@ function ScrollAndAnalyticsTracker() {
       "/contact": `צור קשר | ${siteName}`,
       "/pinuy-binuy": `פינוי בינוי | ${siteName}`,
       "/scheduler": `תיאום פגישה | ${siteName}`,
+      "/database": `ניהול מסד נתונים | ${siteName}`,
     };
 
     document.title = titleMap[pathname] || siteName;
@@ -86,6 +88,7 @@ function AppContent() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/pinuy-binuy" element={<PinuyBinuyLP />} />
             <Route path="/scheduler" element={<Scheduler />} />
+            <Route path="/database" element={<DatabaseViewer />} />
           </Routes>
         </Suspense>
       </main>
