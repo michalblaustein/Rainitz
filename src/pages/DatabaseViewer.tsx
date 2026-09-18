@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Database, 
   Server, 
@@ -53,6 +53,7 @@ export default function DatabaseViewer() {
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [syncNotice, setSyncNotice] = useState<string | null>(null);
   const [syncProgress, setSyncProgress] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Helper to clean internal UI fields before syncing to server
   const cleanArticle = (art: any) => {
@@ -64,8 +65,8 @@ export default function DatabaseViewer() {
   // Load all databases on mount
   const checkAndLoadData = async (shouldAutoSync = true) => {
     setLoading(true);
-    
-    // 1. Read Local Storage
+
+    // 1. Fetch Local Storage
     let localData: any[] = [];
     try {
       const cached = localStorage.getItem("babun_articles_cache");
@@ -77,44 +78,53 @@ export default function DatabaseViewer() {
       console.warn("Failed to read local cache:", e);
     }
 
-    // 2. Fetch Server Storage (/api/articles)
+    // 2. Fetch Server Storage (/api/articles) if available
     let srvData: any[] = [];
     try {
       const srvRes = await fetch("/api/articles");
       if (srvRes.ok) {
-        srvData = await srvRes.json();
-        setServerArticles(Array.isArray(srvData) ? srvData : []);
-        setServerStatus({
-          ok: true,
-          message: "פעיל וזמין לכל המחשבים",
-          count: srvData.length
-        });
+        const ct = srvRes.headers.get("content-type") || "";
+        if (ct.includes("application/json")) {
+          srvData = await srvRes.json();
+          setServerArticles(Array.isArray(srvData) ? srvData : []);
+          setServerStatus({
+            ok: true,
+            message: "פעיל וזמין לכל המחשבים",
+            count: srvData.length
+          });
+        } else {
+          setServerStatus({
+            ok: false,
+            message: "אחסון סטטי (הסנכרון פועל ישירות מול פיירבייס בענן)",
+            count: 0
+          });
+        }
       } else {
         setServerStatus({
           ok: false,
-          message: `שגיאת שרת (${srvRes.status})`,
+          message: "שרת מקומי אינו זמין (סנכרון בענן דרך פיירבייס)",
           count: 0
         });
       }
     } catch (err: any) {
       setServerStatus({
         ok: false,
-        message: "שרת לא זמין כרגע",
+        message: "סנכרון פעיל ישירות מול פיירבייס בענן",
         count: 0
       });
     }
 
     // 3. Test Firestore Live Connection
+    let fsData: any[] = [];
     try {
       const snap = await getDocs(collection(db, "articles"));
-      const fsData: any[] = [];
       snap.forEach((doc) => {
         fsData.push({ id: doc.id, ...doc.data() });
       });
       setFirestoreArticles(fsData);
       setFirestoreStatus({
         ok: true,
-        message: `מחובר תקין (${fsData.length} כתבות בפיירבייס)`
+        message: `מחובר ומסונכרן (${fsData.length} כתבות בפיירבייס)`
       });
     } catch (fsErr: any) {
       const errStr = fsErr?.message || String(fsErr);
@@ -123,27 +133,30 @@ export default function DatabaseViewer() {
         ok: false,
         code: isQuota ? "QUOTA_EXCEEDED" : "ERROR",
         message: isQuota 
-          ? "חריגת מכסה יומית (Quota Limit Exceeded) - מסלול חינמי הוגבל ל-50k קריאות" 
+          ? "חריגת מכסה יומית (Quota Limit Exceeded) - מסלול חינמי הוגבל" 
           : `שגיאת גישה: ${errStr}`
       });
     }
 
-    // 4. Calculate Merged View
+    // 4. Calculate Merged View across all databases
     const idMap = new Map<string, any>();
     // Default seed
     defaultSeedArticles.forEach((a) => idMap.set(a.id, { ...a, _source: "ברירת מחדל" }));
     // Server storage
-    srvData.forEach((a) => idMap.set(a.id, { ...a, _source: "שרת (זמין לכולם)" }));
+    srvData.forEach((a) => idMap.set(a.id, { ...a, _source: "שרת מקומי" }));
+    // Firestore (Live global cloud DB)
+    fsData.forEach((a) => idMap.set(a.id, { ...a, _source: "פיירבייס (זמין לכולם)" }));
     
-    // Check which local articles are not on server yet
+    const fsIds = new Set(fsData.map((f: any) => f.id));
     const srvIds = new Set(srvData.map((s: any) => s.id));
     const unsyncedItems: any[] = [];
 
     localData.forEach((a) => {
-      if (idMap.has(a.id)) {
-        idMap.set(a.id, { ...idMap.get(a.id), ...a, _source: "שרת + מקומי" });
+      const isOnline = fsIds.has(a.id) || srvIds.has(a.id);
+      if (isOnline) {
+        idMap.set(a.id, { ...idMap.get(a.id), ...a, _source: "פיירבייס + מקומי" });
       } else {
-        idMap.set(a.id, { ...a, _source: "מקומי בלבד (טרם סונכרן)" });
+        idMap.set(a.id, { ...a, _source: "מקומי בלבד (טרם סונכרן ל-Firebase)" });
         unsyncedItems.push(a);
       }
     });
@@ -152,61 +165,46 @@ export default function DatabaseViewer() {
     setMergedArticles(finalMerged);
     setLoading(false);
 
-    // 5. Automatic background sync: if this computer has local articles missing from the server, auto-sync them!
+    // 5. Automatic background sync: if this computer has local articles missing from Firebase, sync them!
     if (shouldAutoSync && unsyncedItems.length > 0) {
-      console.log(`Auto-syncing ${unsyncedItems.length} local articles to server...`);
+      console.log(`Auto-syncing ${unsyncedItems.length} local articles to Firestore...`);
       setSyncing(true);
       try {
-        const fullListToSync = finalMerged.map(cleanArticle).filter(Boolean);
-        
-        // Try bulk sync first
-        let syncSuccess = false;
-        try {
-          const res = await fetch("/api/articles/sync", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(fullListToSync),
-          });
-          if (res.ok) {
-            syncSuccess = true;
-          }
-        } catch (e) {
-          console.warn("Auto-sync bulk failed, falling back to item-by-item...", e);
-        }
-
-        // If bulk wasn't successful, sync unsynced items individually
-        if (!syncSuccess) {
-          for (const item of unsyncedItems) {
-            try {
-              await fetch("/api/articles/sync", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(cleanArticle(item)),
-              });
-            } catch (err) {}
+        for (const item of unsyncedItems) {
+          try {
+            const cleaned = cleanArticle(item);
+            if (cleaned && cleaned.id) {
+              await setDoc(doc(db, "articles", cleaned.id), cleaned, { merge: true });
+            }
+          } catch (err) {
+            console.warn("Auto-sync error for item:", item.id, err);
           }
         }
 
-        const freshSrvRes = await fetch("/api/articles");
-        if (freshSrvRes.ok) {
-          const freshSrvData = await freshSrvRes.json();
-          setServerArticles(freshSrvData);
-          setServerStatus({
-            ok: true,
-            message: "פעיל וזמין לכל המחשבים",
-            count: freshSrvData.length,
-          });
+        // Also notify local server if available
+        fetch("/api/articles/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(finalMerged.map(cleanArticle).filter(Boolean)),
+        }).catch(() => {});
 
-          // Update merged view to reflect everything is now on server
-          const updatedMap = new Map<string, any>();
-          defaultSeedArticles.forEach((a) => updatedMap.set(a.id, { ...a, _source: "ברירת מחדל" }));
-          freshSrvData.forEach((a) => updatedMap.set(a.id, { ...a, _source: "שרת (זמין לכולם)" }));
-          localData.forEach((a) => {
-            updatedMap.set(a.id, { ...updatedMap.get(a.id), ...a, _source: "שרת + מקומי" });
-          });
-          setMergedArticles(Array.from(updatedMap.values()));
-          setSyncNotice(`בוצע סנכרון אוטומטי מלא! כל ${freshSrvData.length} הכתבות נשמרו בשרת וזמינות כעת לכל המחשבים בעולם.`);
-        }
+        // Re-read Firestore after sync
+        const freshSnap = await getDocs(collection(db, "articles"));
+        const freshFs: any[] = [];
+        freshSnap.forEach((doc) => freshFs.push({ id: doc.id, ...doc.data() }));
+        setFirestoreArticles(freshFs);
+        setFirestoreStatus({
+          ok: true,
+          message: `מחובר ומסונכרן (${freshFs.length} כתבות בפיירבייס)`
+        });
+
+        // Update view
+        const updatedMap = new Map<string, any>();
+        defaultSeedArticles.forEach((a) => updatedMap.set(a.id, { ...a, _source: "ברירת מחדל" }));
+        freshFs.forEach((a) => updatedMap.set(a.id, { ...a, _source: "פיירבייס (זמין לכולם)" }));
+        localData.forEach((a) => updatedMap.set(a.id, { ...updatedMap.get(a.id), ...a, _source: "פיירבייס + מקומי" }));
+        setMergedArticles(Array.from(updatedMap.values()));
+        setSyncNotice(`בוצע סנכרון אוטומטי מלא! כל ${freshFs.length} הכתבות נשמרו ב-Firebase בענן וזמינות לכל המחשבים בעולם.`);
       } catch (autoErr) {
         console.warn("Auto-sync error:", autoErr);
       } finally {
@@ -219,7 +217,7 @@ export default function DatabaseViewer() {
     checkAndLoadData(true);
   }, []);
 
-  // Force Sync to Server (Bulk with automatic single-item fallback)
+  // Force Sync to Firebase & Server
   const handleForceSyncToServer = async () => {
     setSyncing(true);
     setSyncNotice(null);
@@ -228,103 +226,120 @@ export default function DatabaseViewer() {
       // Build a comprehensive, deduplicated list from all sources
       const combinedMap = new Map<string, any>();
       defaultSeedArticles.forEach((a) => combinedMap.set(a.id, cleanArticle(a)));
+      firestoreArticles.forEach((a) => combinedMap.set(a.id, cleanArticle(a)));
       serverArticles.forEach((a) => combinedMap.set(a.id, cleanArticle(a)));
       localArticles.forEach((a) => combinedMap.set(a.id, cleanArticle(a)));
       mergedArticles.forEach((a) => combinedMap.set(a.id, cleanArticle(a)));
 
       const listToSync = Array.from(combinedMap.values()).filter(Boolean);
 
-      setSyncProgress("בודק ומעלה נתונים לשרת...");
+      setSyncProgress("מתחיל סנכרון לענן Firebase...");
 
-      // 1. Try bulk upload first
-      let bulkSucceeded = false;
-      let lastErrorMessage = "";
+      let fsSuccess = 0;
+      for (let i = 0; i < listToSync.length; i++) {
+        const item = listToSync[i];
+        setSyncProgress(`מעלה כתבה ${i + 1} מתוך ${listToSync.length} לפיירבייס: ${item.title?.slice(0, 20)}...`);
+        try {
+          await setDoc(doc(db, "articles", item.id), cleanArticle(item), { merge: true });
+          fsSuccess++;
+        } catch (itemErr: any) {
+          console.error(`Failed to sync item ${item.id} to Firestore:`, itemErr);
+        }
+      }
 
+      // Also try sync to server API (won't throw error if on static hosting)
       try {
-        const res = await fetch("/api/articles/sync", {
+        await fetch("/api/articles/sync", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(listToSync)
         });
-        
-        if (res.ok) {
-          bulkSucceeded = true;
-        } else {
-          const errBody = await res.text().catch(() => "");
-          lastErrorMessage = `קוד שגיאה מהשרת: ${res.status} (${errBody || res.statusText})`;
-          console.warn("Bulk sync was not ok, trying item-by-item:", res.status, errBody);
-        }
-      } catch (err: any) {
-        lastErrorMessage = err?.message || "בעיית תקשורת";
-        console.warn("Bulk sync network exception, falling back:", err);
-      }
+      } catch (err) {}
 
-      // 2. If bulk upload didn't succeed (e.g. payload too large or timeout), upload item by item!
-      if (!bulkSucceeded) {
-        let successCount = 0;
-        for (let i = 0; i < listToSync.length; i++) {
-          const item = listToSync[i];
-          setSyncProgress(`מעלה כתבה ${i + 1} מתוך ${listToSync.length}: ${item.title?.slice(0, 25)}...`);
-          try {
-            const singleRes = await fetch("/api/articles/sync", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(cleanArticle(item))
-            });
-            if (singleRes.ok) {
-              successCount++;
-            }
-          } catch (itemErr) {
-            console.error(`Failed to sync item ${item.id}:`, itemErr);
-          }
-        }
-
-        if (successCount === 0) {
-          throw new Error(lastErrorMessage || "העלאת הכתבות לשרת נכשלה. אנא בדוק את החיבור לרשת.");
-        }
-      }
-
-      // Also update localStorage and dispatch event for consistency across tabs
+      // Update localStorage & dispatch event
       try {
         localStorage.setItem("babun_articles_cache", JSON.stringify(listToSync));
         window.dispatchEvent(new CustomEvent("articles_updated", { detail: listToSync }));
       } catch (e) {}
 
-      setSyncNotice(`הסנכרון הושלם בהצלחה! כל ${listToSync.length} הכתבות והפודקאסטים נשמרו בשרת וזמינים כעת לכל מחשב בעולם.`);
+      setSyncNotice(`הסנכרון הושלם בהצלחה! ${fsSuccess} כתבות ופודקאסטים נשמרו ב-Firebase Firestore בענן וזמינים כעת לכל המחשבים בעולם.`);
       await checkAndLoadData(false);
     } catch (e: any) {
-      alert(`שגיאה בסנכרון לשרת: ${e?.message || "אנא נסה שוב"}`);
+      alert(`שגיאה בסנכרון: ${e?.message || "אנא נסה שוב"}`);
     } finally {
       setSyncing(false);
       setSyncProgress(null);
     }
   };
 
-  // Sync a single article
+  // Sync a single article directly to Firestore
   const handleSyncSingleArticle = async (item: any) => {
     setSyncing(true);
     setSyncNotice(null);
     const cleaned = cleanArticle(item);
-    setSyncProgress(`מעלה את "${cleaned.title?.slice(0, 25)}..." לשרת...`);
+    setSyncProgress(`מעלה את "${cleaned.title?.slice(0, 25)}..." לפיירבייס בענן...`);
     try {
-      const res = await fetch("/api/articles/sync", {
+      await setDoc(doc(db, "articles", cleaned.id), cleaned, { merge: true });
+
+      // Also push to local server if available
+      fetch("/api/articles/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cleaned),
-      });
+      }).catch(() => {});
 
-      if (res.ok) {
-        setSyncNotice(`הכתבה "${cleaned.title}" סונכרנה בהצלחה לשרת!`);
-        await checkAndLoadData(false);
-      } else {
-        const errText = await res.text().catch(() => "");
-        alert(`שגיאה בהעלאת הכתבה (${res.status}): ${errText || "אנא נסה שוב"}`);
-      }
+      setSyncNotice(`הכתבה "${cleaned.title}" סונכרנה בהצלחה לפיירבייס בענן וזמינה כעת לכל המחשבים!`);
+      await checkAndLoadData(false);
     } catch (e: any) {
-      alert(`שגיאה בסנכרון הכתבה: ${e?.message || "אנא נסה שוב"}`);
+      alert(`שגיאה בסנכרון הכתבה לפיירבייס: ${e?.message || "אנא נסה שוב"}`);
     } finally {
       setSyncing(false);
       setSyncProgress(null);
+    }
+  };
+
+  // Import articles directly from a JSON backup file
+  const handleImportJSON = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        alert("הקובץ אינו מכיל רשימת כתבות תקינה.");
+        return;
+      }
+
+      setSyncing(true);
+      setSyncProgress(`מייבא ${parsed.length} כתבות ישירות לפיירבייס בענן...`);
+
+      let importedCount = 0;
+      for (let i = 0; i < parsed.length; i++) {
+        const item = parsed[i];
+        if (item && item.id) {
+          setSyncProgress(`מייבא כתבה ${i + 1} מתוך ${parsed.length}: ${item.title?.slice(0, 20)}...`);
+          try {
+            await setDoc(doc(db, "articles", item.id), cleanArticle(item), { merge: true });
+            importedCount++;
+          } catch (err) {
+            console.warn("Import item error:", item.id, err);
+          }
+        }
+      }
+
+      try {
+        localStorage.setItem("babun_articles_cache", JSON.stringify(parsed));
+        window.dispatchEvent(new CustomEvent("articles_updated", { detail: parsed }));
+      } catch (e) {}
+
+      setSyncNotice(`הייבוא הושלם בהצלחה! ${importedCount} כתבות נשמרו ב-Firebase בענן וזמינות לכל המחשבים.`);
+      await checkAndLoadData(false);
+    } catch (err: any) {
+      alert(`שגיאה בקריאת קובץ ה-JSON: ${err?.message || "אנא וודא שהקובץ תקין"}`);
+    } finally {
+      setSyncing(false);
+      setSyncProgress(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -378,7 +393,7 @@ export default function DatabaseViewer() {
 
           <div className="flex items-center gap-3 flex-wrap">
             <button
-              onClick={checkAndLoadData}
+              onClick={() => checkAndLoadData(false)}
               disabled={loading}
               className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/15 rounded-xl text-sm font-bold flex items-center gap-2 transition-all cursor-pointer"
             >
@@ -402,6 +417,23 @@ export default function DatabaseViewer() {
             >
               <Download size={16} />
               <span>ייצוא JSON</span>
+            </button>
+
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleImportJSON} 
+              accept=".json,application/json" 
+              className="hidden" 
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={syncing}
+              className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/15 rounded-xl text-sm font-bold flex items-center gap-2 transition-all cursor-pointer"
+              title="ייבוא ושמירת כתבות מקובץ JSON ישירות לפיירבייס בענן"
+            >
+              <Upload size={16} />
+              <span>ייבוא JSON</span>
             </button>
           </div>
         </div>

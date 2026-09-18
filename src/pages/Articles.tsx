@@ -732,11 +732,13 @@ export default function Articles() {
         setSelectedArticle(null);
       }
 
-      await fetch("/api/articles/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedList),
-      });
+      try {
+        await fetch("/api/articles/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedList),
+        });
+      } catch (e) {}
 
       alert("הכתבה נמחקה בהצלחה!");
     } catch (err: any) {
