@@ -18,12 +18,14 @@ import {
   Calendar,
   Sparkles,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  Play
 } from "lucide-react";
 import { motion } from "motion/react";
 import { collection, getDocs, doc, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { defaultSeedArticles } from "../data/defaultArticles";
+import UniversalMediaPlayer from "../components/common/UniversalMediaPlayer";
 
 export default function DatabaseViewer() {
   const [activeTab, setActiveTab] = useState<"articles" | "leads" | "raw">("articles");
@@ -626,15 +628,14 @@ export default function DatabaseViewer() {
                         </td>
                         <td className="p-4 text-xs max-w-[160px] truncate text-zinc-400 font-mono">
                           {item.link && item.link !== "#" ? (
-                            <a 
-                              href={item.link} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-blue-400 hover:underline flex items-center gap-1"
+                            <button 
+                              onClick={() => setSelectedItem(item)}
+                              className="text-babun-accent hover:underline flex items-center gap-1 cursor-pointer font-bold"
+                              title="צפייה בנגן המוטמע באתר"
                             >
+                              <Play size={12} className="shrink-0 fill-current" />
                               <span className="truncate">{item.link}</span>
-                              <ExternalLink size={12} className="shrink-0" />
-                            </a>
+                            </button>
                           ) : (
                             <span className="text-zinc-600">—</span>
                           )}

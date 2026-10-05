@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Link, useSearchParams, useParams, useNavigate } from "react-router-dom";
 import Markdown from "react-markdown";
@@ -380,6 +380,15 @@ export default function Articles() {
   const [selectedPodcast, setSelectedPodcast] = useState<any | null>(null);
   const [isPlayingPodcast, setIsPlayingPodcast] = useState<boolean>(false);
   const [heroVideoLoaded, setHeroVideoLoaded] = useState<boolean>(false);
+  const podcastStageRef = useRef<HTMLDivElement>(null);
+
+  const handlePlayPodcast = (podcast: any) => {
+    setSelectedPodcast(podcast);
+    setIsPlayingPodcast(true);
+    if (podcastStageRef.current) {
+      podcastStageRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
 
   // Helper to extract YouTube video ID from links
   const getYoutubeId = (url: string) => {
@@ -1382,8 +1391,243 @@ export default function Articles() {
                   המנהל יעלה תכנים חמים בקרוב מאוד.
                 </p>
               </div>
+            ) : activeCategory === "podcast" ? (
+              /* DEDICATED IN-SITE EMBEDDED PODCAST HUB & STAGE */
+              <div className="space-y-16" ref={podcastStageRef}>
+                {(() => {
+                  const activePod = selectedPodcast || (filteredArticles.length > 0 ? filteredArticles[0] : null);
+                  if (!activePod) return null;
+                  const mediaUrl = formatExternalUrl(activePod.link);
+
+                  return (
+                    <div className="bg-white rounded-babun-xl border border-babun-primary/10 p-6 md:p-10 shadow-xl overflow-hidden text-right">
+                      {/* Top Header Badge & Title */}
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-babun-primary/10 pb-6 mb-8">
+                        <div className="flex items-center gap-3.5">
+                          <div className="w-12 h-12 rounded-full bg-babun-accent/20 text-babun-primary flex items-center justify-center font-bold shrink-0">
+                            <Play size={22} className="fill-babun-accent text-babun-primary ml-0.5" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold uppercase tracking-widest text-babun-accent bg-babun-primary px-2.5 py-0.5 rounded-sm">
+                                נגן פודקאסט מוטמע באתר
+                              </span>
+                              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-sm border border-emerald-200">
+                                מתנגן ישירות כאן
+                              </span>
+                            </div>
+                            <h3 className="text-xl md:text-2xl lg:text-3xl font-black font-display text-babun-primary mt-1.5 leading-snug">
+                              {activePod.title}
+                            </h3>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-xs font-bold text-babun-primary/60 font-mono shrink-0">
+                          <Calendar size={14} />
+                          <span>{activePod.date}</span>
+                        </div>
+                      </div>
+
+                      {/* The Main Embedded Media Player (YouTube, Spotify, etc.) */}
+                      {mediaUrl && detectMediaType(mediaUrl) !== "unknown" ? (
+                        <div className="w-full aspect-video rounded-babun-lg overflow-hidden shadow-2xl bg-black mb-8 border border-babun-primary/15">
+                          <UniversalMediaPlayer
+                            url={mediaUrl}
+                            title={activePod.title}
+                            poster={getDisplayImage(activePod.image || activePod.innerImage)}
+                            autoPlay={isPlayingPodcast}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full aspect-video rounded-babun-lg overflow-hidden shadow-md bg-zinc-100 mb-8 border border-babun-primary/10 flex items-center justify-center">
+                          <ImageWithSkeleton
+                            src={getDisplayImage(activePod.image || activePod.innerImage)}
+                            className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                            alt={activePod.title}
+                          />
+                        </div>
+                      )}
+
+                      {/* Active Episode Details & Action Buttons */}
+                      <div className="flex flex-col md:flex-row items-start justify-between gap-6 pt-2">
+                        <div className="flex-1 space-y-3">
+                          {activePod.summary && (
+                            <p className="text-babun-primary/80 text-sm md:text-base leading-relaxed font-normal">
+                              {activePod.summary}
+                            </p>
+                          )}
+                          {activePod.content && (
+                            <p className="text-babun-primary/60 text-xs md:text-sm line-clamp-3 leading-relaxed">
+                              {activePod.content.replace(/[#*`]/g, '')}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-3 shrink-0 flex-wrap">
+                          <button
+                            onClick={() => handleSelectArticle(activePod)}
+                            className="bg-babun-primary hover:bg-black text-white px-5 py-3 rounded-babun-sm font-display font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                          >
+                            <span>עמוד הפרק המלא והתמלול</span>
+                            <ArrowLeft size={15} />
+                          </button>
+
+                          {isAdminMode && activePod.id && (
+                            <button
+                              onClick={(e) => handleEditArticleClick(activePod, e)}
+                              className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 border border-amber-500/20 px-3.5 py-3 rounded-babun-sm text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Edit size={14} />
+                              <span>ערוך פרק</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Playlist of All Other Podcast Episodes */}
+                <div>
+                  <div className="flex items-center justify-between mb-8 pb-3 border-b border-babun-primary/10 text-right">
+                    <div>
+                      <h4 className="text-xl md:text-2xl font-black font-display text-babun-primary">
+                        כל פרקי הפודקאסט להאזנה וצפייה ישירה באתר
+                      </h4>
+                      <p className="text-xs text-babun-primary/60 mt-1">
+                        לחץ על "נגן פרק זה" כדי לטעון ולהשמיע אותו ישירות בנגן המובנה למעלה – ללא יציאה מהאתר
+                      </p>
+                    </div>
+                    <span className="text-xs font-bold bg-babun-primary/5 px-3 py-1.5 rounded-full text-babun-primary font-mono">
+                      {filteredArticles.length} פרקים
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {filteredArticles.map((article, idx) => {
+                      const isSelected = selectedPodcast?.id === article.id || (!selectedPodcast && idx === 0);
+
+                      return (
+                        <motion.div
+                          key={article.id || idx}
+                          layout
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: idx * 0.05 }}
+                          className={`group text-right flex flex-col justify-between bg-white p-6 rounded-babun-xl border transition-all duration-300 shadow-md hover:shadow-xl ${
+                            isSelected
+                              ? "border-babun-accent ring-2 ring-babun-accent/30 bg-amber-50/20"
+                              : "border-babun-primary/5 hover:border-babun-accent/35"
+                          }`}
+                        >
+                          {/* Thumbnail with interactive Play overlay */}
+                          <div 
+                            onClick={() => handlePlayPodcast(article)}
+                            className="w-full aspect-[16/10] bg-[#efede8] overflow-hidden rounded-babun-lg relative border border-babun-primary/5 shrink-0 shadow-sm cursor-pointer"
+                          >
+                            <ImageWithSkeleton
+                              src={getDisplayImage(article.image || article.innerImage)}
+                              className="w-full h-full object-cover group-hover:scale-103 transition-all duration-700"
+                              referrerPolicy="no-referrer"
+                              alt={article.title}
+                            />
+                            <div className="absolute top-3 right-3 bg-babun-accent text-babun-primary font-display font-bold px-2 py-0.5 text-[9px] uppercase tracking-wider rounded-babun-xs z-10 pointer-events-none">
+                              {article.category || "פודקאסט"}
+                            </div>
+                            <div className={`absolute bottom-3 left-3 p-2 rounded-full transition-all z-10 ${
+                              isSelected 
+                                ? "bg-babun-accent text-babun-primary opacity-100 shadow-lg scale-110" 
+                                : "bg-babun-primary/80 backdrop-blur-xs text-white opacity-85 group-hover:opacity-100 group-hover:bg-babun-accent group-hover:text-babun-primary"
+                            }`}>
+                              <Play size={16} className="fill-current ml-0.5" />
+                            </div>
+                            {isSelected && (
+                              <div className="absolute top-3 left-3 bg-emerald-600 text-white font-bold text-[9px] px-2 py-0.5 rounded-babun-xs shadow-sm flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                                <span>מתנגן כעת</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Info contents */}
+                          <div className="flex-1 w-full flex flex-col justify-between pt-4">
+                            <div>
+                              <div className="flex items-center gap-2 justify-end text-[11px] font-bold opacity-30 mb-2 font-mono">
+                                <span>{article.date}</span>
+                                <Calendar size={12} />
+                              </div>
+                              <h5 
+                                onClick={() => handlePlayPodcast(article)}
+                                className="text-lg font-display font-bold text-babun-primary group-hover:text-babun-accent transition-colors leading-snug line-clamp-2 cursor-pointer"
+                              >
+                                {article.title}
+                              </h5>
+                              {article.summary && (
+                                <p className="text-babun-primary/60 text-xs mt-2.5 line-clamp-2 font-light leading-relaxed">
+                                  {article.summary}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="mt-5 pt-4 border-t border-babun-primary/5 flex items-center justify-between gap-2">
+                              <button
+                                onClick={() => handlePlayPodcast(article)}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-babun-sm text-xs font-bold font-display cursor-pointer transition-all ${
+                                  isSelected
+                                    ? "bg-babun-accent text-babun-primary shadow-xs"
+                                    : "bg-babun-primary text-white hover:bg-black"
+                                }`}
+                              >
+                                <Play size={12} className="fill-current ml-0.5" />
+                                <span>{isSelected ? "מתנגן כעת למעלה" : "נגן פרק זה"}</span>
+                              </button>
+
+                              <button
+                                onClick={() => handleSelectArticle(article)}
+                                className="text-babun-primary/60 hover:text-babun-primary text-xs font-bold flex items-center gap-1 cursor-pointer"
+                              >
+                                <span>פרטי הפרק</span>
+                                <ArrowLeft size={12} />
+                              </button>
+                            </div>
+
+                            {isAdminMode && article.id && (
+                              <div className="flex items-center justify-between mt-3 pt-2 border-t border-babun-primary/5 border-dashed">
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleDeleteArticle(article.id, article.title);
+                                  }}
+                                  className="text-red-500 hover:text-red-700 p-1 cursor-pointer rounded-babun-sm hover:bg-red-50 transition-colors"
+                                  title="מחק כתבה"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleEditArticleClick(article, e);
+                                  }}
+                                  className="text-babun-primary hover:text-babun-accent p-1 cursor-pointer rounded-babun-sm hover:bg-babun-primary/5 transition-colors flex items-center gap-1 text-xs font-bold"
+                                  title="ערוך כתבה"
+                                >
+                                  <Edit size={13} />
+                                  <span>ערוך</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             ) : (
-              /* STANDARD ARTICLE & MAGAZINE VIEW FOR ALL CATEGORIES */
+              /* STANDARD ARTICLE & MAGAZINE VIEW FOR ALL OTHER CATEGORIES */
               <div className="space-y-16">
                 {filteredArticles.length > 0 && (() => {
                   const firstArticle = filteredArticles[0];
@@ -1804,7 +2048,7 @@ export default function Articles() {
                       onChange={(e) => setFormCategory(e.target.value)}
                       className="w-full border border-babun-primary/15 rounded-babun-md px-4 py-3.5 text-sm focus:outline-hidden focus:border-babun-accent bg-white text-right"
                     >
-                      <option value="podcast">פודקאסטים (הפניה ישירה לעמוד המקור)</option>
+                      <option value="podcast">פודקאסטים (נגן מוטמע באתר)</option>
                       <option value="weekly">טור שבועי</option>
                       <option value="articles">כתבות ומאמרים</option>
                       <option value="kavei">קווי מידע</option>
@@ -1848,19 +2092,32 @@ export default function Articles() {
                       ✨ כל קישור שמוזן כאן מוטמע ישירות באתר בנגן מובנה – ללא פתיחת חלון חדש וללא יציאה מהאתר!
                     </p>
                     {formLink && detectMediaType(formLink) !== "unknown" && (
-                      <div className="mt-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-sm flex items-center justify-end gap-1">
-                        <span>
-                          {detectMediaType(formLink) === "hls" && "✨ זוהה שידור וידאו HLS / Bunny Stream – יוטמע בנגן מובנה באתר!"}
-                          {detectMediaType(formLink) === "youtube" && "✨ זוהה סרטון YouTube – יוטמע בנגן וידאו מובנה באתר!"}
-                          {detectMediaType(formLink) === "vimeo" && "✨ זוהה סרטון Vimeo – יוטמע בנגן וידאו מובנה באתר!"}
-                          {detectMediaType(formLink) === "spotify" && "✨ זוהה פודקאסט Spotify – יוטמע בנגן Spotify מובנה באתר!"}
-                          {detectMediaType(formLink) === "apple_podcasts" && "✨ זוהה Apple Podcasts – יוטמע בנגן פודקאסטים מובנה באתר!"}
-                          {detectMediaType(formLink) === "audio" && "✨ זוהה קובץ שמע / פודקאסט – יוטמע בנגן שמע ייעודי באתר!"}
-                          {detectMediaType(formLink) === "video" && "✨ זוהה קובץ וידאו MP4 – יוטמע ישירות באתר!"}
-                          {detectMediaType(formLink) === "iframe" && "✨ זוהה קישור רשת – יוטמע ישירות באתר ללא יציאה לחלון אחר!"}
-                        </span>
-                        <CheckCircle size={13} className="text-emerald-600" />
-                      </div>
+                      <>
+                        <div className="mt-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-sm flex items-center justify-end gap-1">
+                          <span>
+                            {detectMediaType(formLink) === "hls" && "✨ זוהה שידור וידאו HLS / Bunny Stream – יוטמע בנגן מובנה באתר!"}
+                            {detectMediaType(formLink) === "youtube" && "✨ זוהה סרטון YouTube – יוטמע בנגן וידאו מובנה באתר!"}
+                            {detectMediaType(formLink) === "vimeo" && "✨ זוהה סרטון Vimeo – יוטמע בנגן וידאו מובנה באתר!"}
+                            {detectMediaType(formLink) === "spotify" && "✨ זוהה פודקאסט Spotify – יוטמע בנגן Spotify מובנה באתר!"}
+                            {detectMediaType(formLink) === "apple_podcasts" && "✨ זוהה Apple Podcasts – יוטמע בנגן פודקאסטים מובנה באתר!"}
+                            {detectMediaType(formLink) === "audio" && "✨ זוהה קובץ שמע / פודקאסט – יוטמע בנגן שמע ייעודי באתר!"}
+                            {detectMediaType(formLink) === "video" && "✨ זוהה קובץ וידאו MP4 – יוטמע ישירות באתר!"}
+                            {detectMediaType(formLink) === "iframe" && "✨ זוהה קישור רשת – יוטמע ישירות באתר ללא יציאה לחלון אחר!"}
+                          </span>
+                          <CheckCircle size={13} className="text-emerald-600" />
+                        </div>
+                        <div className="mt-3 bg-black/5 p-3 rounded-babun-md border border-babun-primary/10">
+                          <span className="text-[11px] font-bold text-babun-primary block mb-2 text-right">
+                            🎬 תצוגה מקדימה ישירה של הנגן המוטמע:
+                          </span>
+                          <div className="w-full max-w-sm mx-auto aspect-video rounded-md overflow-hidden shadow-sm">
+                            <UniversalMediaPlayer
+                              url={formLink}
+                              title="תצוגה מקדימה של נגן מוטמע"
+                            />
+                          </div>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
