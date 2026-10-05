@@ -987,24 +987,42 @@ export default function Articles() {
 
         <div className="max-w-5xl mx-auto px-4 md:px-8 pt-10 md:pt-14 pb-24">
           {/* Main Hero Image / Embedded Video / Podcast Player */}
-          {selectedArticle.link && detectMediaType(selectedArticle.link) !== "unknown" ? (
-            <div className="mb-12">
-              <UniversalMediaPlayer
-                url={selectedArticle.link}
-                title={selectedArticle.title}
-                poster={getDisplayImage(selectedArticle.image || selectedArticle.innerImage)}
-              />
-            </div>
-          ) : (
-            <div className="w-full overflow-hidden rounded-sm mb-12 shadow-sm border border-zinc-100 bg-zinc-50">
-              <img
-                src={getDisplayImage(selectedArticle.image || selectedArticle.innerImage)}
-                className="w-full max-h-[640px] object-cover"
-                referrerPolicy="no-referrer"
-                alt={selectedArticle.title}
-              />
-            </div>
-          )}
+          {(() => {
+            const extUrl = formatExternalUrl(selectedArticle.link);
+            const isMedia = extUrl && detectMediaType(extUrl) !== "unknown";
+
+            if (isMedia) {
+              return (
+                <div className="mb-12 space-y-3">
+                  <div className="w-full aspect-video rounded-babun-lg overflow-hidden shadow-2xl bg-black border border-babun-primary/15">
+                    <UniversalMediaPlayer
+                      url={extUrl}
+                      title={selectedArticle.title}
+                      poster={getDisplayImage(selectedArticle.image || selectedArticle.innerImage)}
+                      autoPlay={false}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-zinc-500 bg-zinc-50 border border-zinc-200/80 px-4 py-2.5 rounded-sm">
+                    <span className="font-bold text-babun-primary font-display">נגן מוטמע באתר רייניץ</span>
+                    <span className="text-emerald-700 font-bold bg-emerald-100/60 px-2.5 py-0.5 rounded-xs">
+                      הפרק מתנגן ישירות בתוך האתר • ללא פתיחת חלון חדש
+                    </span>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div className="w-full overflow-hidden rounded-sm mb-12 shadow-sm border border-zinc-100 bg-zinc-50">
+                <img
+                  src={getDisplayImage(selectedArticle.image || selectedArticle.innerImage)}
+                  className="w-full max-h-[640px] object-cover"
+                  referrerPolicy="no-referrer"
+                  alt={selectedArticle.title}
+                />
+              </div>
+            );
+          })()}
 
           {/* Two-Column Layout (Article Body + Sticky Share Sidebar) */}
           <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start justify-between">
@@ -1469,7 +1487,7 @@ export default function Articles() {
                             onClick={() => handleSelectArticle(activePod)}
                             className="bg-babun-primary hover:bg-black text-white px-5 py-3 rounded-babun-sm font-display font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
                           >
-                            <span>עמוד הפרק המלא והתמלול</span>
+                            <span>צפייה והאזנה בעמוד הפרק המלא באתר רייניץ</span>
                             <ArrowLeft size={15} />
                           </button>
 
@@ -1515,7 +1533,11 @@ export default function Articles() {
                           initial={{ opacity: 0, y: 15 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: idx * 0.05 }}
-                          className={`group text-right flex flex-col justify-between bg-white p-6 rounded-babun-xl border transition-all duration-300 shadow-md hover:shadow-xl ${
+                          onClick={(e) => {
+                            if ((e.target as HTMLElement).closest("button")) return;
+                            handleSelectArticle(article);
+                          }}
+                          className={`group cursor-pointer text-right flex flex-col justify-between bg-white p-6 rounded-babun-xl border transition-all duration-300 shadow-md hover:shadow-xl ${
                             isSelected
                               ? "border-babun-accent ring-2 ring-babun-accent/30 bg-amber-50/20"
                               : "border-babun-primary/5 hover:border-babun-accent/35"
@@ -1523,7 +1545,7 @@ export default function Articles() {
                         >
                           {/* Thumbnail with interactive Play overlay */}
                           <div 
-                            onClick={() => handlePlayPodcast(article)}
+                            onClick={() => handleSelectArticle(article)}
                             className="w-full aspect-[16/10] bg-[#efede8] overflow-hidden rounded-babun-lg relative border border-babun-primary/5 shrink-0 shadow-sm cursor-pointer"
                           >
                             <ImageWithSkeleton
@@ -1535,11 +1557,7 @@ export default function Articles() {
                             <div className="absolute top-3 right-3 bg-babun-accent text-babun-primary font-display font-bold px-2 py-0.5 text-[9px] uppercase tracking-wider rounded-babun-xs z-10 pointer-events-none">
                               {article.category || "פודקאסט"}
                             </div>
-                            <div className={`absolute bottom-3 left-3 p-2 rounded-full transition-all z-10 ${
-                              isSelected 
-                                ? "bg-babun-accent text-babun-primary opacity-100 shadow-lg scale-110" 
-                                : "bg-babun-primary/80 backdrop-blur-xs text-white opacity-85 group-hover:opacity-100 group-hover:bg-babun-accent group-hover:text-babun-primary"
-                            }`}>
+                            <div className="absolute bottom-3 left-3 p-2 rounded-full transition-all z-10 bg-babun-primary/80 backdrop-blur-xs text-white group-hover:bg-babun-accent group-hover:text-babun-primary">
                               <Play size={16} className="fill-current ml-0.5" />
                             </div>
                             {isSelected && (
@@ -1558,7 +1576,7 @@ export default function Articles() {
                                 <Calendar size={12} />
                               </div>
                               <h5 
-                                onClick={() => handlePlayPodcast(article)}
+                                onClick={() => handleSelectArticle(article)}
                                 className="text-lg font-display font-bold text-babun-primary group-hover:text-babun-accent transition-colors leading-snug line-clamp-2 cursor-pointer"
                               >
                                 {article.title}
@@ -1572,23 +1590,27 @@ export default function Articles() {
 
                             <div className="mt-5 pt-4 border-t border-babun-primary/5 flex items-center justify-between gap-2">
                               <button
-                                onClick={() => handlePlayPodcast(article)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-babun-sm text-xs font-bold font-display cursor-pointer transition-all ${
-                                  isSelected
-                                    ? "bg-babun-accent text-babun-primary shadow-xs"
-                                    : "bg-babun-primary text-white hover:bg-black"
-                                }`}
+                                onClick={() => handleSelectArticle(article)}
+                                className="flex items-center gap-1.5 px-3.5 py-2 rounded-babun-sm text-xs font-bold font-display cursor-pointer transition-all bg-babun-primary text-white hover:bg-black shadow-sm"
                               >
-                                <Play size={12} className="fill-current ml-0.5" />
-                                <span>{isSelected ? "מתנגן כעת למעלה" : "נגן פרק זה"}</span>
+                                <span>צפייה והאזנה לפרק באתר</span>
+                                <ArrowLeft size={13} />
                               </button>
 
                               <button
-                                onClick={() => handleSelectArticle(article)}
-                                className="text-babun-primary/60 hover:text-babun-primary text-xs font-bold flex items-center gap-1 cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handlePlayPodcast(article);
+                                }}
+                                className={`text-xs font-bold flex items-center gap-1 cursor-pointer px-2.5 py-1.5 rounded-babun-sm border transition-all ${
+                                  isSelected
+                                    ? "bg-babun-accent text-babun-primary border-babun-accent"
+                                    : "text-babun-primary/70 hover:text-babun-primary hover:bg-babun-primary/5 border-zinc-200"
+                                }`}
+                                title="השמע ישירות בנגן למעלה"
                               >
-                                <span>פרטי הפרק</span>
-                                <ArrowLeft size={12} />
+                                <Play size={12} className="fill-current ml-0.5" />
+                                <span>{isSelected ? "מתנגן למעלה" : "נגן למעלה"}</span>
                               </button>
                             </div>
 

@@ -181,7 +181,7 @@ export default function UniversalMediaPlayer({
     return (
       <div className={`w-full aspect-video rounded-sm overflow-hidden bg-black relative shadow-xl border border-zinc-200 ${className}`}>
         <iframe
-          src={`https://www.youtube.com/embed/${ytId}?autoplay=${autoPlay ? 1 : 0}&rel=0`}
+          src={`https://www.youtube-nocookie.com/embed/${ytId}?autoplay=${autoPlay ? 1 : 0}&rel=0&modestbranding=1&playsinline=1`}
           title={title}
           className="w-full h-full border-0 absolute inset-0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -222,19 +222,11 @@ export default function UniversalMediaPlayer({
                   setHlsError(null);
                   setHasStarted(true);
                 }}
-                className="bg-babun-accent text-babun-primary text-xs font-bold px-4 py-2 rounded-sm flex items-center gap-1.5 cursor-pointer"
+                className="bg-babun-accent text-babun-primary text-xs font-bold px-4 py-2 rounded-sm flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-105 transition-transform"
               >
                 <RefreshCw size={14} />
-                <span>נסה שוב</span>
+                <span>נסה לטעון שוב</span>
               </button>
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-white/80 hover:text-white underline font-mono"
-              >
-                פתח קישור ישיר ↗
-              </a>
             </div>
           </div>
         ) : (
