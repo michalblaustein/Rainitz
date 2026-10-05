@@ -10,7 +10,7 @@ interface UniversalMediaPlayerProps {
   className?: string;
 }
 
-export function detectMediaType(url: string): "youtube" | "vimeo" | "hls" | "video" | "audio" | "iframe" | "unknown" {
+export function detectMediaType(url: string): "youtube" | "vimeo" | "hls" | "video" | "audio" | "spotify" | "apple_podcasts" | "soundcloud" | "iframe" | "unknown" {
   if (!url || url === "#") return "unknown";
   const clean = url.trim().toLowerCase();
 
@@ -24,19 +24,39 @@ export function detectMediaType(url: string): "youtube" | "vimeo" | "hls" | "vid
     return "vimeo";
   }
 
-  // 3. HLS Stream (.m3u8) - Bunny CDN, Cloudflare Stream, AWS CloudFront, etc.
+  // 3. Spotify
+  if (clean.includes("spotify.com")) {
+    return "spotify";
+  }
+
+  // 4. Apple Podcasts
+  if (clean.includes("podcasts.apple.com")) {
+    return "apple_podcasts";
+  }
+
+  // 5. SoundCloud
+  if (clean.includes("soundcloud.com")) {
+    return "soundcloud";
+  }
+
+  // 6. HLS Stream (.m3u8) - Bunny CDN, Cloudflare Stream, AWS CloudFront, etc.
   if (clean.includes(".m3u8") || clean.includes("b-cdn.net") || clean.includes("mediadelivery.net")) {
     return "hls";
   }
 
-  // 4. Direct Audio
-  if (clean.endsWith(".mp3") || clean.endsWith(".wav") || clean.endsWith(".aac") || clean.endsWith(".m4a") || clean.includes("spotify.com") || clean.includes("soundcloud.com")) {
+  // 7. Direct Audio
+  if (clean.endsWith(".mp3") || clean.endsWith(".wav") || clean.endsWith(".aac") || clean.endsWith(".m4a") || clean.includes(".mp3?") || clean.includes(".m4a?")) {
     return "audio";
   }
 
-  // 5. Direct Video
-  if (clean.endsWith(".mp4") || clean.endsWith(".webm") || clean.endsWith(".ogg") || clean.endsWith(".mov")) {
+  // 8. Direct Video
+  if (clean.endsWith(".mp4") || clean.endsWith(".webm") || clean.endsWith(".ogg") || clean.endsWith(".mov") || clean.includes(".mp4?")) {
     return "video";
+  }
+
+  // 9. Generic http/https web link or domain
+  if (clean.startsWith("http://") || clean.startsWith("https://") || clean.includes(".")) {
+    return "iframe";
   }
 
   return "unknown";
@@ -44,9 +64,16 @@ export function detectMediaType(url: string): "youtube" | "vimeo" | "hls" | "vid
 
 export function getYoutubeId(url: string): string {
   if (!url) return "";
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-  const match = url.match(regExp);
-  return match && match[2].length === 11 ? match[2] : "";
+  const clean = url.trim();
+  const regExp = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/|live\/))([\w-]{11})/;
+  const match = clean.match(regExp);
+  if (match && match[1]) {
+    return match[1];
+  }
+  // Fallback regex
+  const fallback = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/|live\/)([^#\&\?]*).*/;
+  const matchFallback = clean.match(fallback);
+  return matchFallback && matchFallback[2].length === 11 ? matchFallback[2] : "";
 }
 
 export function getVimeoId(url: string): string {
@@ -290,6 +317,81 @@ export default function UniversalMediaPlayer({
         >
           דפדפנך אינו תומך בניגון אודיו זה.
         </audio>
+      </div>
+    );
+  }
+
+  // 6. Spotify Embed Player
+  if (mediaType === "spotify") {
+    let embedUrl = url;
+    if (!embedUrl.includes("/embed/")) {
+      embedUrl = embedUrl.replace("open.spotify.com/", "open.spotify.com/embed/");
+    }
+    return (
+      <div className={`w-full rounded-sm overflow-hidden bg-[#121212] relative shadow-xl border border-zinc-200 ${className}`}>
+        <iframe
+          src={embedUrl}
+          title={title}
+          width="100%"
+          height="232"
+          frameBorder="0"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+        />
+      </div>
+    );
+  }
+
+  // 7. Apple Podcasts Embed Player
+  if (mediaType === "apple_podcasts") {
+    let embedUrl = url;
+    if (!embedUrl.includes("embed.podcasts.apple.com")) {
+      embedUrl = embedUrl.replace("podcasts.apple.com", "embed.podcasts.apple.com");
+    }
+    return (
+      <div className={`w-full rounded-sm overflow-hidden bg-black relative shadow-xl border border-zinc-200 ${className}`}>
+        <iframe
+          src={embedUrl}
+          title={title}
+          width="100%"
+          height="175"
+          frameBorder="0"
+          allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+          sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+        />
+      </div>
+    );
+  }
+
+  // 8. SoundCloud Embed Player
+  if (mediaType === "soundcloud") {
+    return (
+      <div className={`w-full rounded-sm overflow-hidden bg-white relative shadow-xl border border-zinc-200 ${className}`}>
+        <iframe
+          width="100%"
+          height="166"
+          scrolling="no"
+          frameBorder="no"
+          allow="autoplay"
+          title={title}
+          src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23fee000&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`}
+        />
+      </div>
+    );
+  }
+
+  // 9. Generic iframe Web Embed
+  if (mediaType === "iframe") {
+    const safeUrl = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
+    return (
+      <div className={`w-full min-h-[480px] aspect-video rounded-sm overflow-hidden bg-white relative shadow-xl border border-zinc-200 ${className}`}>
+        <iframe
+          src={safeUrl}
+          title={title}
+          className="w-full h-full border-0 absolute inset-0"
+          sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
+          allowFullScreen
+        />
       </div>
     );
   }

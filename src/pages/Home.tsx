@@ -650,15 +650,9 @@ export default function Home() {
                   className="flex flex-col h-full group cursor-pointer"
                 >
                   {(() => {
-                    const extUrl = formatExternalUrl(latestMedia[0].link);
-                    const CardElement = extUrl ? "a" : Link;
-                    const cardProps = extUrl
-                      ? { href: extUrl, target: "_blank", rel: "noopener noreferrer" }
-                      : { to: `/articles/${latestMedia[0].id || ""}` };
-
                     return (
-                      <CardElement
-                        {...(cardProps as any)}
+                      <Link
+                        to={`/articles/${latestMedia[0].id || ""}`}
                         className="flex flex-col h-full bg-white hover:bg-zinc-50/50 p-6 rounded-none border-2 border-babun-primary transition-all duration-300"
                       >
                         <div className="relative aspect-[16/9] rounded-none overflow-hidden mb-6 border border-babun-primary/25">
@@ -675,7 +669,7 @@ export default function Home() {
                           </div>
                           <div className="absolute bottom-4 left-4">
                             <div className="w-12 h-12 bg-babun-primary text-white rounded-none flex items-center justify-center border border-babun-primary transition-all group-hover:bg-babun-accent group-hover:text-babun-primary group-hover:rotate-[-45deg]">
-                              {extUrl ? <ExternalLink size={22} /> : <ArrowLeft size={22} />}
+                              <ArrowLeft size={22} />
                             </div>
                           </div>
                         </div>
@@ -693,14 +687,12 @@ export default function Home() {
                               {latestMedia[0].summary}
                             </p>
                           )}
-                          {extUrl && (
-                            <div className="mt-4 flex items-center justify-end gap-2 text-babun-primary font-bold text-sm">
-                              <span>האזנה לפודקאסט בעמוד החיצוני</span>
-                              <ExternalLink size={16} />
-                            </div>
-                          )}
+                          <div className="mt-4 flex items-center justify-end gap-2 text-babun-primary font-bold text-sm">
+                            <span>צפייה והאזנה לפרק באתר</span>
+                            <ArrowLeft size={16} />
+                          </div>
                         </div>
-                      </CardElement>
+                      </Link>
                     );
                   })()}
                 </motion.div>
@@ -709,12 +701,6 @@ export default function Home() {
               {/* Left Column: 3 Smaller Stacked Articles/Podcasts */}
               <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
                 {latestMedia.slice(1, 4).map((item, index) => {
-                  const extUrl = formatExternalUrl(item.link);
-                  const CardElement = extUrl ? "a" : Link;
-                  const cardProps = extUrl
-                    ? { href: extUrl, target: "_blank", rel: "noopener noreferrer" }
-                    : { to: `/articles/${item.id || ""}` };
-
                   return (
                     <motion.div
                       key={item.id || index}
@@ -724,8 +710,8 @@ export default function Home() {
                       transition={{ delay: index * 0.1 }}
                       className="group"
                     >
-                      <CardElement
-                        {...(cardProps as any)}
+                      <Link
+                        to={`/articles/${item.id || ""}`}
                         className="flex gap-4 p-4 rounded-none bg-white hover:bg-zinc-50/50 transition-all duration-300 border-2 border-babun-primary"
                       >
                         <div className="relative w-28 sm:w-36 aspect-[4/3] rounded-none overflow-hidden flex-shrink-0 border border-babun-primary/10">
@@ -748,14 +734,12 @@ export default function Home() {
                           <h4 className="text-base sm:text-lg font-display font-black text-babun-primary leading-tight group-hover:text-babun-accent transition-colors line-clamp-2">
                             {item.title}
                           </h4>
-                          {extUrl && (
-                            <div className="mt-2 flex items-center justify-end gap-1 text-[11px] font-bold text-babun-primary/70 group-hover:text-babun-primary">
-                              <span>האזנה לפודקאסט</span>
-                              <ExternalLink size={12} />
-                            </div>
-                          )}
+                          <div className="mt-2 flex items-center justify-end gap-1 text-[11px] font-bold text-babun-primary/70 group-hover:text-babun-primary">
+                            <span>האזנה לפרק באתר</span>
+                            <ArrowLeft size={12} />
+                          </div>
                         </div>
-                      </CardElement>
+                      </Link>
                     </motion.div>
                   );
                 })}

@@ -4,6 +4,7 @@ import { Mail, Phone, MapPin } from "lucide-react";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { defaultSeedArticles } from "../../data/defaultArticles";
+import { formatExternalUrl, isPodcastArticle } from "../../lib/utils";
 
 const getDisplayImage = (url: string) => {
   if (!url) return "";
@@ -143,28 +144,32 @@ export default function Footer() {
               כתבות ופודקאסטים
             </Link>
             <div className="space-y-4 w-full">
-              {latestArticles.map((article, idx) => (
-                <Link 
-                  key={article.id || idx}
-                  to={`/articles/${article.id || ""}`} 
-                  className={`group flex items-center gap-4 hover:text-babun-accent transition-colors w-full ${idx > 0 ? "border-t border-white/5 pt-4" : ""}`}
-                >
-                  <img 
-                    src={getDisplayImage(article.image || article.innerImage)} 
-                    alt={article.title} 
-                    className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="flex flex-col min-w-0">
-                    <span className="line-clamp-2 leading-snug font-normal text-white/90 group-hover:text-babun-accent transition-colors text-sm text-right">
-                      {article.title}
-                    </span>
-                    <span className="text-xs text-white/30 mt-1 text-right">
-                      {article.date || ""} • {article.category || ""}
-                    </span>
-                  </div>
-                </Link>
-              ))}
+              {latestArticles.map((article, idx) => {
+                const isPodcast = isPodcastArticle(article) || article.categoryId === "podcast";
+
+                return (
+                  <Link 
+                    key={article.id || idx}
+                    to={`/articles/${article.id || ""}`}
+                    className={`group flex items-center gap-4 hover:text-babun-accent transition-colors w-full ${idx > 0 ? "border-t border-white/5 pt-4" : ""}`}
+                  >
+                    <img 
+                      src={getDisplayImage(article.image || article.innerImage)} 
+                      alt={article.title} 
+                      className="w-16 h-16 rounded-md object-cover flex-shrink-0 border border-white/10 group-hover:border-babun-accent/40 transition-all duration-300 shadow-md group-hover:scale-[1.03]"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="flex flex-col min-w-0">
+                      <span className="line-clamp-2 leading-snug font-normal text-white/90 group-hover:text-babun-accent transition-colors text-sm text-right">
+                        {article.title}
+                      </span>
+                      <span className="text-xs text-white/30 mt-1 text-right">
+                        {article.date || ""} • {isPodcast ? "פודקאסט" : article.category || ""}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>
