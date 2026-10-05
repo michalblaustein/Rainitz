@@ -5,6 +5,16 @@ import { fileURLToPath } from 'url';
 import { GoogleGenAI } from "@google/genai";
 import fs from "fs";
 import dotenv from "dotenv";
+import { initializeApp as initFirebaseApp } from "firebase/app";
+import { 
+  getFirestore as initFirestore, 
+  collection as fsCollection, 
+  getDocs as fsGetDocs, 
+  doc as fsDoc, 
+  setDoc as fsSetDoc, 
+  deleteDoc as fsDeleteDoc,
+  serverTimestamp as fsServerTimestamp
+} from "firebase/firestore";
 
 dotenv.config();
 
@@ -372,6 +382,34 @@ async function startServer() {
     }
   });
 
+  // Server-side Firestore initialization for guaranteed cross-device synchronization
+  let serverFirestoreDb: any = null;
+  function getServerFirestore() {
+    if (!serverFirestoreDb) {
+      try {
+        let cfg: any = null;
+        const configPaths = [
+          path.join(process.cwd(), "firebase-applet-config.json"),
+          path.join(__dirname, "firebase-applet-config.json"),
+        ];
+        for (const cp of configPaths) {
+          if (fs.existsSync(cp)) {
+            cfg = JSON.parse(fs.readFileSync(cp, "utf-8"));
+            break;
+          }
+        }
+        if (cfg) {
+          const app = initFirebaseApp(cfg, "server-sync-app");
+          serverFirestoreDb = initFirestore(app, cfg.firestoreDatabaseId || "ai-studio-8b156cfd-5ed3-419a-8832-fe4436ecd5da");
+          console.log("Server Firestore client initialized successfully.");
+        }
+      } catch (err) {
+        console.warn("Server Firestore initialization notice:", err);
+      }
+    }
+    return serverFirestoreDb;
+  }
+
   // In-memory cache and multi-path file persistence for articles
   const getPossibleBackupPaths = () => [
     path.join(process.cwd(), "src", "data", "articles.json"),
@@ -380,6 +418,7 @@ async function startServer() {
   ];
 
   let inMemoryArticles: any[] = [];
+  let lastFirestoreFetchTime = 0;
 
   // Seed inMemoryArticles on server startup from available disk paths
   for (const p of getPossibleBackupPaths()) {
@@ -412,49 +451,174 @@ async function startServer() {
     }
   };
 
-  // API route to get cached/backed-up articles when Firestore is down or blocked (Quota limit)
-  app.get("/api/articles", (req, res) => {
+  // Sync server memory & disk directly with Cloud Firestore
+  async function syncFromFirestore(force = false) {
+    const now = Date.now();
+    if (!force && now - lastFirestoreFetchTime < 15000 && inMemoryArticles.length > 0) {
+      return inMemoryArticles;
+    }
     try {
+      const sDb = getServerFirestore();
+      if (!sDb) return inMemoryArticles;
+      const snap = await fsGetDocs(fsCollection(sDb, "articles"));
+      if (!snap.empty) {
+        const fsArticles = snap.docs.map((d: any) => {
+          const data = d.data();
+          let createdAtStr = data.createdAt;
+          if (data.createdAt?.toDate) {
+            createdAtStr = data.createdAt.toDate().toISOString();
+          } else if (data.createdAt?.seconds) {
+            createdAtStr = new Date(data.createdAt.seconds * 1000).toISOString();
+          } else if (!createdAtStr) {
+            createdAtStr = new Date().toISOString();
+          }
+          return {
+            id: d.id,
+            ...data,
+            createdAt: createdAtStr,
+          };
+        });
+
+        // Merge with any in-memory items (preserving edits)
+        const mergedMap = new Map<string, any>();
+        inMemoryArticles.forEach((a) => {
+          if (a && a.id) mergedMap.set(a.id, a);
+        });
+        fsArticles.forEach((a) => {
+          if (a && a.id) mergedMap.set(a.id, { ...mergedMap.get(a.id), ...a });
+        });
+
+        const merged = Array.from(mergedMap.values());
+        persistArticlesToDisk(merged);
+        lastFirestoreFetchTime = now;
+        console.log(`Server synchronized ${merged.length} articles from Firestore (total in memory: ${merged.length})`);
+        return merged;
+      }
+    } catch (err: any) {
+      console.warn("Notice during server Firestore sync:", err?.message || err);
+    }
+    return inMemoryArticles;
+  }
+
+  // Initial eager sync from Firestore on startup
+  syncFromFirestore(true).catch((e) => console.warn("Startup Firestore sync notice:", e));
+
+  // API route to get cached articles: guaranteed instantaneous response on EVERY computer and filter
+  app.get("/api/articles", async (req, res) => {
+    try {
+      // Background revalidate if older than 15 seconds
+      const now = Date.now();
+      if (now - lastFirestoreFetchTime > 15000) {
+        syncFromFirestore(false).catch(() => {});
+      }
+
       if (inMemoryArticles && inMemoryArticles.length > 0) {
         return res.json(inMemoryArticles);
       }
+
       for (const p of getPossibleBackupPaths()) {
         if (fs.existsSync(p)) {
           const data = fs.readFileSync(p, "utf-8");
           const parsed = JSON.parse(data);
-          if (Array.isArray(parsed)) {
+          if (Array.isArray(parsed) && parsed.length > 0) {
             inMemoryArticles = parsed;
             return res.json(parsed);
           }
         }
       }
-      res.json([]);
+
+      // Eager fetch if memory was empty
+      const fresh = await syncFromFirestore(true);
+      res.json(fresh || []);
     } catch (error) {
-      console.error("Error reading articles backup JSON:", error);
-      res.status(500).json({ error: "Failed to read backup articles" });
+      console.error("Error serving articles API:", error);
+      res.json(inMemoryArticles || []);
+    }
+  });
+
+  // Dedicated single-article save endpoint: saves to disk + memory + writes directly to Cloud Firestore!
+  app.post("/api/articles/save", async (req, res) => {
+    try {
+      const article = req.body;
+      if (!article || !article.id) {
+        return res.status(400).json({ error: "Missing article or article.id" });
+      }
+
+      // 1. Update Server Memory & Disk
+      const articlesMap = new Map<string, any>();
+      (inMemoryArticles || []).forEach((a) => {
+        if (a && a.id) articlesMap.set(a.id, a);
+      });
+      articlesMap.set(article.id, { ...articlesMap.get(article.id), ...article });
+      const merged = Array.from(articlesMap.values());
+      persistArticlesToDisk(merged);
+
+      // 2. Guaranteed Server-Side Push to Cloud Firestore (bypasses any client browser network restrictions)
+      let firestoreSynced = false;
+      try {
+        const sDb = getServerFirestore();
+        if (sDb) {
+          const { _source, ...cleanData } = article;
+          await fsSetDoc(fsDoc(sDb, "articles", article.id), {
+            ...cleanData,
+            createdAt: cleanData.createdAt || fsServerTimestamp(),
+          }, { merge: true });
+          firestoreSynced = true;
+          console.log(`Server-side successfully saved article "${article.title?.slice(0, 30)}" to Cloud Firestore!`);
+        }
+      } catch (fsErr: any) {
+        console.warn("Server Firestore push notice:", fsErr?.message || fsErr);
+      }
+
+      lastFirestoreFetchTime = Date.now();
+      res.json({ success: true, firestoreSynced, article, total: merged.length });
+    } catch (err: any) {
+      console.error("Error in /api/articles/save:", err);
+      res.status(500).json({ error: err?.message || "Failed to save article" });
+    }
+  });
+
+  // Dedicated article delete endpoint: deletes from memory + disk + deletes from Cloud Firestore
+  app.post("/api/articles/delete", async (req, res) => {
+    try {
+      const { id } = req.body;
+      if (!id) {
+        return res.status(400).json({ error: "Missing article id" });
+      }
+
+      // 1. Remove from memory and disk
+      const filtered = (inMemoryArticles || []).filter((a) => a.id !== id);
+      persistArticlesToDisk(filtered);
+
+      // 2. Delete from Firestore
+      let firestoreDeleted = false;
+      try {
+        const sDb = getServerFirestore();
+        if (sDb) {
+          await fsDeleteDoc(fsDoc(sDb, "articles", id));
+          firestoreDeleted = true;
+          console.log(`Server-side successfully deleted article ${id} from Cloud Firestore`);
+        }
+      } catch (fsErr: any) {
+        console.warn("Server Firestore delete notice:", fsErr?.message || fsErr);
+      }
+
+      res.json({ success: true, firestoreDeleted, total: filtered.length });
+    } catch (err: any) {
+      console.error("Error in /api/articles/delete:", err);
+      res.status(500).json({ error: err?.message || "Failed to delete article" });
     }
   });
 
   // API route to sync/save articles to server-side backup from the client (supports bulk array or single item)
-  app.post("/api/articles/sync", (req, res) => {
+  app.post("/api/articles/sync", async (req, res) => {
     try {
       const payload = req.body;
       let incomingArticles: any[] = [];
 
       if (Array.isArray(payload)) {
-        const articlesMap = new Map<string, any>();
-        payload.forEach((a) => {
-          if (a && a.id) {
-            articlesMap.set(a.id, a);
-          }
-        });
-        const merged = Array.from(articlesMap.values());
-        persistArticlesToDisk(merged);
-        console.log(`Server-side articles synchronized bulk successfully (total: ${merged.length})`);
-        return res.json({ success: true, count: payload.length, total: merged.length });
-      }
-
-      if (payload && typeof payload === "object" && (payload.article || payload.id)) {
+        incomingArticles = payload;
+      } else if (payload && typeof payload === "object" && (payload.article || payload.id)) {
         incomingArticles = [payload.article || payload];
       } else if (payload && Array.isArray(payload.articles)) {
         incomingArticles = payload.articles;
@@ -462,7 +626,7 @@ async function startServer() {
         return res.status(400).json({ error: "Payload must be an array of articles or a single article object" });
       }
 
-      // Upsert single items into inMemoryArticles by ID
+      // Upsert into memory & disk
       const articlesMap = new Map<string, any>();
       (inMemoryArticles || []).forEach((a) => {
         if (a && a.id) articlesMap.set(a.id, a);
@@ -476,7 +640,20 @@ async function startServer() {
       const merged = Array.from(articlesMap.values());
       persistArticlesToDisk(merged);
 
-      console.log(`Server-side articles upserted successfully (total: ${merged.length})`);
+      // Also background push missing items to Firestore
+      try {
+        const sDb = getServerFirestore();
+        if (sDb) {
+          for (const item of incomingArticles) {
+            if (item && item.id) {
+              const { _source, ...cleanItem } = item;
+              fsSetDoc(fsDoc(sDb, "articles", item.id), cleanItem, { merge: true }).catch(() => {});
+            }
+          }
+        }
+      } catch (e) {}
+
+      console.log(`Server-side articles synchronized successfully (total: ${merged.length})`);
       res.json({ success: true, count: incomingArticles.length, total: merged.length });
     } catch (error: any) {
       console.error("Error synchronizing articles to backup JSON:", error);

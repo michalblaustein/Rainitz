@@ -63,33 +63,43 @@ function AppContent() {
   const location = useLocation();
   const isLandingPage = location.pathname === "/pinuy-binuy" || location.pathname === "/pinuy-binuy/";
 
-  // Auto-sync articles from local cache to server in the background
+  // Auto-sync articles between local cache and server in the background
   useEffect(() => {
     try {
-      const cached = localStorage.getItem("babun_articles_cache");
-      if (cached) {
-        const localList = JSON.parse(cached);
-        if (Array.isArray(localList) && localList.length > 0) {
-          fetch("/api/articles")
-            .then((res) => (res.ok ? res.json() : []))
-            .then((serverData) => {
-              const serverIds = new Set((serverData || []).map((s: any) => s.id));
-              const missingOnServer = localList.filter((l: any) => !serverIds.has(l.id));
-              if (missingOnServer.length > 0) {
-                const combined = [...serverData, ...missingOnServer].map((a: any) => {
-                  const { _source, ...rest } = a;
-                  return rest;
-                });
-                fetch("/api/articles/sync", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(combined),
-                }).catch(() => {});
-              }
-            })
-            .catch(() => {});
-        }
-      }
+      fetch("/api/articles")
+        .then((res) => (res.ok ? res.json() : []))
+        .then((serverData) => {
+          if (!Array.isArray(serverData) || serverData.length === 0) return;
+          
+          let localList: any[] = [];
+          try {
+            const cached = localStorage.getItem("babun_articles_cache");
+            if (cached) localList = JSON.parse(cached);
+          } catch (e) {}
+
+          const serverIds = new Set(serverData.map((s: any) => s.id));
+          const missingOnServer = (Array.isArray(localList) ? localList : []).filter((l: any) => !serverIds.has(l.id));
+
+          if (missingOnServer.length > 0) {
+            // Push any local articles to server
+            const combined = [...serverData, ...missingOnServer].map((a: any) => {
+              const { _source, ...rest } = a;
+              return rest;
+            });
+            localStorage.setItem("babun_articles_cache", JSON.stringify(combined));
+            window.dispatchEvent(new CustomEvent("articles_updated", { detail: combined }));
+            fetch("/api/articles/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(combined),
+            }).catch(() => {});
+          } else if (serverData.length > (localList?.length || 0)) {
+            // Server has more/newer articles - update local cache immediately!
+            localStorage.setItem("babun_articles_cache", JSON.stringify(serverData));
+            window.dispatchEvent(new CustomEvent("articles_updated", { detail: serverData }));
+          }
+        })
+        .catch(() => {});
     } catch (e) {}
   }, []);
 

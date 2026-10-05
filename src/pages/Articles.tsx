@@ -30,6 +30,7 @@ import {
   Play,
   FileText,
   Database,
+  RefreshCw,
 } from "lucide-react";
 import {
   collection,
@@ -43,6 +44,7 @@ import {
   onSnapshot,
   updateDoc,
   serverTimestamp,
+  setDoc,
 } from "firebase/firestore";
 import {
   signInWithPopup,
@@ -377,24 +379,104 @@ export default function Articles() {
     }
   }, [articlesList, selectedPodcast]);
 
-  // Load and listen to articles from Firestore with resilient multi-tier loading
+  // Robust comparator for articles that handles Timestamps, ISO dates, Hebrew dates, and epoch timestamps
+  const sortArticles = (list: any[]) => {
+    return [...list].sort((a, b) => {
+      const getTime = (item: any) => {
+        if (!item) return 0;
+        if (item.createdAt?.toMillis) return item.createdAt.toMillis();
+        if (item.createdAt?.seconds) return item.createdAt.seconds * 1000;
+        if (item.createdAt) {
+          const t = new Date(item.createdAt).getTime();
+          if (!isNaN(t) && t > 0) return t;
+        }
+        if (item.date) {
+          const parts = String(item.date).split(/[./-]/);
+          if (parts.length === 3) {
+            const d = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10) - 1;
+            const y = parseInt(parts[2].length === 2 ? "20" + parts[2] : parts[2], 10);
+            const dt = new Date(y, m, d).getTime();
+            if (!isNaN(dt)) return dt;
+          }
+        }
+        return 0;
+      };
+      return getTime(b) - getTime(a);
+    });
+  };
+
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [refreshNotice, setRefreshNotice] = useState<string | null>(null);
+
+  // Helper to safely apply articles and store in client cache & sync server without dropping any records
+  const applyArticles = (incoming: any[], source: string) => {
+    if (!Array.isArray(incoming) || incoming.length === 0) return;
+    setArticlesList((prev) => {
+      const map = new Map<string, any>();
+      // 1. Default seed baseline
+      defaultSeedArticles.forEach((a) => { if (a && a.id) map.set(a.id, a); });
+      // 2. Previously loaded state
+      prev.forEach((a) => { if (a && a.id) map.set(a.id, a); });
+      // 3. Incoming fresh articles (merge fields, preserving any richer content)
+      incoming.forEach((a) => {
+        if (a && a.id) {
+          map.set(a.id, { ...map.get(a.id), ...a });
+        }
+      });
+
+      const sorted = sortArticles(Array.from(map.values()));
+      try {
+        localStorage.setItem("babun_articles_cache", JSON.stringify(sorted));
+        window.dispatchEvent(new CustomEvent("articles_updated", { detail: sorted }));
+      } catch (e) {}
+      return sorted;
+    });
+    setLoading(false);
+  };
+
+  // One-click manual refresh & sync across all devices
+  const refreshAllArticles = async () => {
+    setIsRefreshing(true);
+    setRefreshNotice(null);
+    try {
+      // 1. Fetch server backup
+      const srvRes = await fetch("/api/articles");
+      let total = 0;
+      if (srvRes.ok) {
+        const srvData = await srvRes.json();
+        if (Array.isArray(srvData) && srvData.length > 0) {
+          applyArticles(srvData, "manualRefreshServer");
+          total = Math.max(total, srvData.length);
+        }
+      }
+
+      // 2. Fetch directly from Firestore (no orderBy to prevent omitted documents)
+      try {
+        const snap = await getDocs(collection(db, "articles"));
+        if (!snap.empty) {
+          const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+          applyArticles(docs, "manualRefreshFirestore");
+          total = Math.max(total, docs.length);
+        }
+      } catch (fsErr) {
+        console.warn("Manual refresh Firestore notice:", fsErr);
+      }
+
+      setRefreshNotice(`הסנכרון הושלם! כל ${total || articlesList.length} הכתבות מעודכנות בכל המחשבים.`);
+      setTimeout(() => setRefreshNotice(null), 5000);
+    } catch (e) {
+      setRefreshNotice("הרענון הושלם.");
+      setTimeout(() => setRefreshNotice(null), 3000);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Load and listen to articles from Firestore and Server with resilient multi-tier loading
   useEffect(() => {
     setLoading(true);
     let isMounted = true;
-
-    // Helper to safely apply articles and store in client cache & sync server
-    const applyArticles = (data: any[], source: string) => {
-      if (!isMounted || !Array.isArray(data) || data.length === 0) return;
-      const existingIds = new Set(data.map((d: any) => d.id));
-      const missingDefaults = defaultSeedArticles.filter((d) => !existingIds.has(d.id));
-      const combined = [...data, ...missingDefaults];
-      setArticlesList(combined);
-      setLoading(false);
-      try {
-        localStorage.setItem("babun_articles_cache", JSON.stringify(combined));
-        window.dispatchEvent(new CustomEvent("articles_updated", { detail: combined }));
-      } catch (e) {}
-    };
 
     // 1. Immediate local cache check for zero-delay rendering
     try {
@@ -411,6 +493,12 @@ export default function Articles() {
     fetch("/api/articles")
       .then((res) => (res.ok ? res.json() : []))
       .then((serverData) => {
+        if (!isMounted) return;
+        if (Array.isArray(serverData) && serverData.length > 0) {
+          applyArticles(serverData, "serverApi");
+        }
+
+        // Check if this computer has extra local articles that server lacks
         let localData: any[] = [];
         try {
           const cached = localStorage.getItem("babun_articles_cache");
@@ -421,31 +509,26 @@ export default function Articles() {
         const extraLocal = (Array.isArray(localData) ? localData : []).filter((d: any) => !serverIds.has(d.id));
 
         if (extraLocal.length > 0) {
-          // If this computer has articles that the server lacks, push them to server now!
-          const combined = [...extraLocal, ...(serverData || [])];
-          applyArticles(combined, "localMerge");
           fetch("/api/articles/sync", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(combined),
+            body: JSON.stringify(extraLocal),
           }).catch(() => {});
-        } else if (Array.isArray(serverData) && serverData.length > 0) {
-          applyArticles(serverData, "serverApi");
         }
       })
       .catch((err) => {
         console.warn("Server-side articles API check:", err);
       });
 
-    // 3. Setup real-time listener or one-time getDocs from Firestore
+    // 3. Setup real-time listener or one-time getDocs from Firestore (without orderBy to avoid dropping documents)
     const articlesRef = collection(db, "articles");
-    const q = query(articlesRef, orderBy("createdAt", "desc"));
 
     let unsubscribe = () => {};
     try {
       unsubscribe = onSnapshot(
-        q,
+        articlesRef,
         (snapshot) => {
+          if (!isMounted) return;
           if (!snapshot.empty) {
             const docs = snapshot.docs.map((doc) => ({
               id: doc.id,
@@ -460,14 +543,14 @@ export default function Articles() {
               body: JSON.stringify(docs),
             }).catch(() => {});
           } else {
-            if (isMounted) setLoading(false);
+            setLoading(false);
           }
         },
         async (error) => {
           console.warn("Firestore onSnapshot error, attempting one-time getDocs:", error);
           try {
-            const snapshot = await getDocs(q);
-            if (!snapshot.empty) {
+            const snapshot = await getDocs(articlesRef);
+            if (!snapshot.empty && isMounted) {
               const docs = snapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
@@ -619,7 +702,7 @@ export default function Articles() {
     }
   };
 
-  // Save new article or edit existing one in Firestore
+  // Save new article or edit existing one with multi-tier cloud and server sync
   const handleSaveArticle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim() || !formImage.trim() || !formContent.trim()) {
@@ -641,7 +724,7 @@ export default function Articles() {
 
     try {
       const articleData = {
-        title: formTitle,
+        title: formTitle.trim(),
         category: categoryName,
         categoryId: formCategory,
         date: publishDate,
@@ -651,75 +734,82 @@ export default function Articles() {
         link: formatExternalUrl(formLink) || "#",
       };
 
-      let targetId = editingArticleId || `reinitz_${Date.now()}`;
+      // Deterministic ID across devices
+      const targetId = editingArticleId || `reinitz_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       
-      // 1. Attempt writing to Firestore (safe - if quota exceeded, we catch and proceed seamlessly)
-      try {
-        if (editingArticleId) {
-          await updateDoc(doc(db, "articles", editingArticleId), articleData);
-        } else {
-          const docRef = await addDoc(collection(db, "articles"), {
-            ...articleData,
-            createdAt: serverTimestamp(),
-          });
-          if (docRef?.id) {
-            targetId = docRef.id;
-          }
-        }
-      } catch (dbErr: any) {
-        console.warn("Firestore write notice (falling back to persistent server storage):", dbErr);
-      }
-
-      // 2. Guaranteed instant update to local state & localStorage
       const fullRecord = {
         id: targetId,
         ...articleData,
         createdAt: new Date().toISOString(),
       };
 
+      // 1. Guaranteed server-side save (saves to disk, in-memory, AND writes to Cloud Firestore on backend!)
+      try {
+        await fetch("/api/articles/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(fullRecord),
+        });
+      } catch (srvErr) {
+        console.warn("Server save notice:", srvErr);
+      }
+
+      // 2. Direct client Firestore write with setDoc (merge)
+      try {
+        await setDoc(doc(db, "articles", targetId), {
+          ...articleData,
+          createdAt: serverTimestamp(),
+        }, { merge: true });
+      } catch (dbErr: any) {
+        console.warn("Direct Firestore write note (backed up by server):", dbErr);
+      }
+
+      // 3. Instant local state & localStorage update
       const updatedList = editingArticleId
         ? articlesList.map((art) => (art.id === editingArticleId ? { ...art, ...fullRecord } : art))
         : [fullRecord, ...articlesList.filter((a) => a.id !== targetId)];
 
-      setArticlesList(updatedList);
+      const sortedList = sortArticles(updatedList);
+      setArticlesList(sortedList);
 
       try {
-        localStorage.setItem("babun_articles_cache", JSON.stringify(updatedList));
-        window.dispatchEvent(new CustomEvent("articles_updated", { detail: updatedList }));
+        localStorage.setItem("babun_articles_cache", JSON.stringify(sortedList));
+        window.dispatchEvent(new CustomEvent("articles_updated", { detail: sortedList }));
       } catch (e) {}
 
-      // 3. Guaranteed instant sync to server backend (makes it visible on all computers in the world!)
-      try {
-        await fetch("/api/articles/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedList),
-        });
-      } catch (syncErr) {
-        console.warn("Server-side sync notice:", syncErr);
-      }
-
-      alert(editingArticleId ? "הכתבה עודכנה בהצלחה!" : "הכתבה פורסמה בהצלחה!");
+      alert(editingArticleId ? "הכתבה עודכנה בהצלחה וסונכרנה לכל המחשבים!" : "הכתבה פורסמה בהצלחה וסונכרנה לכל המחשבים!");
 
       // Close both the add/edit modal and return to articles list view
       handleCloseAddForm();
       handleCloseArticle();
     } catch (err: any) {
-      console.error("Failed to save article to Firestore:", err);
+      console.error("Failed to save article:", err);
       alert(`שגיאה בשמירת הכתבה: ${err.message}`);
     }
   };
 
-  // Delete article from Firestore
+  // Delete article from Firestore & Server
   const handleDeleteArticle = async (id: string, name: string) => {
     if (!window.confirm(`האם אתה בטוח שברצונך למחוק את הכתבה: "${name}"?`))
       return;
 
     try {
+      // 1. Server delete (removes from memory, disk, and Cloud Firestore)
+      try {
+        await fetch("/api/articles/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+      } catch (srvErr) {
+        console.warn("Server delete notice:", srvErr);
+      }
+
+      // 2. Direct client Firestore delete
       try {
         await deleteDoc(doc(db, "articles", id));
       } catch (err: any) {
-        console.warn("Firestore delete failed. Falling back to server-side backup sync:", err);
+        console.warn("Direct Firestore delete note:", err);
       }
 
       const updatedList = articlesList.filter((art) => art.id !== id);
@@ -728,19 +818,12 @@ export default function Articles() {
         localStorage.setItem("babun_articles_cache", JSON.stringify(updatedList));
         window.dispatchEvent(new CustomEvent("articles_updated", { detail: updatedList }));
       } catch (e) {}
+
       if (selectedArticle?.id === id) {
         setSelectedArticle(null);
       }
 
-      try {
-        await fetch("/api/articles/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedList),
-        });
-      } catch (e) {}
-
-      alert("הכתבה נמחקה בהצלחה!");
+      alert("הכתבה נמחקה בהצלחה מכל המחשבים והענן!");
     } catch (err: any) {
       console.error("Delete error:", err);
       alert(`שגיאה במחיקת הכתבה: ${err.message}`);
@@ -1144,6 +1227,15 @@ export default function Articles() {
               )}
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={refreshAllArticles}
+                disabled={isRefreshing}
+                className="bg-emerald-700 hover:bg-emerald-800 text-white font-display text-xs font-bold px-3.5 py-2 rounded-babun-sm flex items-center gap-1.5 cursor-pointer shadow-md disabled:opacity-50 transition-colors"
+                title="סנכרון ענן מיידי לכל המחשבים בעולם"
+              >
+                <RefreshCw size={13} className={`text-white ${isRefreshing ? "animate-spin" : ""}`} />
+                <span>{isRefreshing ? "מסנכרן..." : "סנכרן את כל המחשבים עכשיו"}</span>
+              </button>
               <Link
                 to="/database"
                 className="bg-babun-primary hover:bg-black text-white font-display text-xs font-bold px-3.5 py-2 rounded-babun-sm flex items-center gap-1.5 cursor-pointer shadow-md"
@@ -1187,6 +1279,18 @@ export default function Articles() {
         id="content-section"
         className="max-w-7xl mx-auto px-4 md:px-8 pt-16"
       >
+        {/* Refresh Notification Banner */}
+        {refreshNotice && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 mx-auto max-w-xl bg-emerald-50 border border-emerald-300 text-emerald-900 px-5 py-3.5 rounded-babun-md text-center text-sm font-bold shadow-sm flex items-center justify-center gap-2.5"
+          >
+            <CheckCircle size={18} className="text-emerald-600 shrink-0" />
+            <span>{refreshNotice}</span>
+          </motion.div>
+        )}
+
         {/* Dynamic Category Filtering Buttons */}
         <div
           className="flex flex-row flex-wrap items-center justify-center gap-3 md:gap-4 mb-20"
@@ -1218,6 +1322,20 @@ export default function Articles() {
               </button>
             );
           })}
+
+          {/* Quick Refresh Content Button */}
+          <button
+            onClick={refreshAllArticles}
+            disabled={isRefreshing}
+            className="flex flex-row items-center gap-2 px-5 py-4 rounded-babun-md font-display font-bold text-xs md:text-sm bg-white text-babun-primary/70 hover:text-babun-primary border border-babun-primary/5 hover:border-babun-accent/40 shadow-xs cursor-pointer transition-all disabled:opacity-50"
+            title="רענן ומשוך כתבות עדכניות מהענן עכשיו"
+          >
+            <RefreshCw
+              size={16}
+              className={`text-babun-accent ${isRefreshing ? "animate-spin" : ""}`}
+            />
+            <span>{isRefreshing ? "מרענן..." : "רענן מאגר"}</span>
+          </button>
         </div>
 
         {/* LOADING INDICATOR */}

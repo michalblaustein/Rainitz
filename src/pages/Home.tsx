@@ -78,14 +78,21 @@ export default function Home() {
     // 1. Initial quick load from server backup (instant load, completely bypasses firestore offline/quota lock)
     setLoadingMedia(true);
     fetch("/api/articles")
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error("HTTP error");
-      })
+      .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          const podcastsOnly = data.filter((item: any) => item.categoryId === "podcast");
-          setLatestMedia(podcastsOnly.slice(0, 4));
+          const podcastsOnly = data.filter((item: any) => item.categoryId === "podcast" || item.category === "פודקאסטים");
+          if (podcastsOnly.length > 0) {
+            setLatestMedia(podcastsOnly.slice(0, 4));
+          }
+          // Also update cache if this computer had stale cache
+          try {
+            const cached = localStorage.getItem("babun_articles_cache");
+            const parsed = cached ? JSON.parse(cached) : [];
+            if (!Array.isArray(parsed) || data.length > parsed.length) {
+              localStorage.setItem("babun_articles_cache", JSON.stringify(data));
+            }
+          } catch (e) {}
         }
       })
       .catch((err) => {
@@ -95,7 +102,7 @@ export default function Home() {
           if (cached) {
             const parsed = JSON.parse(cached);
             if (Array.isArray(parsed) && parsed.length > 0) {
-              const podcastsOnly = parsed.filter((item: any) => item.categoryId === "podcast");
+              const podcastsOnly = parsed.filter((item: any) => item.categoryId === "podcast" || item.category === "פודקאסטים");
               setLatestMedia(podcastsOnly.slice(0, 4));
             }
           }
@@ -107,21 +114,22 @@ export default function Home() {
         setLoadingMedia(false);
       });
 
-    // 2. Setup subscription to automatically update if firestore is healthy/online
-    const q = query(
-      collection(db, "articles"),
-      orderBy("createdAt", "desc")
-    );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      const podcastsOnly = docs.filter((item: any) => item.categoryId === "podcast");
-      setLatestMedia(podcastsOnly.slice(0, 4));
-      setLoadingMedia(false);
+    // 2. Setup subscription to automatically update from Firestore (no orderBy to prevent missing docs)
+    const articlesCol = collection(db, "articles");
+    const unsubscribe = onSnapshot(articlesCol, (snapshot) => {
+      if (!snapshot.empty) {
+        const docs = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        const podcastsOnly = docs.filter((item: any) => item.categoryId === "podcast" || item.category === "פודקאסטים");
+        if (podcastsOnly.length > 0) {
+          setLatestMedia(podcastsOnly.slice(0, 4));
+        }
+        setLoadingMedia(false);
+      }
     }, (error) => {
-      console.warn("Home Firestore snapshot failed (Quota limit), staying with server backup list:", error);
+      console.warn("Home Firestore snapshot note:", error);
     });
     return () => unsubscribe();
   }, []);
