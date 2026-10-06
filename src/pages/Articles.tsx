@@ -1010,22 +1010,14 @@ export default function Articles() {
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-zinc-50 border border-zinc-200/80 p-3 sm:px-4 rounded-sm">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-babun-primary font-display">נגן מוטמע באתר רייניץ</span>
+                      <span className="font-bold text-babun-primary font-display">נגן פודקאסט מוטמע באתר רייניץ</span>
                       <span className="text-zinc-400">•</span>
-                      <span className="text-zinc-600">האזנה ישירה באתר</span>
+                      <span className="text-zinc-600">האזנה וצפייה ישירה באתר</span>
                     </div>
-                    {extUrl && (
-                      <a
-                        href={extUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 font-bold text-babun-primary hover:text-black bg-babun-accent hover:bg-yellow-400 px-3.5 py-1.5 rounded-sm transition-all self-start sm:self-auto cursor-pointer shadow-xs"
-                        title="פתיחת הקישור לפודקאסט בטאב חדש"
-                      >
-                        <span>פתיחת הפודקאסט בטאב חדש</span>
-                        <ExternalLink size={13} />
-                      </a>
-                    )}
+                    <div className="inline-flex items-center gap-1.5 font-bold text-emerald-800 bg-emerald-100/80 px-3 py-1 rounded-sm border border-emerald-300">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                      <span>מתנגן ישירות בעמוד זה באתר</span>
+                    </div>
                   </div>
                 </div>
               );
@@ -1127,28 +1119,27 @@ export default function Articles() {
                 </div>
               )}
 
-              {/* Direct Link Banner to Podcast (Opens in a New Tab) */}
+              {/* Embedded Player Notice Banner (Embedded inside Reinitz site) */}
               {formatExternalUrl(selectedArticle.link) && (
                 <div className="mt-8 p-6 bg-gradient-to-l from-babun-accent/15 via-babun-accent/5 to-white border border-babun-accent/30 rounded-babun-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm text-right">
                   <div className="space-y-1">
                     <h5 className="font-display font-black text-babun-primary text-base sm:text-lg flex items-center justify-end sm:justify-start gap-2">
                       <PlayCircle size={20} className="text-babun-accent fill-babun-primary shrink-0" />
-                      <span>{isPodcastArticle(selectedArticle) || selectedArticle.categoryId === "podcast" ? "קישור לפרק הפודקאסט המלא" : "קישור למקור הכתבה"}</span>
+                      <span>{isPodcastArticle(selectedArticle) || selectedArticle.categoryId === "podcast" ? "פרק הפודקאסט מוטמע ומתנגן ישירות באתר" : "התוכן מוטמע ישירות באתר"}</span>
                     </h5>
                     <p className="text-xs text-zinc-600">
-                      לצפייה או האזנה ישירה ב-YouTube / פלטפורמת המקור – לחץ לפתיחה בטאב נפרד
+                      הפרק מוטמע לצפייה ולהאזנה מלאה בנגן בחלק העליון של עמוד זה באתר של רייניץ – ללא צורך ביציאה מהאתר
                     </p>
                   </div>
-                  <a
-                    href={formatExternalUrl(selectedArticle.link)}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                     className="inline-flex items-center justify-center gap-2 bg-babun-primary hover:bg-black text-white px-5 py-3 rounded-babun-sm font-display font-bold text-xs shadow-md transition-all shrink-0 cursor-pointer hover:scale-102"
-                    title="פתיחת הקישור לפודקאסט בטאב חדש"
                   >
-                    <span>פתיחת הפודקאסט בטאב חדש</span>
-                    <ExternalLink size={14} className="text-babun-accent" />
-                  </a>
+                    <Play size={14} className="text-babun-accent fill-babun-accent" />
+                    <span>נגן בראש העמוד</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -1156,22 +1147,21 @@ export default function Articles() {
             {/* Left Side: Sticky Sidebar (Share + Tools) */}
             <div className="w-full lg:w-[25%] shrink-0 space-y-6">
               <div className="sticky top-28 bg-white border border-zinc-200/80 rounded-sm p-6 space-y-5 shadow-xs">
-                {/* Direct Podcast Open Link in Sidebar */}
+                {/* Embedded Player Notice in Sidebar */}
                 {formatExternalUrl(selectedArticle.link) && (
                   <div className="pb-4 border-b border-zinc-200/80">
-                    <span className="text-xs font-bold text-zinc-400 block tracking-wider uppercase mb-3">
-                      קישור ישיר
+                    <span className="text-xs font-bold text-zinc-400 block tracking-wider uppercase mb-2">
+                      נגן מוטמע באתר
                     </span>
-                    <a
-                      href={formatExternalUrl(selectedArticle.link)}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
                       className="w-full flex items-center justify-center gap-2 bg-babun-primary hover:bg-black text-white py-3.5 px-4 rounded-sm text-xs font-bold font-display shadow-md transition-all cursor-pointer group"
-                      title="פתיחת הקישור לפודקאסט בטאב חדש"
                     >
-                      <span>פתיחת הפודקאסט בטאב חדש</span>
-                      <ExternalLink size={14} className="text-babun-accent group-hover:translate-x-0.5 transition-transform" />
-                    </a>
+                      <Play size={14} className="text-babun-accent fill-babun-accent" />
+                      <span>האזנה בנגן המוטמע</span>
+                    </button>
                   </div>
                 )}
 
@@ -1562,19 +1552,6 @@ export default function Articles() {
                             <ArrowLeft size={15} />
                           </button>
 
-                          {formatExternalUrl(activePod.link) && (
-                            <a
-                              href={formatExternalUrl(activePod.link)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="bg-babun-accent hover:bg-yellow-400 text-babun-primary px-4 py-3 rounded-babun-sm font-display font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
-                              title="פתיחת הקישור לפודקאסט בטאב חדש"
-                            >
-                              <span>פתח פודקאסט בטאב חדש</span>
-                              <ExternalLink size={14} />
-                            </a>
-                          )}
-
                           {isAdminMode && activePod.id && (
                             <button
                               onClick={(e) => handleEditArticleClick(activePod, e)}
@@ -1681,26 +1658,12 @@ export default function Articles() {
                                 <ArrowLeft size={13} />
                               </button>
 
-                              {formatExternalUrl(article.link) && (
-                                <a
-                                  href={formatExternalUrl(article.link)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="text-xs font-bold flex items-center gap-1 cursor-pointer px-2.5 py-2 rounded-babun-sm bg-babun-accent/20 hover:bg-babun-accent text-babun-primary border border-babun-accent/40 transition-all shadow-2xs"
-                                  title="פתיחת הקישור לפודקאסט בטאב חדש"
-                                >
-                                  <span>פתח בטאב חדש</span>
-                                  <ExternalLink size={12} />
-                                </a>
-                              )}
-
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handlePlayPodcast(article);
                                 }}
-                                className={`text-xs font-bold flex items-center gap-1 cursor-pointer px-2 py-2 rounded-babun-sm border transition-all ${
+                                className={`text-xs font-bold flex items-center gap-1 cursor-pointer px-2.5 py-2 rounded-babun-sm border transition-all ${
                                   isSelected
                                     ? "bg-babun-accent text-babun-primary border-babun-accent"
                                     : "text-babun-primary/70 hover:text-babun-primary hover:bg-babun-primary/5 border-zinc-200"
