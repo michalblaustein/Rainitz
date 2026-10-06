@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Link, useSearchParams, useParams, useNavigate } from "react-router-dom";
+import { Link, useSearchParams, useParams, useNavigate, useLocation } from "react-router-dom";
 import Markdown from "react-markdown";
 import {
   MessageCircle,
@@ -75,12 +75,16 @@ export default function Articles() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { id: routeParamId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const hasEditParam = searchParams.get("edit") === "true" || searchParams.get("admin") === "true";
 
   const [activeCategory, setActiveCategory] = useState<string>(() => {
     const categoryParam = searchParams.get("category");
     if (categoryParam && mediaCategories.some(cat => cat.id === categoryParam)) {
       return categoryParam;
+    }
+    if (window.location.pathname === "/podcasts") {
+      return "podcast";
     }
     return "all";
   });
@@ -102,10 +106,12 @@ export default function Articles() {
     const categoryParam = searchParams.get("category");
     if (categoryParam && mediaCategories.some(cat => cat.id === categoryParam)) {
       setActiveCategory(categoryParam);
+    } else if (location.pathname === "/podcasts") {
+      setActiveCategory("podcast");
     } else if (!categoryParam) {
       setActiveCategory("all");
     }
-  }, [searchParams]);
+  }, [searchParams, location.pathname]);
 
   const [articlesList, setArticlesList] = useState<any[]>(() => {
     try {

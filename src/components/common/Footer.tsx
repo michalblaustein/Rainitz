@@ -114,7 +114,8 @@ export default function Footer() {
               <li><Link to="/courses" className="hover:text-babun-accent transition-colors">קורסים</Link></li>
               <li><Link to="/consulting" className="hover:text-babun-accent transition-colors">פגישת ייעוץ</Link></li>
               <li><Link to="/book" className="hover:text-babun-accent transition-colors">הספר "שליש בקרקע"</Link></li>
-              <li><Link to="/articles" className="hover:text-babun-accent transition-colors">מאמרים ופודקאסטים</Link></li>
+              <li><Link to="/articles" className="hover:text-babun-accent transition-colors">מאמרים</Link></li>
+              <li><Link to="/podcasts" className="hover:text-babun-accent transition-colors">פודקאסטים</Link></li>
               <li><Link to="/calculators" className="hover:text-babun-accent transition-colors">מחשבוני נדל"ן</Link></li>
             </ul>
           </div>

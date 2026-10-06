@@ -8,7 +8,8 @@ const navLinks = [
   { name: "פגישת ייעוץ", path: "/consulting" },
   { name: "מחשבונים", path: "/calculators" },
   { name: "הספר", path: "/book" },
-  { name: "מאמרים ופודקאסטים", path: "/articles" },
+  { name: "מאמרים", path: "/articles" },
+  { name: "פודקאסטים", path: "/podcasts" },
 ];
 
 export default function Navbar() {
@@ -25,8 +26,18 @@ export default function Navbar() {
   }, []);
 
   const isHomePage = location.pathname === "/";
-  const darkHeroPages = ["/courses", "/consulting", "/calculators", "/book", "/articles", "/about", "/contact"];
+  const darkHeroPages = ["/courses", "/consulting", "/calculators", "/book", "/articles", "/podcasts", "/about", "/contact"];
   const hasDarkHero = isHomePage || darkHeroPages.includes(location.pathname);
+
+  const isLinkActive = (path: string) => {
+    if (path === "/podcasts") {
+      return location.pathname === "/podcasts" || (location.pathname === "/articles" && location.search.includes("category=podcast"));
+    }
+    if (path === "/articles") {
+      return (location.pathname === "/articles" || location.pathname.startsWith("/articles/")) && !location.search.includes("category=podcast");
+    }
+    return location.pathname === path.split("?")[0];
+  };
 
   return (
     <header className="fixed top-0 w-full z-50 transition-all duration-300">
@@ -51,33 +62,36 @@ export default function Navbar() {
 
           {/* Main Navigation - Center */}
           <nav className="hidden lg:flex items-center gap-0">
-            {navLinks.map((link, index) => (
-              <div key={link.path} className="flex items-center">
-                <Link 
-                  to={link.path}
-                  className={`text-lg transition-all duration-300 relative group px-6 py-2 flex flex-col items-center ${
-                    location.pathname === link.path.split("?")[0]
-                      ? (isScrolled || !hasDarkHero ? "text-black" : "text-white") 
-                      : (isScrolled || !hasDarkHero ? "text-black/70 hover:text-black" : "text-white/70 hover:text-white")
-                  }`}
-                >
-                  <div className="flex flex-col items-center justify-center">
-                    <span className="invisible font-bold block h-0 select-none overflow-hidden" aria-hidden="true">
-                      {link.name}
-                    </span>
-                    <span className="font-extrabold transition-all duration-100">
-                      {link.name}
-                    </span>
-                  </div>
-                  <span className={`absolute -bottom-1 right-0 w-full h-1 bg-babun-accent transition-transform duration-500 origin-right ${
-                    location.pathname === link.path.split("?")[0] ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                  }`} />
-                </Link>
-                {index < navLinks.length - 1 && (
-                  <div className={`w-px h-6 transition-colors duration-300 ${isScrolled || !hasDarkHero ? "bg-black/10" : "bg-white/20"}`} />
-                )}
-              </div>
-            ))}
+            {navLinks.map((link, index) => {
+              const active = isLinkActive(link.path);
+              return (
+                <div key={link.path} className="flex items-center">
+                  <Link 
+                    to={link.path}
+                    className={`text-[17px] transition-all duration-300 relative group px-4 lg:px-5 py-2 flex flex-col items-center ${
+                      active
+                        ? (isScrolled || !hasDarkHero ? "text-black" : "text-white") 
+                        : (isScrolled || !hasDarkHero ? "text-black/70 hover:text-black" : "text-white/70 hover:text-white")
+                    }`}
+                  >
+                    <div className="flex flex-col items-center justify-center">
+                      <span className="invisible font-bold block h-0 select-none overflow-hidden" aria-hidden="true">
+                        {link.name}
+                      </span>
+                      <span className="font-extrabold transition-all duration-100 whitespace-nowrap">
+                        {link.name}
+                      </span>
+                    </div>
+                    <span className={`absolute -bottom-1 right-0 w-full h-1 bg-babun-accent transition-transform duration-500 origin-right ${
+                      active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                    }`} />
+                  </Link>
+                  {index < navLinks.length - 1 && (
+                    <div className={`w-px h-6 transition-colors duration-300 ${isScrolled || !hasDarkHero ? "bg-black/10" : "bg-white/20"}`} />
+                  )}
+                </div>
+              );
+            })}
           </nav>
 
           {/* CTA Left */}
@@ -112,16 +126,19 @@ export default function Navbar() {
             <button onClick={() => setIsOpen(false)} className="self-start mb-8 p-2 border border-babun-primary/10 rounded-full">
               <X size={20} />
             </button>
-            {navLinks.map((link) => (
-              <Link 
-                key={link.path} 
-                to={link.path} 
-                className={`text-xl font-display font-bold uppercase tracking-widest ${location.pathname === link.path.split("?")[0] ? "text-babun-accent" : "text-babun-primary"}`}
-                onClick={() => setIsOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const active = isLinkActive(link.path);
+              return (
+                <Link 
+                  key={link.path} 
+                  to={link.path} 
+                  className={`text-xl font-display font-bold uppercase tracking-widest ${active ? "text-babun-accent" : "text-babun-primary"}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
             <div className="mt-auto flex flex-col gap-4 pt-8 border-t border-babun-primary/5">
               <Link to="/consulting" className="btn-babun-primary w-full justify-center">קביעת ייעוץ</Link>
               <div className="flex gap-4 justify-center mt-4">
