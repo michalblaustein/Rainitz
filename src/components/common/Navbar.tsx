@@ -8,7 +8,7 @@ const navLinks = [
   { name: "פגישת ייעוץ", path: "/consulting" },
   { name: "מחשבונים", path: "/calculators" },
   { name: "הספר", path: "/book" },
-  { name: "מאמרים", path: "/articles" },
+  { name: "מאמרים", path: "/articles?category=weekly" },
   { name: "פודקאסטים", path: "/podcasts" },
 ];
 
@@ -33,8 +33,8 @@ export default function Navbar() {
     if (path === "/podcasts") {
       return location.pathname === "/podcasts" || (location.pathname === "/articles" && location.search.includes("category=podcast"));
     }
-    if (path === "/articles") {
-      return (location.pathname === "/articles" || location.pathname.startsWith("/articles/")) && !location.search.includes("category=podcast");
+    if (path.startsWith("/articles")) {
+      return (location.pathname === "/articles" || location.pathname.startsWith("/articles/") || location.pathname === "/weekly") && !location.search.includes("category=podcast") && location.pathname !== "/podcasts";
     }
     return location.pathname === path.split("?")[0];
   };

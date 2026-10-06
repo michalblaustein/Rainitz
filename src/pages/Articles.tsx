@@ -86,6 +86,9 @@ export default function Articles() {
     if (window.location.pathname === "/podcasts") {
       return "podcast";
     }
+    if (window.location.pathname === "/weekly") {
+      return "weekly";
+    }
     return "all";
   });
 
@@ -108,6 +111,8 @@ export default function Articles() {
       setActiveCategory(categoryParam);
     } else if (location.pathname === "/podcasts") {
       setActiveCategory("podcast");
+    } else if (location.pathname === "/weekly") {
+      setActiveCategory("weekly");
     } else if (!categoryParam) {
       setActiveCategory("all");
     }

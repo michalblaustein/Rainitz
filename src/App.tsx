@@ -32,6 +32,7 @@ function ScrollAndAnalyticsTracker() {
       "/book": `הספר "שליש בקרקע" | ${siteName}`,
       "/calculators": `מחשבוני נדל"ן וכלכלה | ${siteName}`,
       "/articles": `מאמרים וכתבות | ${siteName}`,
+      "/weekly": `הטור השבועי | ${siteName}`,
       "/podcasts": `פודקאסטים נדל"ן | ${siteName}`,
       "/about": `אודות | ${siteName}`,
       "/contact": `צור קשר | ${siteName}`,
@@ -124,6 +125,7 @@ function AppContent() {
             <Route path="/book" element={<Book />} />
             <Route path="/calculators" element={<Calculators />} />
             <Route path="/articles" element={<Articles />} />
+            <Route path="/weekly" element={<Articles />} />
             <Route path="/podcasts" element={<Articles />} />
             <Route path="/articles/:id" element={<Articles />} />
             <Route path="/article/:id" element={<Articles />} />
