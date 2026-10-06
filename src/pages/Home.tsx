@@ -185,44 +185,35 @@ export default function Home() {
 
   const handleCourseSyllabus = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCourseStatus("loading");
-    try {
-      // 1. Save to local Firestore (course_signups collection as defined in blueprint)
+    const registrationUrl = "https://rainitz.ravpage.co.il/lo-mehakim-ladira?ref=atar";
+
+    if (courseName || coursePhone || courseEmail) {
       try {
-        await addDoc(collection(db, "course_signups"), { 
-          name: courseName,
-          phone: coursePhone,
-          email: courseEmail, 
+        // 1. Save to local Firestore
+        addDoc(collection(db, "course_signups"), { 
+          name: courseName || "ללא שם",
+          phone: coursePhone || "",
+          email: courseEmail || "", 
           courseType: "digital",
           createdAt: serverTimestamp() 
-        });
-      } catch (dbErr) {
-        console.warn("Firestore course signup failed, proceeding with backend sync:", dbErr);
+        }).catch(() => {});
+
+        // 2. Forward lead details directly to CRM
+        syncLeadToBackend({
+          name: courseName || "ללא שם",
+          phone: coursePhone || "",
+          email: courseEmail || "",
+          message: "הרשמה לקורס מדף הבית",
+          source: "הרשמה לקורס - דף הבית",
+          tag: "הרשמה לקורס"
+        }).catch(() => {});
+      } catch (err) {
+        console.warn("Lead save notice:", err);
       }
-
-      // 2. Forward lead details directly to CRM
-      await syncLeadToBackend({
-        name: courseName,
-        phone: coursePhone,
-        email: courseEmail,
-        message: "הרשמה לקורס מדף הבית",
-        source: "הרשמה לקורס - דף הבית",
-        tag: "הרשמה לקורס"
-      });
-
-      setCourseStatus("success");
-      setCourseName("");
-      setCoursePhone("");
-      setCourseEmail("");
-
-      // Redirect user to the course registration page
-      setTimeout(() => {
-        window.location.href = "https://rainitz.ravpage.co.il/lo-mehakim-ladira?ref=atar";
-      }, 700);
-    } catch (e) {
-      console.error("Course registration request failed:", e);
-      setCourseStatus(null);
     }
+
+    // Lead directly to the course registration page
+    window.location.href = registrationUrl;
   };
 
   return (
@@ -510,7 +501,6 @@ export default function Home() {
                   
                   <form onSubmit={handleCourseSyllabus} className="flex flex-col gap-2.5 sm:gap-3 w-full">
                     <input 
-                      required 
                       type="text" 
                       placeholder="שם מלא"
                       className="w-full h-10 sm:h-11 bg-gray-50/90 px-4 rounded-full border border-gray-200 focus:border-babun-accent focus:bg-white outline-none text-xs sm:text-sm text-center text-babun-primary placeholder:text-gray-400 shadow-inner"
@@ -518,7 +508,6 @@ export default function Home() {
                       onChange={e => setCourseName(e.target.value)}
                     />
                     <input 
-                      required 
                       type="tel" 
                       placeholder="מספר טלפון"
                       className="w-full h-10 sm:h-11 bg-gray-50/90 px-4 rounded-full border border-gray-200 focus:border-babun-accent focus:bg-white outline-none text-xs sm:text-sm text-center text-babun-primary placeholder:text-gray-400 shadow-inner"
@@ -526,7 +515,6 @@ export default function Home() {
                       onChange={e => setCoursePhone(e.target.value)}
                     />
                     <input 
-                      required 
                       type="email" 
                       placeholder="כתובת אימייל"
                       className="w-full h-10 sm:h-11 bg-gray-50/90 px-4 rounded-full border border-gray-200 focus:border-babun-accent focus:bg-white outline-none text-xs sm:text-sm text-center text-babun-primary placeholder:text-gray-400 shadow-inner"
@@ -536,26 +524,11 @@ export default function Home() {
                     <motion.button 
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      disabled={courseStatus === "loading"}
                       type="submit"
-                      className="bg-babun-primary text-white font-bold w-full h-10 sm:h-11 rounded-full shadow-md transition-colors hover:bg-black disabled:opacity-50 flex items-center justify-center text-xs sm:text-sm cursor-pointer mt-1"
+                      className="bg-babun-primary text-white font-bold w-full h-10 sm:h-11 rounded-full shadow-md transition-colors hover:bg-black flex items-center justify-center text-xs sm:text-sm cursor-pointer mt-1"
                     >
-                      {courseStatus === "loading" ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                          className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
-                        />
-                      ) : (
-                        "להרשמה"
-                      )}
+                      להרשמה
                     </motion.button>
-                    <a
-                      href="https://rainitz.ravpage.co.il/lo-mehakim-ladira?ref=atar"
-                      className="text-[11px] text-babun-primary/70 hover:text-black underline mt-1 block"
-                    >
-                      או מעבר ישיר לעמוד ההרשמה ←
-                    </a>
                   </form>
                 </div>
               )}
