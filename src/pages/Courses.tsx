@@ -768,20 +768,22 @@ export default function Courses() {
                   </div>
                   <div className="text-left bg-babun-primary/5 px-4 py-2 rounded-2xl border border-babun-primary/5">
                     <span className="text-xs text-zinc-500 font-bold block">מחיר מיוחד</span>
-                    <span className="text-2xl font-black text-babun-primary font-display">1,200 ₪</span>
+                    <span className="text-2xl font-black text-babun-primary font-display">288 ₪</span>
                   </div>
                 </div>
 
                 <h3 className="text-2xl md:text-3xl font-display font-black text-babun-primary mb-3">
-                  קורס טלפוני
+                  קורס לא מחכים לדירה - מתחילים להתקדם אליה
                 </h3>
                 <span className="inline-block px-3 py-1 bg-babun-primary/10 text-babun-primary text-xs font-black rounded-full mb-6">
-                  במערכת אור עולם
+                  קורס טלפוני/זום
                 </span>
 
-                <p className="text-zinc-600 text-base leading-relaxed mb-6 font-light">
-                  לימוד נוח וזמין ישירות מהטלפון האישי שלך, בקצב שלך ובזמן שלך באמצעות מערכת טלפונית מתקדמת. הקורס מובא במערכת טלפונית של מרכז רייניץ לנדל״ן ופתוח להאזנה בכל עת.
-                </p>
+                <div className="text-zinc-700 text-base leading-relaxed mb-6 font-medium space-y-1">
+                  <p>ההון העצמי נשחק בבנק?</p>
+                  <p>דירה בהנחה הפכה לאנחה?</p>
+                  <p className="font-bold text-babun-primary pt-1">הצעד הראשון לדירה משלכם מתחיל כאן!</p>
+                </div>
 
                 <div className="space-y-3 pt-4 border-t border-zinc-100 mb-8 text-sm text-zinc-700">
                   <div className="flex items-center gap-2">
@@ -801,7 +803,7 @@ export default function Courses() {
 
               <div>
                 <a
-                  href="https://plando.co.il/self_services/embed_store/24805?ak=597df96284d52e5dd3be33b6ff7afc68"
+                  href="https://rainitz.ravpage.co.il/lo-mehakim-ladira?ref=atar1"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-4 px-6 rounded-2xl text-lg font-black transition-all duration-300 flex items-center justify-center gap-2 shadow-lg group cursor-pointer bg-babun-accent text-babun-primary hover:bg-babun-accent/90"
@@ -948,7 +950,7 @@ export default function Courses() {
                     <h2 className="text-3xl font-display font-black">
                       הרשמה אל:{" "}
                       <span className="text-babun-accent">
-                        {activeRegisterCourse === "phone" && "הקורס הטלפוני"}
+                        {activeRegisterCourse === "phone" && "קורס לא מחכים לדירה - מתחילים להתקדם אליה"}
                         {activeRegisterCourse === "digital" && "הקורס הדיגיטלי (רישום מוקדם)"}
                         {activeRegisterCourse === "frontal" && "הקורס הפרונטלי (קבלת עדכונים)"}
                       </span>
