@@ -205,17 +205,22 @@ export default function Home() {
         name: courseName,
         phone: coursePhone,
         email: courseEmail,
-        message: "בקשת סילבוס / השארת פרטים לקורס מדף הבית",
-        source: "הורדת סילבוס - דף הבית",
-        tag: "הורדת סילבוס"
+        message: "הרשמה לקורס מדף הבית",
+        source: "הרשמה לקורס - דף הבית",
+        tag: "הרשמה לקורס"
       });
 
       setCourseStatus("success");
       setCourseName("");
       setCoursePhone("");
       setCourseEmail("");
+
+      // Redirect user to the course registration page
+      setTimeout(() => {
+        window.location.href = "https://rainitz.ravpage.co.il/lo-mehakim-ladira?ref=atar";
+      }, 700);
     } catch (e) {
-      console.error("Course syllabus request failed:", e);
+      console.error("Course registration request failed:", e);
       setCourseStatus(null);
     }
   };
@@ -489,12 +494,18 @@ export default function Home() {
                 >
                   <CheckCircle size={52} className="text-green-500 mx-auto mb-3 animate-bounce" />
                   <div className="text-babun-primary font-bold text-xl leading-tight mb-2">פרטיך התקבלו בהצלחה!</div>
-                  <p className="text-babun-primary/70 text-sm leading-snug">הסילבוס המלא של הקורס יישלח אליך בהקדם.</p>
+                  <p className="text-babun-primary/70 text-sm leading-snug mb-3">מעביר אותך לעמוד ההרשמה לקורס...</p>
+                  <a
+                    href="https://rainitz.ravpage.co.il/lo-mehakim-ladira?ref=atar"
+                    className="inline-block bg-babun-primary text-white text-xs font-bold py-2.5 px-5 rounded-full hover:bg-black transition-colors"
+                  >
+                    מעבר לעמוד ההרשמה ←
+                  </a>
                 </motion.div>
               ) : (
                 <div className="w-full max-w-[240px] sm:max-w-[290px] md:max-w-[320px]">
                   <p className="text-babun-primary text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 leading-tight px-2">
-                    השאירו פרטים לקבלת הסילבוס:
+                    השאירו פרטים להרשמה:
                   </p>
                   
                   <form onSubmit={handleCourseSyllabus} className="flex flex-col gap-2.5 sm:gap-3 w-full">
@@ -536,9 +547,15 @@ export default function Home() {
                           className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
                         />
                       ) : (
-                        "לקבלת הסילבוס במייל"
+                        "להרשמה"
                       )}
                     </motion.button>
+                    <a
+                      href="https://rainitz.ravpage.co.il/lo-mehakim-ladira?ref=atar"
+                      className="text-[11px] text-babun-primary/70 hover:text-black underline mt-1 block"
+                    >
+                      או מעבר ישיר לעמוד ההרשמה ←
+                    </a>
                   </form>
                 </div>
               )}
