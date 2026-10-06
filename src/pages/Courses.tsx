@@ -304,14 +304,16 @@ export default function Courses() {
                 <span>מה לומדים בקורס?</span>
               </button>
 
-              {/* Yellow Button - להרשמה לקורס */}
-              <button 
-                onClick={() => scrollToSection("register-section")}
+              {/* Yellow Button - להרשמה לקורס לא מחכים לדירה */}
+              <a 
+                href="https://rainitz.ravpage.co.il/lo-mehakim-ladira?ref=atar1"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-babun-accent hover:bg-babun-accent/90 text-babun-primary text-lg px-9 py-4 font-black rounded-[100px] shadow-lg shadow-babun-accent/25 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-3 group cursor-pointer"
               >
-                <span className="font-display">להרשמה לקורס</span>
+                <span className="font-display">להרשמה לקורס לא מחכים לדירה</span>
                 <ArrowLeft size={20} className="group-hover:translate-x-[-6px] transition-transform duration-300" />
-              </button>
+              </a>
             </motion.div>
           </div>
         </div>
