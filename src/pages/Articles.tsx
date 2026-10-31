@@ -56,6 +56,7 @@ import {
 import { db, auth, handleFirestoreError, OperationType } from "../lib/firebase";
 import ImageWithSkeleton from "../components/common/ImageWithSkeleton";
 import UniversalMediaPlayer, { detectMediaType } from "../components/common/UniversalMediaPlayer";
+import RichTextEditor from "../components/common/RichTextEditor";
 import { defaultSeedArticles } from "../data/defaultArticles";
 import { formatExternalUrl, isPodcastArticle } from "../lib/utils";
 
@@ -1063,55 +1064,62 @@ export default function Articles() {
               {/* Text / Markdown Content */}
               {selectedArticle.content ? (
                 <div className="article-content text-zinc-800 text-base md:text-lg leading-[1.85] space-y-6">
-                  <Markdown
-                    components={{
-                      h1: ({node, ...props}) => (
-                        <div className="bg-[#FBFBFA] border-r-4 border-babun-accent py-3.5 px-6 my-8 rounded-[2px] shadow-xs">
-                          <h1 className="text-xl md:text-2xl font-black text-babun-primary font-display m-0 leading-snug" {...props} />
-                        </div>
-                      ),
-                      h2: ({node, ...props}) => (
-                        <div className="bg-[#FBFBFA] border-r-4 border-babun-accent py-3.5 px-6 my-8 rounded-[2px] shadow-xs">
-                          <h2 className="text-xl md:text-2xl font-black text-babun-primary font-display m-0 leading-snug" {...props} />
-                        </div>
-                      ),
-                      h3: ({node, ...props}) => (
-                        <div className="bg-[#FBFBFA] border-r-4 border-babun-accent py-3 px-5 my-6 rounded-[2px] shadow-xs">
-                          <h3 className="text-lg md:text-xl font-bold text-babun-primary font-display m-0 leading-snug" {...props} />
-                        </div>
-                      ),
-                      h4: ({node, ...props}) => (
-                        <div className="bg-[#FBFBFA] border-r-4 border-babun-accent py-2.5 px-4 my-5 rounded-[2px] shadow-xs">
-                          <h4 className="text-base md:text-lg font-bold text-babun-primary font-display m-0" {...props} />
-                        </div>
-                      ),
-                      p: ({node, ...props}) => (
-                        <p className="text-zinc-700 text-base md:text-lg leading-[1.85] mb-5 font-normal" {...props} />
-                      ),
-                      strong: ({node, ...props}) => (
-                        <strong className="font-bold text-babun-primary" {...props} />
-                      ),
-                      ul: ({node, ...props}) => (
-                        <ul className="list-disc list-inside space-y-2.5 my-5 text-zinc-700 mr-2" {...props} />
-                      ),
-                      ol: ({node, ...props}) => (
-                        <ol className="list-decimal list-inside space-y-2.5 my-5 text-zinc-700 mr-2" {...props} />
-                      ),
-                      blockquote: ({node, ...props}) => (
-                        <blockquote className="border-r-4 border-babun-accent bg-babun-accent/5 py-4 px-6 my-6 text-zinc-800 font-medium italic rounded-sm" {...props} />
-                      ),
-                      a: ({node, ...props}) => (
-                        <a
-                          {...props}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-babun-primary font-bold underline hover:text-babun-accent transition-colors inline-flex items-center gap-1 cursor-pointer"
-                        />
-                      ),
-                    }}
-                  >
-                    {selectedArticle.content}
-                  </Markdown>
+                  {/<[a-z][\s\S]*>/i.test(selectedArticle.content) ? (
+                    <div
+                      className="article-rich-content text-zinc-800 text-base md:text-lg leading-[1.85] space-y-4 font-sans"
+                      dangerouslySetInnerHTML={{ __html: selectedArticle.content }}
+                    />
+                  ) : (
+                    <Markdown
+                      components={{
+                        h1: ({node, ...props}) => (
+                          <div className="bg-[#FBFBFA] border-r-4 border-babun-accent py-3.5 px-6 my-8 rounded-[2px] shadow-xs">
+                            <h1 className="text-xl md:text-2xl font-black text-babun-primary font-display m-0 leading-snug" {...props} />
+                          </div>
+                        ),
+                        h2: ({node, ...props}) => (
+                          <div className="bg-[#FBFBFA] border-r-4 border-babun-accent py-3.5 px-6 my-8 rounded-[2px] shadow-xs">
+                            <h2 className="text-xl md:text-2xl font-black text-babun-primary font-display m-0 leading-snug" {...props} />
+                          </div>
+                        ),
+                        h3: ({node, ...props}) => (
+                          <div className="bg-[#FBFBFA] border-r-4 border-babun-accent py-3 px-5 my-6 rounded-[2px] shadow-xs">
+                            <h3 className="text-lg md:text-xl font-bold text-babun-primary font-display m-0 leading-snug" {...props} />
+                          </div>
+                        ),
+                        h4: ({node, ...props}) => (
+                          <div className="bg-[#FBFBFA] border-r-4 border-babun-accent py-2.5 px-4 my-5 rounded-[2px] shadow-xs">
+                            <h4 className="text-base md:text-lg font-bold text-babun-primary font-display m-0" {...props} />
+                          </div>
+                        ),
+                        p: ({node, ...props}) => (
+                          <p className="text-zinc-700 text-base md:text-lg leading-[1.85] mb-5 font-normal" {...props} />
+                        ),
+                        strong: ({node, ...props}) => (
+                          <strong className="font-bold text-babun-primary" {...props} />
+                        ),
+                        ul: ({node, ...props}) => (
+                          <ul className="list-disc list-inside space-y-2.5 my-5 text-zinc-700 mr-2" {...props} />
+                        ),
+                        ol: ({node, ...props}) => (
+                          <ol className="list-decimal list-inside space-y-2.5 my-5 text-zinc-700 mr-2" {...props} />
+                        ),
+                        blockquote: ({node, ...props}) => (
+                          <blockquote className="border-r-4 border-babun-accent bg-babun-accent/5 py-4 px-6 my-6 text-zinc-800 font-medium italic rounded-sm" {...props} />
+                        ),
+                        a: ({node, ...props}) => (
+                          <a
+                            {...props}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-babun-primary font-bold underline hover:text-babun-accent transition-colors inline-flex items-center gap-1 cursor-pointer"
+                          />
+                        ),
+                      }}
+                    >
+                      {selectedArticle.content}
+                    </Markdown>
+                  )}
                 </div>
               ) : (
                 <div className="bg-babun-primary/5 border-r-4 border-babun-accent p-6 rounded-babun-md space-y-2">
@@ -1448,6 +1456,27 @@ export default function Articles() {
             />
             <span>{isRefreshing ? "מרענן..." : "רענן מאגר"}</span>
           </button>
+
+          {/* Quick Admin & Editor Entry Button */}
+          {!isAdminMode ? (
+            <button
+              onClick={() => setShowAdminLogin(true)}
+              className="flex flex-row items-center gap-2 px-5 py-4 rounded-babun-md font-display font-bold text-xs md:text-sm bg-white text-babun-primary hover:text-black border border-babun-primary/10 hover:border-babun-accent/60 shadow-xs cursor-pointer transition-all"
+              title="כניסה לעריכת והוספת מאמרים בעורך הטקסט המעוצב"
+            >
+              <Lock size={15} className="text-babun-accent" />
+              <span>עריכת מאמרים</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleOpenAddForm}
+              className="flex flex-row items-center gap-2 px-5 py-4 rounded-babun-md font-display font-bold text-xs md:text-sm bg-babun-primary text-white hover:bg-black border border-babun-primary shadow-md cursor-pointer transition-all"
+              title="הוספת מאמר חדש עם עורך הטקסט המעוצב"
+            >
+              <Plus size={16} className="text-babun-accent" />
+              <span>הוספת מאמר חדש</span>
+            </button>
+          )}
         </div>
 
         {/* LOADING INDICATOR */}
@@ -1914,13 +1943,14 @@ export default function Articles() {
       </div>
 
       {/* FLOATING ADMIN LOGIN BUTTON */}
-      {!isAdminMode && hasEditParam && (
+      {!isAdminMode && (
         <button
           onClick={() => setShowAdminLogin(true)}
-          className="fixed bottom-8 right-8 z-55 bg-babun-primary/90 text-white hover:text-babun-accent hover:bg-babun-primary p-4 rounded-full shadow-2xl transition-all duration-300 backdrop-blur-md cursor-pointer flex items-center justify-center"
-          title="כניסת מנהל למערכת"
+          className="fixed bottom-6 right-6 z-40 bg-babun-primary text-white hover:text-babun-accent hover:bg-black px-4 py-3 rounded-full shadow-2xl transition-all duration-300 backdrop-blur-md cursor-pointer flex items-center gap-2 group border border-white/20"
+          title="כניסה לעריכת מאמרים"
         >
-          <Lock size={20} />
+          <Lock size={16} className="text-babun-accent" />
+          <span className="text-xs font-bold font-display hidden sm:inline group-hover:inline">עריכת מאמרים</span>
         </button>
       )}
 
@@ -2087,18 +2117,25 @@ export default function Articles() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white w-full max-w-3xl h-[85vh] rounded-babun-xl overflow-hidden relative shadow-2xl flex flex-col text-right z-10 border border-babun-primary/15"
+              className="bg-white w-full max-w-5xl h-[92vh] rounded-babun-xl overflow-hidden relative shadow-2xl flex flex-col text-right z-10 border border-babun-primary/15"
             >
-              <div className="bg-babun-primary text-white p-6 justify-between flex flex-row-reverse items-center">
-                <div className="flex items-center gap-2 flex-row-reverse">
-                  <Newspaper className="text-babun-accent" size={20} />
-                  <h3 className="text-xl font-display font-black leading-none">
-                    העלאת תוכן חדש (כתבה / פודקאסט)
-                  </h3>
+              <div className="bg-babun-primary text-white p-5 justify-between flex flex-row-reverse items-center shrink-0">
+                <div className="flex items-center gap-2.5 flex-row-reverse">
+                  <div className="w-8 h-8 rounded-full bg-babun-accent/20 flex items-center justify-center">
+                    <Edit className="text-babun-accent" size={17} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-display font-black leading-none">
+                      {editingArticleId ? "עריכת מאמר / תוכן" : "העלאת תוכן ומאמר חדש"}
+                    </h3>
+                    <span className="text-[11px] text-white/60 block mt-0.5">
+                      עורך טקסט עשיר עם גופנים, גדלים, צבעים, הדגשות, כותרות, קישורים ורשימות
+                    </span>
+                  </div>
                 </div>
                 <button
                   onClick={() => setShowAddForm(false)}
-                  className="text-white hover:text-babun-accent cursor-pointer"
+                  className="text-white hover:text-babun-accent cursor-pointer p-1 rounded"
                 >
                   <X size={20} />
                 </button>
@@ -2482,21 +2519,17 @@ export default function Articles() {
                     </button>
 
                     <label className="block text-xs font-black font-display text-babun-primary uppercase tracking-wider">
-                      טקסט חי של הכתבה (לפודקאסטים ניתן להשאיר ריק)
+                      תוכן הכתבה (עורך טקסט מעוצב)
                     </label>
                   </div>
 
-                  <textarea
-                    rows={8}
-                    placeholder="הקלד כאן את הטקסט המלא של המאמר... (עבור פודקאסטים מקושרים ניתן להשאיר ריק או לרשום תיאור קצר)"
+                  {/* Comprehensive Rich Text Editor */}
+                  <RichTextEditor
                     value={formContent}
-                    onChange={(e) => setFormContent(e.target.value)}
-                    className="w-full border border-babun-primary/15 rounded-babun-md p-4 text-sm focus:outline-hidden focus:border-babun-accent focus:ring-1 focus:ring-babun-accent bg-babun-light/20 text-right leading-relaxed font-sans"
+                    onChange={setFormContent}
+                    placeholder="הקלד כאן את תוכן המאמר... השתמש בסרגל הכלים העליון לעיצוב גופנים, גדלים, צבעים, הדגשות, כותרות, קישורים ורשימות"
+                    minHeight="380px"
                   />
-                  <p className="text-[10px] text-babun-primary/45 text-left">
-                    תומך בכתיבת עיצוב כותרות ורשימות ב-Markdown כגון # כותרת,
-                    **מודגש** וכדומה.
-                  </p>
                 </div>
 
                 {/* Submit actions */}
