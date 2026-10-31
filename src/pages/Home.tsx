@@ -7,7 +7,6 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { syncLeadToBackend } from "../lib/leadSync";
 import { defaultSeedArticles } from "../data/defaultArticles";
 import { formatExternalUrl } from "../lib/utils";
-import loMehakimLogo from "../assets/images/lo-mehakim.svg";
 
 
 const services = [
@@ -540,10 +539,9 @@ export default function Home() {
           <div className="flex-1 flex justify-center lg:justify-start items-center relative z-30 lg:translate-y-[60px] lg:translate-x-[80px] lg:-mr-20 -mt-12 lg:mt-0">
             <div className="w-60 h-60 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-[380px] lg:h-[380px] bg-babun-accent rounded-full relative flex items-center justify-center shadow-[0_20px_60px_rgba(0,0,0,0.45)] border-4 border-babun-accent overflow-hidden">
                <img 
-                 src={loMehakimLogo} 
-                 alt="לא מחכים לדירה" 
+                 src="/assets/aistudio/yad_942ed072.jpg" 
+                 alt="קורס לא מחכים לדירה" 
                  className="w-full h-full object-cover"
-                 referrerPolicy="no-referrer"
                />
             </div>
           </div>
