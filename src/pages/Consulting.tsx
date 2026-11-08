@@ -58,6 +58,43 @@ export default function Consulting() {
   // FAQ State
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  // Auto-scroll to booking section and focus the input if opened via direct link, hash, or query param
+  useEffect(() => {
+    const isBookingTarget =
+      window.location.hash === "#booking-section" ||
+      window.location.search.includes("book") ||
+      window.location.pathname === "/booking" ||
+      window.location.pathname === "/book-meeting";
+
+    if (isBookingTarget) {
+      const doScroll = () => {
+        const el = document.getElementById("booking-section");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          const firstInput = el.querySelector("input") as HTMLInputElement | null;
+          if (firstInput && document.activeElement !== firstInput) {
+            firstInput.focus();
+          }
+          return true;
+        }
+        return false;
+      };
+
+      doScroll();
+      const t1 = setTimeout(doScroll, 100);
+      const t2 = setTimeout(doScroll, 350);
+      const t3 = setTimeout(doScroll, 800);
+      const t4 = setTimeout(doScroll, 1500);
+
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+        clearTimeout(t4);
+      };
+    }
+  }, []);
+
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
   };

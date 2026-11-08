@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
 import { MessageCircle } from "lucide-react";
 import Navbar from "./components/common/Navbar";
@@ -7,22 +7,63 @@ import Footer from "./components/common/Footer";
 // Lazy load pages for performance
 const Home = lazy(() => import("./pages/Home"));
 const About = lazy(() => import("./pages/About"));
+import Consulting from "./pages/Consulting";
 const Contact = lazy(() => import("./pages/Contact"));
 const Calculators = lazy(() => import("./pages/Calculators"));
 const Courses = lazy(() => import("./pages/Courses"));
-const Consulting = lazy(() => import("./pages/Consulting"));
 const Book = lazy(() => import("./pages/Book"));
 const Articles = lazy(() => import("./pages/Articles"));
 const PinuyBinuyLP = lazy(() => import("./pages/PinuyBinuyLP"));
 const Scheduler = lazy(() => import("./pages/Scheduler"));
 const DatabaseViewer = lazy(() => import("./pages/DatabaseViewer"));
 
-// Component to scroll to top on route change & track Google Analytics pageviews
 function ScrollAndAnalyticsTracker() {
-  const { pathname, search } = useLocation();
+  const { pathname, search, hash } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const isBooking =
+      hash === "#booking-section" ||
+      search.includes("book") ||
+      pathname === "/booking" ||
+      pathname === "/book-meeting";
+
+    if (isBooking) {
+      const doScroll = () => {
+        const el = document.getElementById("booking-section");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          const firstInput = el.querySelector("input") as HTMLInputElement | null;
+          if (firstInput && document.activeElement !== firstInput) {
+            firstInput.focus();
+          }
+          return true;
+        }
+        return false;
+      };
+
+      doScroll();
+      const t1 = setTimeout(doScroll, 100);
+      const t2 = setTimeout(doScroll, 350);
+      const t3 = setTimeout(doScroll, 800);
+      const t4 = setTimeout(doScroll, 1500);
+
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+        clearTimeout(t4);
+      };
+    } else if (hash) {
+      setTimeout(() => {
+        const id = hash.replace("#", "");
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 150);
+    } else {
+      window.scrollTo(0, 0);
+    }
 
     const siteName = 'יעקב רייניץ - נדל"ן וכלכלה נבונה';
     const titleMap: Record<string, string> = {
@@ -122,6 +163,8 @@ function AppContent() {
             <Route path="/about" element={<About />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/consulting" element={<Consulting />} />
+            <Route path="/booking" element={<Consulting />} />
+            <Route path="/book-meeting" element={<Consulting />} />
             <Route path="/book" element={<Book />} />
             <Route path="/calculators" element={<Calculators />} />
             <Route path="/articles" element={<Articles />} />
