@@ -347,14 +347,18 @@ export default function Consulting() {
               </p>
               
               <div className="pt-4">
-                <button 
-                  onClick={scrollToBooking}
+                <a 
+                  href="#booking-section"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToBooking();
+                  }}
                   className="bg-babun-accent hover:bg-babun-primary hover:text-white text-babun-primary px-10 py-5 rounded-[100px] font-bold text-lg md:text-xl shadow-xl hover:shadow-babun-accent/25 transition-all duration-300 transform hover:-translate-y-0.5 inline-flex items-center gap-3 z-10 cursor-pointer"
                   id="truth-cta-btn"
                 >
                   <ArrowLeft size={20} className="stroke-[2.5px] animate-pulse" />
                   <span>קבע פגישה עכשיו</span>
-                </button>
+                </a>
               </div>
             </div>
           </div>
